@@ -466,6 +466,7 @@ def step_X_score(
     requires_update: bool,
     num_heads: int,
     n_embed: int,
+    layer:nn.Module,
     td_err: Optional[torch.Tensor],
     q: torch.Tensor,
     k: torch.Tensor,
@@ -487,8 +488,9 @@ def step_X_score(
     causal_mask = torch.tril(torch.ones(seq_len, kv_len, device=device)).unsqueeze(0).unsqueeze(0)
     # Avoid -inf which can blow up energy calculations downstream.
     scores = scores.masked_fill(causal_mask == 0, -1e4)
+    mu=layer(scores)
 
-    mu = scores
+    
     target_scores = target if target is not None else mu
     bu_err = target_scores - mu
     error = bu_err - td_err if td_err is not None else bu_err

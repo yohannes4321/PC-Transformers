@@ -186,7 +186,7 @@ class PCTransformer(nn.Module):
                 execute_parallel(
                     use_cuda, streams_or_futures, block.attn.pc_X_score.forward,
                     target_activity=block.attn.pc_X_A.get_x("X_A"), layer_type="X_score",
-                    t=t, T=self.config.T, requires_update=True, td_err=td_score,
+                    t=t, T=self.config.T, requires_update=True, td_err=td_score,layer=None,
                     q=q_mu, k=k_mu, use_cache=use_kv_cache
                 )
                 execute_parallel(
