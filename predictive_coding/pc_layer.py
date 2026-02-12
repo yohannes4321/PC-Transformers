@@ -188,6 +188,8 @@ class PCLayer(nn.Module):
                 else:
                     # Fallback: try to reshape anyway
                     target_for_energy = _reshape_to_heads(target_activity, self.num_heads)
+            # Debug print statement to understand shape mismatch
+            print(f"X_Q DEBUG: target_for_energy.shape={target_for_energy.shape if target_for_energy is not None else None}, mu_Q.shape={mu_Q.shape}")
             error = target_for_energy - mu_Q
             energy, step_errors = finalize_step(mu_Q, target_for_energy, error, t, layer_type, self.energy_fn_name)
             self._energy += energy
