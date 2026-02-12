@@ -18,7 +18,6 @@ import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
 from utils.device_utils import setup_device, cleanup_memory
 import json
-import logging
 from data_preparation.config import vocab_size
 
 """
@@ -29,7 +28,7 @@ Usage: torchrun --nproc-per-node=<NUM_GPU> training.py
 
 """
 
-def train(model, dataloader, config, global_step, device, logger):
+def train(model, dataloader, config, global_step, device):
     torch.set_grad_enabled(False)
     model.train()
     total_ce_loss = 0.0
@@ -115,10 +114,7 @@ def train(model, dataloader, config, global_step, device, logger):
         perplexity = math.exp(ce_loss.item()) if ce_loss.item() < 100 else float("inf")
 
         if (not dist.is_initialized() or dist.get_rank() == 0) and (batch_idx + 1) % 10 == 0:
-            if logger:
-                logger.info(f"  Batch {batch_idx + 1}/{len(dataloader)} | Batch Energy: {batch_energy:.4f} | Perplexity: {perplexity:.4f}")
-            else:
-                print(f"  Batch {batch_idx + 1}/{len(dataloader)} | Batch Energy: {batch_energy:.4f} | Perplexity: {perplexity:.4f}")
+            print(f"  Batch {batch_idx + 1}/{len(dataloader)} | Batch Energy: {batch_energy:.4f} | Perplexity: {perplexity:.4f}")
 
         if (not dist.is_initialized() or dist.get_rank() == 0) and (batch_idx + 1) % debug_every == 0:
             for name, module in model.named_modules():
@@ -131,14 +127,9 @@ def train(model, dataloader, config, global_step, device, logger):
                         mu_shape = tuple(mu.shape) if mu is not None else None
                         td_shape = tuple(td_err.shape) if td_err is not None else None
                         bu_shape = tuple(bu_err.shape) if bu_err is not None else None
-                        if logger:
-                            logger.info(
-                                f"[PC] {name}:{layer_key} mu={mu_shape} td_err={td_shape} bu_err={bu_shape} energy={energy}"
-                            )
-                        else:
-                            print(
-                                f"[PC] {name}:{layer_key} mu={mu_shape} td_err={td_shape} bu_err={bu_shape} energy={energy}"
-                            )
+                        print(
+                            f"[PC] {name}:{layer_key} mu={mu_shape} td_err={td_shape} bu_err={bu_shape} energy={energy}"
+                        )
 
     avg_energy = total_energy / batch_count if batch_count > 0 else 0.0
     avg_ce_loss = total_ce_loss / batch_count if batch_count > 0 else 0.0
@@ -154,28 +145,7 @@ def main():
 
     rank = dist.get_rank() if dist.is_initialized() else 0
 
-    best_config = load_best_config()   
-    # Configure logging
-    log_dir = 'logs'
-    os.makedirs(log_dir, exist_ok=True)
-
-    # build handlers and remove existing ones
-    root_logger = logging.getLogger()
-    root_logger.setLevel(logging.INFO)
-    for h in list(root_logger.handlers):
-        root_logger.removeHandler(h)
-
-    fmt = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-    stream_h = logging.StreamHandler()
-    stream_h.setFormatter(fmt)
-    root_logger.addHandler(stream_h)
-
-    if rank == 0:
-        file_h = logging.FileHandler(os.path.join(log_dir, "training.log"), mode="a")
-        file_h.setFormatter(fmt)
-        root_logger.addHandler(file_h)
-
-    logger = logging.getLogger(__name__)
+    best_config = load_best_config()
    
     config = GPTConfig(
         vocab_size = vocab_size,
@@ -205,23 +175,16 @@ def main():
         optimizer_weight_bound = best_config["optimizer_weight_bound"],
     )
     
-    # Create a separate logger for hyperparameters
-    param_logger = logging.getLogger('param_logger')
-    param_logger.setLevel(logging.INFO)
-    if rank == 0 and root_logger.handlers:
-        param_logger.addHandler(root_logger.handlers[1])
-        param_logger.propagate = False
-
     if rank == 0:
-        param_logger.info(f"\n{'#' * 120}") 
-        logger.info(f"Using device: {device} (local rank {local_rank})")
+        print(f"\n{'#' * 120}") 
+        print(f"Using device: {device} (local rank {local_rank})")
         try:
             cfg = config.__dict__
         except Exception:
             cfg = {k: getattr(config, k) for k in dir(config) if not k.startswith("_") and not callable(getattr(config, k))}
         config_json = json.dumps(cfg, indent=6, default=str)
-        param_logger.info("Saving the hyperparameters configurations:")
-        param_logger.info(config_json)
+        print("Saving the hyperparameters configurations:")
+        print(config_json)
 
     torch.set_grad_enabled(False)
     model = PCTransformer(config).to(device)
@@ -247,19 +210,19 @@ def main():
 
     start_time = time.time()
     if rank == 0:
-        logger.info("========== Training started ==========") 
-        logger.info(f"{sum(p.numel() for p in model.parameters())/1e6:.2f} M parameters")
+        print("========== Training started ==========") 
+        print(f"{sum(p.numel() for p in model.parameters())/1e6:.2f} M parameters")
 
     for epoch in range(config.num_epochs):
         if hasattr(train_loader, "sampler") and isinstance(train_loader.sampler, torch.utils.data.DistributedSampler):
             train_loader.sampler.set_epoch(epoch)
 
         if rank == 0:
-            logger.info(f"Epoch {epoch + 1}/{config.num_epochs}")
+            print(f"Epoch {epoch + 1}/{config.num_epochs}")
 
         model.train()
         train_energy, train_perplexity, global_step = train(
-            model, train_loader, config, global_step, device, logger
+            model, train_loader, config, global_step, device
         )
         train_energies.append(train_energy)
         train_perplexities.append(train_perplexity)
@@ -274,7 +237,7 @@ def main():
         val_perplexities.append(val_perplexity)
 
         if rank == 0:
-            logger.info(f"Epoch {epoch + 1}/{config.num_epochs} | "
+            print(f"Epoch {epoch + 1}/{config.num_epochs} | "
                   f"Train Energy: {train_energy:.4f} | Train Perplexity: {train_perplexity:.4f} | "
                   f"Val Energy: {val_energy:.4f} | Val Perplexity: {val_perplexity:.4f}")
 
@@ -292,7 +255,7 @@ def main():
                 }
                 checkpoint_path = f'checkpoints/model_epoch_{epoch+1}.pt'
                 torch.save(checkpoint, checkpoint_path)
-                logger.info(f"Saved checkpoint to {checkpoint_path}")
+                print(f"Saved checkpoint to {checkpoint_path}")
 
     if rank == 0:
         plot_metrics(
@@ -315,9 +278,9 @@ def main():
         }
         torch.save(final_checkpoint, 'checkpoints/final_model.pt')
         total_time = time.time() - start_time
-        logger.info(f"Training completed in {total_time:.2f} seconds")
-        logger.info("Final model saved to: checkpoints/final_model.pt")
-        logger.info("========== Training completed ==========")
+        print(f"Training completed in {total_time:.2f} seconds")
+        print("Final model saved to: checkpoints/final_model.pt")
+        print("========== Training completed ==========")
 
     # dist.destroy_process_group()
     if use_ddp and dist.is_initialized():
