@@ -299,7 +299,9 @@ class PCLayer(nn.Module):
             else:
                 target_for_energy = target_activity if target_activity is not None else mu_score
             error = target_for_energy - mu_score
-            energy, step_errors = finalize_step(mu_score, target_for_energy, error, t, layer_type, self.energy_fn_name)
+            # Normalize energy by the number of elements to prevent huge values
+            seq_len = mu_score.size(2)
+            energy, step_errors = finalize_step(mu_score, target_for_energy, error / seq_len, t, layer_type, self.energy_fn_name)
             self._energy += energy
             self._energy_cache[layer_type] = energy
             self._errors.extend(step_errors)
@@ -308,7 +310,7 @@ class PCLayer(nn.Module):
         elif layer_type == "X_A":
             lateral_conn = self.lateral_connections.get(layer_type, None)
             score_source = score if score is not None else self._mu_cache.get("X_score")
-            energy_fn_name_xa = "kld"
+            energy_fn_name_xa = "pc_e"
             x, mu_X_A, bu_err = step_X_A(
                 t,
                 T,
