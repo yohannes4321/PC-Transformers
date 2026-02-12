@@ -274,18 +274,25 @@ class PCLayer(nn.Module):
                 self._error_cache["X_V"] = bu_err.detach().clone()
 
             # compute energy
-            if target_activity is not None and target_activity.dim() == 3:
-                target_for_energy = _reshape_to_heads(target_activity, self.num_heads)
-            elif target_activity is not None and target_activity.dim() == 4:
-                # Ensure 4D target has correct head dimension
-                if target_activity.shape[-1] != mu_V.shape[-1]:
-                    target_for_energy = _reshape_to_heads(target_activity, self.num_heads)
-                else:
-                    target_for_energy = target_activity
-            else:
-                # When target is None, use mu_V + bu_err and ensure correct shape
+            if target_activity is None:
+                # When target is None, use mu_V + bu_err
                 fallback = mu_V + bu_err if bu_err is not None else mu_V
                 target_for_energy = _reshape_to_heads(fallback, self.num_heads) if fallback.dim() == 3 else fallback
+            else:
+                # Handle different target shapes
+                if target_activity.dim() == 3:
+                    # This could be a merged 3D tensor, reshape to 4D
+                    target_for_energy = _reshape_to_heads(target_activity, self.num_heads)
+                elif target_activity.dim() == 4:
+                    # Check if this is already in the correct format (B, H, S, D)
+                    if target_activity.shape[1] == self.num_heads and target_activity.shape[-1] == mu_V.shape[-1]:
+                        target_for_energy = target_activity
+                    else:
+                        # Reshape if dimensions don't match
+                        target_for_energy = _reshape_to_heads(target_activity, self.num_heads)
+                else:
+                    # Fallback: try to reshape anyway
+                    target_for_energy = _reshape_to_heads(target_activity, self.num_heads)
             error = target_for_energy - mu_V
             energy, step_errors = finalize_step(mu_V, target_for_energy, error, t, layer_type, self.energy_fn_name)
             self._energy += energy

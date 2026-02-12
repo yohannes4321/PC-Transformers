@@ -158,7 +158,14 @@ def _reshape_to_heads(tensor: Optional[torch.Tensor], num_heads: int) -> Optiona
     if tensor is None:
         return None
     if tensor.dim() == 4:
-        return tensor
+        batch_size, dim1, seq_len, last_dim = tensor.shape
+        # If this is already in the correct format (B, H, S, D), return it
+        if dim1 == num_heads and last_dim * num_heads == tensor.numel() // (batch_size * seq_len):
+            return tensor
+        # Otherwise, assume it's (B, S, H*D) or similar and reshape it
+        total_embed_dim = dim1 * last_dim
+        head_dim = total_embed_dim // num_heads
+        return tensor.view(batch_size, seq_len, num_heads, head_dim).transpose(1, 2)
     batch_size, seq_len, embed_dim = tensor.shape
     head_dim = embed_dim // num_heads
     return tensor.view(batch_size, seq_len, num_heads, head_dim).transpose(1, 2)
