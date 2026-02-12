@@ -293,15 +293,18 @@ class PCLayer(nn.Module):
             self._mu_cache["X_score"] = mu_score.detach().clone()
             if bu_err is not None:
                 self._error_cache["X_score"] = bu_err.detach().clone()
-            # X_score energy should use the top-down error if available, otherwise use mu_score
+            # X_score energy: compare softmax probabilities, not raw logits
+            mu_score_prob = F.softmax(mu_score, dim=-1)
             if td_err is not None:
                 target_for_energy = mu_score + td_err
             else:
                 target_for_energy = target_activity if target_activity is not None else mu_score
-            error = target_for_energy - mu_score
+            # Apply softmax to target as well before computing error
+            target_prob = F.softmax(target_for_energy, dim=-1)
+            error = target_prob - mu_score_prob
             # Normalize energy by the number of elements to prevent huge values
             seq_len = mu_score.size(2)
-            energy, step_errors = finalize_step(mu_score, target_for_energy, error / seq_len, t, layer_type, self.energy_fn_name)
+            energy, step_errors = finalize_step(mu_score_prob, target_prob, error / seq_len, t, layer_type, self.energy_fn_name)
             self._energy += energy
             self._energy_cache[layer_type] = energy
             self._errors.extend(step_errors)
