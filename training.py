@@ -116,20 +116,7 @@ def train(model, dataloader, config, global_step, device):
         if (not dist.is_initialized() or dist.get_rank() == 0) and (batch_idx + 1) % 10 == 0:
             print(f"  Batch {batch_idx + 1}/{len(dataloader)} | Batch Energy: {batch_energy:.4f} | Perplexity: {perplexity:.4f}")
 
-        if (not dist.is_initialized() or dist.get_rank() == 0) and (batch_idx + 1) % debug_every == 0:
-            for name, module in model.named_modules():
-                if isinstance(module, PCLayer):
-                    for layer_key in module._mu_cache.keys():
-                        mu = module.get_mu(layer_key)
-                        td_err = module.get_td_err_input(layer_key)
-                        bu_err = module.get_td_err(layer_key)
-                        energy = module.get_energy_by_layer(layer_key)
-                        mu_shape = tuple(mu.shape) if mu is not None else None
-                        td_shape = tuple(td_err.shape) if td_err is not None else None
-                        bu_shape = tuple(bu_err.shape) if bu_err is not None else None
-                        print(
-                            f"[PC] {name}:{layer_key} mu={mu_shape} td_err={td_shape} bu_err={bu_shape} energy={energy}"
-                        )
+       
 
     avg_energy = total_energy / batch_count if batch_count > 0 else 0.0
     avg_ce_loss = total_ce_loss / batch_count if batch_count > 0 else 0.0
@@ -183,8 +170,7 @@ def main():
         except Exception:
             cfg = {k: getattr(config, k) for k in dir(config) if not k.startswith("_") and not callable(getattr(config, k))}
         config_json = json.dumps(cfg, indent=6, default=str)
-        print("Saving the hyperparameters configurations:")
-        print(config_json)
+       
 
     torch.set_grad_enabled(False)
     model = PCTransformer(config).to(device)
