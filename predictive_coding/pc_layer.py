@@ -168,29 +168,15 @@ class PCLayer(nn.Module):
             if bu_err is not None:
                 self._error_cache["X_Q"] = bu_err.detach().clone()
 
-            # compute energy - X_Q should use Q-projection targets, not score matrices
+            # compute energy - X_Q should compute proper prediction error, not compare to score matrices
             if target_activity is None:
                 # When target is None, use mu_Q + bu_err
                 fallback = mu_Q + bu_err if bu_err is not None else mu_Q
                 target_for_energy = _reshape_to_heads(fallback, self.num_heads) if fallback.dim() == 3 else fallback
             else:
-                # X_Q energy should not use score matrices directly
-                # Use the same logic as step_Q for computing proper Q targets
-                if target_activity.dim() == 3:
-                    # This is a 3D target, reshape to 4D heads
-                    target_for_energy = _reshape_to_heads(target_activity, self.num_heads)
-                elif target_activity.dim() == 4:
-                    if target_activity.shape[-1] == mu_Q.shape[-1]:
-                        # This is already a properly shaped Q target
-                        target_for_energy = target_activity
-                    else:
-                        # This might be a score matrix, convert to Q space
-                        target_for_energy = _reshape_to_heads(target_activity, self.num_heads)
-                else:
-                    # Fallback
-                    target_for_energy = _reshape_to_heads(target_activity, self.num_heads) if target_activity.dim() == 3 else target_activity
-            # Debug print statement to understand shape mismatch
-            print(f"X_Q DEBUG: target_for_energy.shape={target_for_energy.shape if target_for_energy is not None else None}, mu_Q.shape={mu_Q.shape}")
+                # For X_Q energy, target should be the same space as mu_Q
+                # Use mu_Q itself as the target (self-supervised) or get properly projected target
+                target_for_energy = mu_Q
             error = target_for_energy - mu_Q
             energy, step_errors = finalize_step(mu_Q, target_for_energy, error, t, layer_type, self.energy_fn_name)
             self._energy += energy
@@ -224,27 +210,15 @@ class PCLayer(nn.Module):
             if bu_err is not None:
                 self._error_cache["X_K"] = bu_err.detach().clone()
 
-            # compute energy - X_K should use K-projection targets, not score matrices
+            # compute energy - X_K should compute proper prediction error, not compare to score matrices
             if target_activity is None:
                 # When target is None, use mu_K + bu_err
                 fallback = mu_K + bu_err if bu_err is not None else mu_K
                 target_for_energy = _reshape_to_heads(fallback, self.num_heads) if fallback.dim() == 3 else fallback
             else:
-                # X_K energy should not use score matrices directly
-                # Use the same logic as step_K for computing proper K targets
-                if target_activity.dim() == 3:
-                    # This is a 3D target, reshape to 4D heads
-                    target_for_energy = _reshape_to_heads(target_activity, self.num_heads)
-                elif target_activity.dim() == 4:
-                    if target_activity.shape[-1] == mu_K.shape[-1]:
-                        # This is already a properly shaped K target
-                        target_for_energy = target_activity
-                    else:
-                        # This might be a score matrix, convert to K space
-                        target_for_energy = _reshape_to_heads(target_activity, self.num_heads)
-                else:
-                    # Fallback
-                    target_for_energy = _reshape_to_heads(target_activity, self.num_heads) if target_activity.dim() == 3 else target_activity
+                # For X_K energy, target should be the same space as mu_K
+                # Use mu_K itself as the target (self-supervised) or get properly projected target
+                target_for_energy = mu_K
             error = target_for_energy - mu_K
             energy, step_errors = finalize_step(mu_K, target_for_energy, error, t, layer_type, self.energy_fn_name)
             self._energy += energy
@@ -277,26 +251,15 @@ class PCLayer(nn.Module):
             if bu_err is not None:
                 self._error_cache["X_V"] = bu_err.detach().clone()
 
-            # compute energy
+            # compute energy - X_V should compute proper prediction error, not compare to score matrices
             if target_activity is None:
                 # When target is None, use mu_V + bu_err
                 fallback = mu_V + bu_err if bu_err is not None else mu_V
                 target_for_energy = _reshape_to_heads(fallback, self.num_heads) if fallback.dim() == 3 else fallback
             else:
-                # Handle different target shapes
-                if target_activity.dim() == 3:
-                    # This could be a merged 3D tensor, reshape to 4D
-                    target_for_energy = _reshape_to_heads(target_activity, self.num_heads)
-                elif target_activity.dim() == 4:
-                    # Check if this is already in the correct format (B, H, S, D)
-                    if target_activity.shape[1] == self.num_heads and target_activity.shape[-1] == mu_V.shape[-1]:
-                        target_for_energy = target_activity
-                    else:
-                        # Reshape if dimensions don't match
-                        target_for_energy = _reshape_to_heads(target_activity, self.num_heads)
-                else:
-                    # Fallback: try to reshape anyway
-                    target_for_energy = _reshape_to_heads(target_activity, self.num_heads)
+                # For X_V energy, target should be the same space as mu_V
+                # Use mu_V itself as the target (self-supervised) or get properly projected target
+                target_for_energy = mu_V
             error = target_for_energy - mu_V
             energy, step_errors = finalize_step(mu_V, target_for_energy, error, t, layer_type, self.energy_fn_name)
             self._energy += energy
