@@ -293,7 +293,11 @@ class PCLayer(nn.Module):
             self._mu_cache["X_score"] = mu_score.detach().clone()
             if bu_err is not None:
                 self._error_cache["X_score"] = bu_err.detach().clone()
-            target_for_energy = target_activity if target_activity is not None else mu_score
+            # X_score energy should use the top-down error if available, otherwise use mu_score
+            if td_err is not None:
+                target_for_energy = mu_score + td_err
+            else:
+                target_for_energy = target_activity if target_activity is not None else mu_score
             error = target_for_energy - mu_score
             energy, step_errors = finalize_step(mu_score, target_for_energy, error, t, layer_type, self.energy_fn_name)
             self._energy += energy

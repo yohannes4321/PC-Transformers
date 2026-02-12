@@ -170,14 +170,16 @@ class PCTransformer(nn.Module):
                 k_mu = block.attn.pc_X_K.get_mu("X_K")
                 
 
-                # Compute Score TD error from Q and K errors
-                td_err_q = block.attn.pc_X_Q.get_td_err("X_Q")
-                td_err_k = block.attn.pc_X_K.get_td_err("X_K")
-                td_score = None
-                if td_err_q is not None and td_err_k is not None:
-                    td_q = td_err_q.mean(dim=-1, keepdim=True)
-                    td_k = td_err_k.mean(dim=-1, keepdim=True)
-                    td_score = td_q + td_k.transpose(-2, -1)
+                # Compute Score TD error properly - use actual attention scores
+                head_dim = q_mu.shape[-1]
+                mu_score = torch.matmul(q_mu, k_mu.transpose(-2, -1)) / (head_dim ** 0.5)
+                
+                # Get the actual score prediction
+                x_score = block.attn.pc_X_score.get_x("X_score")
+                if x_score is not None:
+                    td_score = x_score - mu_score
+                else:
+                    td_score = None
       
                
                 # Execute Attention mechanism PC nodes
