@@ -284,6 +284,7 @@ class PCLayer(nn.Module):
                 self.num_heads,
                 self.n_embed,
                 td_err=td_err, 
+                layer=None,
                 q=q_source,
                 k=k_source,
                 kv_cache=kv_cache,
