@@ -172,7 +172,11 @@ class PCLayer(nn.Module):
             if target_activity is not None and target_activity.dim() == 3:
                 target_for_energy = _reshape_to_heads(target_activity, self.num_heads)
             elif target_activity is not None and target_activity.dim() == 4:
-                target_for_energy = target_activity
+                # Ensure 4D target has correct head dimension
+                if target_activity.shape[-1] != mu_Q.shape[-1]:
+                    target_for_energy = _reshape_to_heads(target_activity, self.num_heads)
+                else:
+                    target_for_energy = target_activity
             else:
                 # When target is None, use mu_Q + bu_err and ensure correct shape
                 fallback = mu_Q + bu_err if bu_err is not None else mu_Q
@@ -214,7 +218,11 @@ class PCLayer(nn.Module):
             if target_activity is not None and target_activity.dim() == 3:
                 target_for_energy = _reshape_to_heads(target_activity, self.num_heads)
             elif target_activity is not None and target_activity.dim() == 4:
-                target_for_energy = target_activity
+                # Ensure 4D target has correct head dimension
+                if target_activity.shape[-1] != mu_K.shape[-1]:
+                    target_for_energy = _reshape_to_heads(target_activity, self.num_heads)
+                else:
+                    target_for_energy = target_activity
             else:
                 # When target is None, use mu_K + bu_err and ensure correct shape
                 fallback = mu_K + bu_err if bu_err is not None else mu_K
