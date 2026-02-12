@@ -171,8 +171,12 @@ class PCLayer(nn.Module):
             # compute energy
             if target_activity is not None and target_activity.dim() == 3:
                 target_for_energy = _reshape_to_heads(target_activity, self.num_heads)
+            elif target_activity is not None and target_activity.dim() == 4:
+                target_for_energy = target_activity
             else:
-                target_for_energy = target_activity if target_activity is not None else (mu_Q + bu_err)
+                # When target is None, use mu_Q + bu_err and ensure correct shape
+                fallback = mu_Q + bu_err if bu_err is not None else mu_Q
+                target_for_energy = _reshape_to_heads(fallback, self.num_heads) if fallback.dim() == 3 else fallback
             error = target_for_energy - mu_Q
             energy, step_errors = finalize_step(mu_Q, target_for_energy, error, t, layer_type, self.energy_fn_name)
             self._energy += energy
@@ -209,8 +213,12 @@ class PCLayer(nn.Module):
             # compute energy
             if target_activity is not None and target_activity.dim() == 3:
                 target_for_energy = _reshape_to_heads(target_activity, self.num_heads)
+            elif target_activity is not None and target_activity.dim() == 4:
+                target_for_energy = target_activity
             else:
-                target_for_energy = target_activity if target_activity is not None else (mu_K + bu_err)
+                # When target is None, use mu_K + bu_err and ensure correct shape
+                fallback = mu_K + bu_err if bu_err is not None else mu_K
+                target_for_energy = _reshape_to_heads(fallback, self.num_heads) if fallback.dim() == 3 else fallback
             error = target_for_energy - mu_K
             energy, step_errors = finalize_step(mu_K, target_for_energy, error, t, layer_type, self.energy_fn_name)
             self._energy += energy
@@ -246,8 +254,12 @@ class PCLayer(nn.Module):
             # compute energy
             if target_activity is not None and target_activity.dim() == 3:
                 target_for_energy = _reshape_to_heads(target_activity, self.num_heads)
+            elif target_activity is not None and target_activity.dim() == 4:
+                target_for_energy = target_activity
             else:
-                target_for_energy = target_activity if target_activity is not None else (mu_V + bu_err)
+                # When target is None, use mu_V + bu_err and ensure correct shape
+                fallback = mu_V + bu_err if bu_err is not None else mu_V
+                target_for_energy = _reshape_to_heads(fallback, self.num_heads) if fallback.dim() == 3 else fallback
             error = target_for_energy - mu_V
             energy, step_errors = finalize_step(mu_V, target_for_energy, error, t, layer_type, self.energy_fn_name)
             self._energy += energy
