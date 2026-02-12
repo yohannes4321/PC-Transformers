@@ -1,0 +1,14 @@
+import torch.nn as nn
+from .attention import Attention
+from .mlp import MLP
+
+class TransformerBlock(nn.Module):
+    """
+    A single block of the Transformer architecture, consisting of layer normalization, attention, and MLP submodules.
+    """
+    def __init__(self, config):
+        super().__init__()
+        self.ln1 = nn.RMSNorm(config.n_embed)
+        self.attn = Attention(config)
+        self.ln2 = nn.RMSNorm(config.n_embed)
+        self.mlp = MLP(config)

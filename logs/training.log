@@ -1,0 +1,1656 @@
+2025-10-24 12:03:06,410 - INFO - 
+########################################################################################################################
+2025-10-24 12:03:06,410 - INFO - Using device: cpu (local rank 0)
+2025-10-24 12:03:06,410 - INFO - Saving the hyperparameters configurations:
+2025-10-24 12:03:06,410 - INFO - {
+      "vocab_size": 50259,
+      "block_size": 448,
+      "local_learning_rate": 1e-05,
+      "peak_learning_rate": 0.0005,
+      "warmup_steps": 217,
+      "la": 0.5,
+      "n_embed": 12,
+      "dropout": 0.24684719512514441,
+      "T": 10,
+      "is_holding_error": true,
+      "update_bias": false,
+      "num_heads": 6,
+      "n_blocks": 4,
+      "batch_size": 8,
+      "num_epochs": 20,
+      "use_lateral": true,
+      "internal_energy_fn_name": "pc_e",
+      "output_energy_fn_name": "pc_e",
+      "eos_token_id": 50258,
+      "use_flash_attention": true,
+      "combined_internal_weight": 0.7,
+      "combined_output_weight": 0.3
+}
+2025-10-24 12:03:07,020 - INFO - ========== Training started ==========
+2025-10-24 12:03:07,024 - INFO - 1.27 M parameters
+2025-10-24 12:03:07,024 - INFO - Epoch 1/20
+2025-10-24 12:04:20,563 - INFO -   Batch 10/5258 | Batch Energy: 1.7703 | Perplexity: 247433.8574
+2025-10-24 12:05:39,248 - INFO -   Batch 20/5258 | Batch Energy: 1.7578 | Perplexity: 150294.9301
+2025-11-20 13:44:57,517 - INFO - 
+########################################################################################################################
+2025-11-20 13:44:57,517 - INFO - Using device: cuda:0 (local rank 0)
+2025-11-20 13:44:57,517 - INFO - Saving the hyperparameters configurations:
+2025-11-20 13:44:57,517 - INFO - {
+      "vocab_size": 1024,
+      "block_size": 448,
+      "lr": 0.00048332759589273905,
+      "peak_learning_rate": 0.00483327595892739,
+      "warmup_steps": 82,
+      "n_embed": 64,
+      "dropout": 0.010135021708591482,
+      "T": 2,
+      "update_bias": false,
+      "num_heads": 4,
+      "n_blocks": 4,
+      "batch_size": 4,
+      "num_epochs": 20,
+      "internal_energy_fn_name": "pc_e",
+      "output_energy_fn_name": "pc_e",
+      "combined_internal_weight": 0.502141388705608,
+      "combined_output_weight": 0.497858611294392,
+      "use_flash_attention": false,
+      "alpha": 0.5
+}
+2025-11-20 13:44:58,764 - INFO - ========== Training started ==========
+2025-11-20 13:44:58,764 - INFO - 0.68 M parameters
+2025-11-20 13:44:58,764 - INFO - Epoch 1/20
+2025-11-20 13:44:59,692 - INFO -   Batch 10/165 | Batch Energy: 1.4454 | Perplexity: 1157.8436
+2025-11-20 13:45:00,281 - INFO -   Batch 20/165 | Batch Energy: 1.4181 | Perplexity: 1115.4786
+2025-11-20 13:45:00,823 - INFO -   Batch 30/165 | Batch Energy: 1.3946 | Perplexity: 1073.5978
+2025-11-20 13:45:01,370 - INFO -   Batch 40/165 | Batch Energy: 1.3730 | Perplexity: 1026.1013
+2025-11-20 13:45:01,929 - INFO -   Batch 50/165 | Batch Energy: 1.3594 | Perplexity: 1031.8468
+2025-11-20 13:45:02,494 - INFO -   Batch 60/165 | Batch Energy: 1.3542 | Perplexity: 1004.5590
+2025-11-20 13:45:03,055 - INFO -   Batch 70/165 | Batch Energy: 1.3461 | Perplexity: 967.1249
+2025-11-20 13:45:03,611 - INFO -   Batch 80/165 | Batch Energy: 1.3394 | Perplexity: 944.7949
+2025-11-20 13:45:04,145 - INFO -   Batch 90/165 | Batch Energy: 1.3380 | Perplexity: 944.1658
+2025-11-20 13:45:04,685 - INFO -   Batch 100/165 | Batch Energy: 1.3372 | Perplexity: 923.2041
+2025-11-20 13:45:05,219 - INFO -   Batch 110/165 | Batch Energy: 1.3365 | Perplexity: 976.7140
+2025-11-20 13:45:05,775 - INFO -   Batch 120/165 | Batch Energy: 1.3368 | Perplexity: 920.4985
+2025-11-20 13:45:06,307 - INFO -   Batch 130/165 | Batch Energy: 1.3317 | Perplexity: 919.5286
+2025-11-20 13:45:06,837 - INFO -   Batch 140/165 | Batch Energy: 1.3311 | Perplexity: 914.4965
+2025-11-20 13:45:07,370 - INFO -   Batch 150/165 | Batch Energy: 1.3317 | Perplexity: 920.2260
+2025-11-20 13:45:07,900 - INFO -   Batch 160/165 | Batch Energy: 1.3291 | Perplexity: 903.2426
+2025-11-20 13:45:08,427 - INFO - Epoch 1/20 | Train Energy: 1.3597 | Train Perplexity: 983.6121 | Val Energy: 1.3987 | Val Perplexity: 1145.2217
+2025-11-20 13:45:08,427 - INFO - Epoch 2/20
+2025-11-20 13:45:08,966 - INFO -   Batch 10/165 | Batch Energy: 1.3293 | Perplexity: 914.7320
+2025-11-20 13:45:09,501 - INFO -   Batch 20/165 | Batch Energy: 1.3310 | Perplexity: 880.0748
+2025-11-20 13:45:10,044 - INFO -   Batch 30/165 | Batch Energy: 1.3295 | Perplexity: 927.3430
+2025-11-20 13:45:10,584 - INFO -   Batch 40/165 | Batch Energy: 1.3290 | Perplexity: 937.7362
+2025-11-20 13:45:11,117 - INFO -   Batch 50/165 | Batch Energy: 1.3259 | Perplexity: 890.2399
+2025-11-20 13:45:11,652 - INFO -   Batch 60/165 | Batch Energy: 1.3282 | Perplexity: 951.9603
+2025-11-20 13:45:12,193 - INFO -   Batch 70/165 | Batch Energy: 1.3268 | Perplexity: 933.2380
+2025-11-20 13:45:12,724 - INFO -   Batch 80/165 | Batch Energy: 1.3265 | Perplexity: 913.3687
+2025-11-20 13:45:13,256 - INFO -   Batch 90/165 | Batch Energy: 1.3287 | Perplexity: 911.6243
+2025-11-20 13:45:13,788 - INFO -   Batch 100/165 | Batch Energy: 1.3287 | Perplexity: 897.5012
+2025-11-20 13:45:14,321 - INFO -   Batch 110/165 | Batch Energy: 1.3259 | Perplexity: 894.7967
+2025-11-20 13:45:14,861 - INFO -   Batch 120/165 | Batch Energy: 1.3275 | Perplexity: 906.0845
+2025-11-20 13:45:15,407 - INFO -   Batch 130/165 | Batch Energy: 1.3252 | Perplexity: 900.8438
+2025-11-20 13:45:15,965 - INFO -   Batch 140/165 | Batch Energy: 1.3276 | Perplexity: 955.0553
+2025-11-20 13:45:16,550 - INFO -   Batch 150/165 | Batch Energy: 1.3248 | Perplexity: 920.1053
+2025-11-20 13:45:17,144 - INFO -   Batch 160/165 | Batch Energy: 1.3275 | Perplexity: 898.7641
+2025-11-20 13:45:17,723 - INFO - Epoch 2/20 | Train Energy: 1.3275 | Train Perplexity: 926.8113 | Val Energy: 1.3945 | Val Perplexity: 1130.3112
+2025-11-20 13:45:17,724 - INFO - Epoch 3/20
+2025-11-20 13:45:18,304 - INFO -   Batch 10/165 | Batch Energy: 1.3243 | Perplexity: 933.6070
+2025-11-20 13:45:18,843 - INFO -   Batch 20/165 | Batch Energy: 1.3245 | Perplexity: 936.6400
+2025-11-20 13:45:19,377 - INFO -   Batch 30/165 | Batch Energy: 1.3294 | Perplexity: 923.5379
+2025-11-20 13:45:19,907 - INFO -   Batch 40/165 | Batch Energy: 1.3278 | Perplexity: 935.4251
+2025-11-20 13:45:20,463 - INFO -   Batch 50/165 | Batch Energy: 1.3238 | Perplexity: 908.9284
+2025-11-20 13:45:21,035 - INFO -   Batch 60/165 | Batch Energy: 1.3223 | Perplexity: 927.7760
+2025-11-20 13:45:21,586 - INFO -   Batch 70/165 | Batch Energy: 1.3277 | Perplexity: 909.8126
+2025-11-20 13:45:22,124 - INFO -   Batch 80/165 | Batch Energy: 1.3257 | Perplexity: 936.4256
+2025-11-20 13:45:22,662 - INFO -   Batch 90/165 | Batch Energy: 1.3241 | Perplexity: 890.0239
+2025-11-20 13:45:23,199 - INFO -   Batch 100/165 | Batch Energy: 1.3263 | Perplexity: 944.3792
+2025-11-20 13:45:23,743 - INFO -   Batch 110/165 | Batch Energy: 1.3237 | Perplexity: 894.3364
+2025-11-20 13:45:24,275 - INFO -   Batch 120/165 | Batch Energy: 1.3217 | Perplexity: 956.0098
+2025-11-20 13:45:24,814 - INFO -   Batch 130/165 | Batch Energy: 1.3246 | Perplexity: 943.5001
+2025-11-20 13:45:25,356 - INFO -   Batch 140/165 | Batch Energy: 1.3248 | Perplexity: 957.2359
+2025-11-20 13:45:25,893 - INFO -   Batch 150/165 | Batch Energy: 1.3245 | Perplexity: 930.8722
+2025-11-20 13:45:26,432 - INFO -   Batch 160/165 | Batch Energy: 1.3275 | Perplexity: 955.1436
+2025-11-20 13:45:26,954 - INFO - Epoch 3/20 | Train Energy: 1.3256 | Train Perplexity: 925.8649 | Val Energy: 1.3950 | Val Perplexity: 1136.6211
+2025-11-20 13:45:26,954 - INFO - Epoch 4/20
+2025-11-20 13:45:27,480 - INFO -   Batch 10/165 | Batch Energy: 1.3247 | Perplexity: 935.2984
+2025-11-20 13:45:28,020 - INFO -   Batch 20/165 | Batch Energy: 1.3218 | Perplexity: 916.1005
+2025-11-20 13:45:28,566 - INFO -   Batch 30/165 | Batch Energy: 1.3257 | Perplexity: 927.0437
+2025-11-20 13:45:29,116 - INFO -   Batch 40/165 | Batch Energy: 1.3258 | Perplexity: 957.3021
+2025-11-20 13:45:29,668 - INFO -   Batch 50/165 | Batch Energy: 1.3242 | Perplexity: 940.3987
+2025-11-20 13:45:30,237 - INFO -   Batch 60/165 | Batch Energy: 1.3250 | Perplexity: 902.6863
+2025-11-20 13:45:30,823 - INFO -   Batch 70/165 | Batch Energy: 1.3237 | Perplexity: 930.6028
+2025-11-20 13:45:31,385 - INFO -   Batch 80/165 | Batch Energy: 1.3278 | Perplexity: 936.8995
+2025-11-20 13:45:31,937 - INFO -   Batch 90/165 | Batch Energy: 1.3243 | Perplexity: 933.4080
+2025-11-20 13:45:32,504 - INFO -   Batch 100/165 | Batch Energy: 1.3260 | Perplexity: 938.8628
+2025-11-20 13:45:33,048 - INFO -   Batch 110/165 | Batch Energy: 1.3259 | Perplexity: 945.0107
+2025-11-20 13:45:33,578 - INFO -   Batch 120/165 | Batch Energy: 1.3253 | Perplexity: 890.5728
+2025-11-20 13:45:34,111 - INFO -   Batch 130/165 | Batch Energy: 1.3252 | Perplexity: 912.7866
+2025-11-20 13:45:34,661 - INFO -   Batch 140/165 | Batch Energy: 1.3260 | Perplexity: 954.0967
+2025-11-20 13:45:35,191 - INFO -   Batch 150/165 | Batch Energy: 1.3262 | Perplexity: 916.1568
+2025-11-20 13:45:35,717 - INFO -   Batch 160/165 | Batch Energy: 1.3235 | Perplexity: 911.8552
+2025-11-20 13:45:36,237 - INFO - Epoch 4/20 | Train Energy: 1.3253 | Train Perplexity: 925.7501 | Val Energy: 1.3958 | Val Perplexity: 1152.6560
+2025-11-20 13:45:36,237 - INFO - Epoch 5/20
+2025-11-20 13:45:36,791 - INFO -   Batch 10/165 | Batch Energy: 1.3259 | Perplexity: 876.8306
+2025-11-20 13:45:37,334 - INFO -   Batch 20/165 | Batch Energy: 1.3277 | Perplexity: 908.3873
+2025-11-20 13:45:37,876 - INFO -   Batch 30/165 | Batch Energy: 1.3253 | Perplexity: 917.5948
+2025-11-20 13:45:38,411 - INFO -   Batch 40/165 | Batch Energy: 1.3246 | Perplexity: 910.4384
+2025-11-20 13:45:38,946 - INFO -   Batch 50/165 | Batch Energy: 1.3244 | Perplexity: 949.6735
+2025-11-20 13:45:39,485 - INFO -   Batch 60/165 | Batch Energy: 1.3231 | Perplexity: 951.3223
+2025-11-20 13:45:40,020 - INFO -   Batch 70/165 | Batch Energy: 1.3255 | Perplexity: 930.5900
+2025-11-20 13:45:40,565 - INFO -   Batch 80/165 | Batch Energy: 1.3247 | Perplexity: 885.9147
+2025-11-20 13:45:41,115 - INFO -   Batch 90/165 | Batch Energy: 1.3287 | Perplexity: 885.8657
+2025-11-20 13:45:41,657 - INFO -   Batch 100/165 | Batch Energy: 1.3237 | Perplexity: 931.6111
+2025-11-20 13:45:42,203 - INFO -   Batch 110/165 | Batch Energy: 1.3254 | Perplexity: 941.3256
+2025-11-20 13:45:42,783 - INFO -   Batch 120/165 | Batch Energy: 1.3262 | Perplexity: 953.3622
+2025-11-20 13:45:43,326 - INFO -   Batch 130/165 | Batch Energy: 1.3261 | Perplexity: 956.2145
+2025-11-20 13:45:43,863 - INFO -   Batch 140/165 | Batch Energy: 1.3251 | Perplexity: 919.3633
+2025-11-20 13:45:44,411 - INFO -   Batch 150/165 | Batch Energy: 1.3256 | Perplexity: 946.3437
+2025-11-20 13:45:44,949 - INFO -   Batch 160/165 | Batch Energy: 1.3225 | Perplexity: 931.6613
+2025-11-20 13:45:45,483 - INFO - Epoch 5/20 | Train Energy: 1.3255 | Train Perplexity: 922.7666 | Val Energy: 1.3947 | Val Perplexity: 1146.3501
+2025-11-20 13:45:45,497 - INFO - Saved checkpoint to checkpoints/model_epoch_5.pt
+2025-11-20 13:45:45,497 - INFO - Epoch 6/20
+2025-11-20 13:45:46,038 - INFO -   Batch 10/165 | Batch Energy: 1.3258 | Perplexity: 935.1677
+2025-11-20 13:45:46,584 - INFO -   Batch 20/165 | Batch Energy: 1.3242 | Perplexity: 926.2042
+2025-11-20 13:45:47,144 - INFO -   Batch 30/165 | Batch Energy: 1.3238 | Perplexity: 936.1609
+2025-11-20 13:45:47,733 - INFO -   Batch 40/165 | Batch Energy: 1.3218 | Perplexity: 893.3195
+2025-11-20 13:45:48,274 - INFO -   Batch 50/165 | Batch Energy: 1.3286 | Perplexity: 915.8236
+2025-11-20 13:45:48,814 - INFO -   Batch 60/165 | Batch Energy: 1.3260 | Perplexity: 925.9366
+2025-11-20 13:45:49,363 - INFO -   Batch 70/165 | Batch Energy: 1.3267 | Perplexity: 907.6897
+2025-11-20 13:45:49,902 - INFO -   Batch 80/165 | Batch Energy: 1.3244 | Perplexity: 972.7911
+2025-11-20 13:45:50,454 - INFO -   Batch 90/165 | Batch Energy: 1.3250 | Perplexity: 921.3381
+2025-11-20 13:45:51,014 - INFO -   Batch 100/165 | Batch Energy: 1.3277 | Perplexity: 956.9571
+2025-11-20 13:45:51,549 - INFO -   Batch 110/165 | Batch Energy: 1.3277 | Perplexity: 905.6944
+2025-11-20 13:45:52,089 - INFO -   Batch 120/165 | Batch Energy: 1.3247 | Perplexity: 934.5534
+2025-11-20 13:45:52,645 - INFO -   Batch 130/165 | Batch Energy: 1.3260 | Perplexity: 916.3355
+2025-11-20 13:45:53,178 - INFO -   Batch 140/165 | Batch Energy: 1.3242 | Perplexity: 909.9774
+2025-11-20 13:45:53,726 - INFO -   Batch 150/165 | Batch Energy: 1.3231 | Perplexity: 925.6576
+2025-11-20 13:45:54,274 - INFO -   Batch 160/165 | Batch Energy: 1.3248 | Perplexity: 937.6812
+2025-11-20 13:45:54,804 - INFO - Epoch 6/20 | Train Energy: 1.3255 | Train Perplexity: 924.7278 | Val Energy: 1.3951 | Val Perplexity: 1126.5270
+2025-11-20 13:45:54,804 - INFO - Epoch 7/20
+2025-11-20 13:45:55,345 - INFO -   Batch 10/165 | Batch Energy: 1.3278 | Perplexity: 959.2615
+2025-11-20 13:45:55,889 - INFO -   Batch 20/165 | Batch Energy: 1.3240 | Perplexity: 919.3637
+2025-11-20 13:45:56,434 - INFO -   Batch 30/165 | Batch Energy: 1.3260 | Perplexity: 896.3994
+2025-11-20 13:45:56,973 - INFO -   Batch 40/165 | Batch Energy: 1.3259 | Perplexity: 911.8204
+2025-11-20 13:45:57,522 - INFO -   Batch 50/165 | Batch Energy: 1.3264 | Perplexity: 865.3574
+2025-11-20 13:45:58,062 - INFO -   Batch 60/165 | Batch Energy: 1.3233 | Perplexity: 897.6112
+2025-11-20 13:45:58,607 - INFO -   Batch 70/165 | Batch Energy: 1.3245 | Perplexity: 909.6538
+2025-11-20 13:45:59,157 - INFO -   Batch 80/165 | Batch Energy: 1.3258 | Perplexity: 935.0157
+2025-11-20 13:45:59,703 - INFO -   Batch 90/165 | Batch Energy: 1.3245 | Perplexity: 963.1905
+2025-11-20 13:46:00,259 - INFO -   Batch 100/165 | Batch Energy: 1.3258 | Perplexity: 884.4909
+2025-11-20 13:46:00,815 - INFO -   Batch 110/165 | Batch Energy: 1.3259 | Perplexity: 947.6437
+2025-11-20 13:46:01,366 - INFO -   Batch 120/165 | Batch Energy: 1.3289 | Perplexity: 863.5219
+2025-11-20 13:46:01,912 - INFO -   Batch 130/165 | Batch Energy: 1.3271 | Perplexity: 922.3395
+2025-11-20 13:46:02,459 - INFO -   Batch 140/165 | Batch Energy: 1.3258 | Perplexity: 942.5329
+2025-11-20 13:46:03,037 - INFO -   Batch 150/165 | Batch Energy: 1.3257 | Perplexity: 921.8215
+2025-11-20 13:46:03,585 - INFO -   Batch 160/165 | Batch Energy: 1.3232 | Perplexity: 903.4041
+2025-11-20 13:46:04,122 - INFO - Epoch 7/20 | Train Energy: 1.3256 | Train Perplexity: 922.0628 | Val Energy: 1.3948 | Val Perplexity: 1149.3091
+2025-11-20 13:46:04,122 - INFO - Epoch 8/20
+2025-11-20 13:46:04,664 - INFO -   Batch 10/165 | Batch Energy: 1.3257 | Perplexity: 889.3710
+2025-11-20 13:46:05,207 - INFO -   Batch 20/165 | Batch Energy: 1.3248 | Perplexity: 944.2770
+2025-11-20 13:46:05,748 - INFO -   Batch 30/165 | Batch Energy: 1.3230 | Perplexity: 935.0406
+2025-11-20 13:46:06,295 - INFO -   Batch 40/165 | Batch Energy: 1.3231 | Perplexity: 942.8246
+2025-11-20 13:46:06,844 - INFO -   Batch 50/165 | Batch Energy: 1.3245 | Perplexity: 905.9584
+2025-11-20 13:46:07,399 - INFO -   Batch 60/165 | Batch Energy: 1.3239 | Perplexity: 908.1685
+2025-11-20 13:46:07,937 - INFO -   Batch 70/165 | Batch Energy: 1.3275 | Perplexity: 902.7040
+2025-11-20 13:46:08,477 - INFO -   Batch 80/165 | Batch Energy: 1.3239 | Perplexity: 981.4756
+2025-11-20 13:46:09,026 - INFO -   Batch 90/165 | Batch Energy: 1.3235 | Perplexity: 953.3431
+2025-11-20 13:46:09,594 - INFO -   Batch 100/165 | Batch Energy: 1.3228 | Perplexity: 907.6793
+2025-11-20 13:46:10,168 - INFO -   Batch 110/165 | Batch Energy: 1.3258 | Perplexity: 928.3859
+2025-11-20 13:46:10,738 - INFO -   Batch 120/165 | Batch Energy: 1.3250 | Perplexity: 919.4900
+2025-11-20 13:46:11,295 - INFO -   Batch 130/165 | Batch Energy: 1.3272 | Perplexity: 910.7250
+2025-11-20 13:46:11,855 - INFO -   Batch 140/165 | Batch Energy: 1.3234 | Perplexity: 931.3717
+2025-11-20 13:46:12,413 - INFO -   Batch 150/165 | Batch Energy: 1.3204 | Perplexity: 933.5638
+2025-11-20 13:46:12,972 - INFO -   Batch 160/165 | Batch Energy: 1.3270 | Perplexity: 913.8357
+2025-11-20 13:46:13,528 - INFO - Epoch 8/20 | Train Energy: 1.3255 | Train Perplexity: 922.9336 | Val Energy: 1.3950 | Val Perplexity: 1153.4161
+2025-11-20 13:46:13,528 - INFO - Epoch 9/20
+2025-11-20 13:46:14,078 - INFO -   Batch 10/165 | Batch Energy: 1.3253 | Perplexity: 927.7862
+2025-11-20 13:46:14,622 - INFO -   Batch 20/165 | Batch Energy: 1.3233 | Perplexity: 940.7014
+2025-11-20 13:46:15,166 - INFO -   Batch 30/165 | Batch Energy: 1.3246 | Perplexity: 930.0297
+2025-11-20 13:46:15,707 - INFO -   Batch 40/165 | Batch Energy: 1.3269 | Perplexity: 937.5189
+2025-11-20 13:46:16,256 - INFO -   Batch 50/165 | Batch Energy: 1.3272 | Perplexity: 895.1300
+2025-11-20 13:46:16,806 - INFO -   Batch 60/165 | Batch Energy: 1.3276 | Perplexity: 922.8406
+2025-11-20 13:46:17,351 - INFO -   Batch 70/165 | Batch Energy: 1.3288 | Perplexity: 980.4825
+2025-11-20 13:46:17,892 - INFO -   Batch 80/165 | Batch Energy: 1.3265 | Perplexity: 929.8062
+2025-11-20 13:46:18,441 - INFO -   Batch 90/165 | Batch Energy: 1.3254 | Perplexity: 915.8424
+2025-11-20 13:46:19,023 - INFO -   Batch 100/165 | Batch Energy: 1.3248 | Perplexity: 942.1829
+2025-11-20 13:46:19,591 - INFO -   Batch 110/165 | Batch Energy: 1.3274 | Perplexity: 910.2817
+2025-11-20 13:46:20,143 - INFO -   Batch 120/165 | Batch Energy: 1.3241 | Perplexity: 882.4452
+2025-11-20 13:46:20,694 - INFO -   Batch 130/165 | Batch Energy: 1.3252 | Perplexity: 913.5752
+2025-11-20 13:46:21,250 - INFO -   Batch 140/165 | Batch Energy: 1.3250 | Perplexity: 941.5931
+2025-11-20 13:46:21,812 - INFO -   Batch 150/165 | Batch Energy: 1.3233 | Perplexity: 899.0063
+2025-11-20 13:46:22,383 - INFO -   Batch 160/165 | Batch Energy: 1.3243 | Perplexity: 904.6115
+2025-11-20 13:46:22,946 - INFO - Epoch 9/20 | Train Energy: 1.3258 | Train Perplexity: 924.1673 | Val Energy: 1.3950 | Val Perplexity: 1148.4152
+2025-11-20 13:46:22,946 - INFO - Epoch 10/20
+2025-11-20 13:46:23,517 - INFO -   Batch 10/165 | Batch Energy: 1.3261 | Perplexity: 918.0570
+2025-11-20 13:46:24,072 - INFO -   Batch 20/165 | Batch Energy: 1.3266 | Perplexity: 937.7617
+2025-11-20 13:46:24,613 - INFO -   Batch 30/165 | Batch Energy: 1.3241 | Perplexity: 960.3444
+2025-11-20 13:46:25,154 - INFO -   Batch 40/165 | Batch Energy: 1.3260 | Perplexity: 954.5467
+2025-11-20 13:46:25,690 - INFO -   Batch 50/165 | Batch Energy: 1.3283 | Perplexity: 897.0096
+2025-11-20 13:46:26,230 - INFO -   Batch 60/165 | Batch Energy: 1.3255 | Perplexity: 932.4031
+2025-11-20 13:46:26,784 - INFO -   Batch 70/165 | Batch Energy: 1.3264 | Perplexity: 942.3491
+2025-11-20 13:46:27,334 - INFO -   Batch 80/165 | Batch Energy: 1.3254 | Perplexity: 921.8976
+2025-11-20 13:46:27,880 - INFO -   Batch 90/165 | Batch Energy: 1.3252 | Perplexity: 925.9984
+2025-11-20 13:46:28,421 - INFO -   Batch 100/165 | Batch Energy: 1.3236 | Perplexity: 919.2940
+2025-11-20 13:46:28,966 - INFO -   Batch 110/165 | Batch Energy: 1.3255 | Perplexity: 953.5922
+2025-11-20 13:46:29,509 - INFO -   Batch 120/165 | Batch Energy: 1.3267 | Perplexity: 909.6729
+2025-11-20 13:46:30,067 - INFO -   Batch 130/165 | Batch Energy: 1.3253 | Perplexity: 941.8810
+2025-11-20 13:46:30,624 - INFO -   Batch 140/165 | Batch Energy: 1.3255 | Perplexity: 960.6915
+2025-11-20 13:46:31,167 - INFO -   Batch 150/165 | Batch Energy: 1.3267 | Perplexity: 941.6479
+2025-11-20 13:46:31,707 - INFO -   Batch 160/165 | Batch Energy: 1.3270 | Perplexity: 930.3837
+2025-11-20 13:46:32,244 - INFO - Epoch 10/20 | Train Energy: 1.3258 | Train Perplexity: 923.9841 | Val Energy: 1.3947 | Val Perplexity: 1143.2833
+2025-11-20 13:46:32,258 - INFO - Saved checkpoint to checkpoints/model_epoch_10.pt
+2025-11-20 13:46:32,258 - INFO - Epoch 11/20
+2025-11-20 13:46:32,803 - INFO -   Batch 10/165 | Batch Energy: 1.3241 | Perplexity: 866.4710
+2025-11-20 13:46:33,358 - INFO -   Batch 20/165 | Batch Energy: 1.3267 | Perplexity: 935.5022
+2025-11-20 13:46:33,904 - INFO -   Batch 30/165 | Batch Energy: 1.3252 | Perplexity: 940.2445
+2025-11-20 13:46:34,489 - INFO -   Batch 40/165 | Batch Energy: 1.3278 | Perplexity: 990.1106
+2025-11-20 13:46:35,056 - INFO -   Batch 50/165 | Batch Energy: 1.3281 | Perplexity: 939.2801
+2025-11-20 13:46:35,609 - INFO -   Batch 60/165 | Batch Energy: 1.3272 | Perplexity: 934.8855
+2025-11-20 13:46:36,169 - INFO -   Batch 70/165 | Batch Energy: 1.3248 | Perplexity: 961.3083
+2025-11-20 13:46:36,709 - INFO -   Batch 80/165 | Batch Energy: 1.3256 | Perplexity: 907.2483
+2025-11-20 13:46:37,249 - INFO -   Batch 90/165 | Batch Energy: 1.3252 | Perplexity: 960.1649
+2025-11-20 13:46:37,788 - INFO -   Batch 100/165 | Batch Energy: 1.3250 | Perplexity: 914.7700
+2025-11-20 13:46:38,328 - INFO -   Batch 110/165 | Batch Energy: 1.3287 | Perplexity: 928.7476
+2025-11-20 13:46:38,868 - INFO -   Batch 120/165 | Batch Energy: 1.3290 | Perplexity: 923.5991
+2025-11-20 13:46:39,416 - INFO -   Batch 130/165 | Batch Energy: 1.3255 | Perplexity: 918.1161
+2025-11-20 13:46:39,976 - INFO -   Batch 140/165 | Batch Energy: 1.3248 | Perplexity: 980.4119
+2025-11-20 13:46:40,530 - INFO -   Batch 150/165 | Batch Energy: 1.3245 | Perplexity: 918.7414
+2025-11-20 13:46:41,067 - INFO -   Batch 160/165 | Batch Energy: 1.3251 | Perplexity: 928.1800
+2025-11-20 13:46:41,595 - INFO - Epoch 11/20 | Train Energy: 1.3259 | Train Perplexity: 925.7038 | Val Energy: 1.3958 | Val Perplexity: 1152.0812
+2025-11-20 13:46:41,596 - INFO - Epoch 12/20
+2025-11-20 13:46:42,133 - INFO -   Batch 10/165 | Batch Energy: 1.3263 | Perplexity: 892.0025
+2025-11-20 13:46:42,677 - INFO -   Batch 20/165 | Batch Energy: 1.3259 | Perplexity: 896.8860
+2025-11-20 13:46:43,220 - INFO -   Batch 30/165 | Batch Energy: 1.3285 | Perplexity: 918.3683
+2025-11-20 13:46:43,757 - INFO -   Batch 40/165 | Batch Energy: 1.3254 | Perplexity: 886.6859
+2025-11-20 13:46:44,299 - INFO -   Batch 50/165 | Batch Energy: 1.3253 | Perplexity: 943.4511
+2025-11-20 13:46:44,851 - INFO -   Batch 60/165 | Batch Energy: 1.3241 | Perplexity: 968.7449
+2025-11-20 13:46:45,437 - INFO -   Batch 70/165 | Batch Energy: 1.3254 | Perplexity: 935.4224
+2025-11-20 13:46:45,984 - INFO -   Batch 80/165 | Batch Energy: 1.3294 | Perplexity: 914.0466
+2025-11-20 13:46:46,525 - INFO -   Batch 90/165 | Batch Energy: 1.3244 | Perplexity: 948.3991
+2025-11-20 13:46:47,059 - INFO -   Batch 100/165 | Batch Energy: 1.3261 | Perplexity: 918.5237
+2025-11-20 13:46:47,596 - INFO -   Batch 110/165 | Batch Energy: 1.3278 | Perplexity: 910.7510
+2025-11-20 13:46:48,130 - INFO -   Batch 120/165 | Batch Energy: 1.3254 | Perplexity: 902.3235
+2025-11-20 13:46:48,663 - INFO -   Batch 130/165 | Batch Energy: 1.3259 | Perplexity: 998.0403
+2025-11-20 13:46:49,202 - INFO -   Batch 140/165 | Batch Energy: 1.3259 | Perplexity: 895.2102
+2025-11-20 13:46:49,747 - INFO -   Batch 150/165 | Batch Energy: 1.3242 | Perplexity: 857.9401
+2025-11-20 13:46:50,309 - INFO -   Batch 160/165 | Batch Energy: 1.3240 | Perplexity: 934.9024
+2025-11-20 13:46:50,862 - INFO - Epoch 12/20 | Train Energy: 1.3262 | Train Perplexity: 921.6360 | Val Energy: 1.3955 | Val Perplexity: 1125.3105
+2025-11-20 13:46:50,863 - INFO - Epoch 13/20
+2025-11-20 13:46:51,399 - INFO -   Batch 10/165 | Batch Energy: 1.3260 | Perplexity: 934.2255
+2025-11-20 13:46:51,941 - INFO -   Batch 20/165 | Batch Energy: 1.3276 | Perplexity: 923.6030
+2025-11-20 13:46:52,483 - INFO -   Batch 30/165 | Batch Energy: 1.3259 | Perplexity: 992.6605
+2025-11-20 13:46:53,028 - INFO -   Batch 40/165 | Batch Energy: 1.3252 | Perplexity: 888.7779
+2025-11-20 13:46:53,570 - INFO -   Batch 50/165 | Batch Energy: 1.3259 | Perplexity: 877.6559
+2025-11-20 13:46:54,109 - INFO -   Batch 60/165 | Batch Energy: 1.3263 | Perplexity: 913.2681
+2025-11-20 13:46:54,649 - INFO -   Batch 70/165 | Batch Energy: 1.3278 | Perplexity: 944.4535
+2025-11-20 13:46:55,186 - INFO -   Batch 80/165 | Batch Energy: 1.3256 | Perplexity: 931.4757
+2025-11-20 13:46:55,764 - INFO -   Batch 90/165 | Batch Energy: 1.3265 | Perplexity: 893.8244
+2025-11-20 13:46:56,331 - INFO -   Batch 100/165 | Batch Energy: 1.3262 | Perplexity: 955.0739
+2025-11-20 13:46:56,892 - INFO -   Batch 110/165 | Batch Energy: 1.3269 | Perplexity: 897.7627
+2025-11-20 13:46:57,446 - INFO -   Batch 120/165 | Batch Energy: 1.3269 | Perplexity: 920.5323
+2025-11-20 13:46:57,995 - INFO -   Batch 130/165 | Batch Energy: 1.3258 | Perplexity: 927.0685
+2025-11-20 13:46:58,541 - INFO -   Batch 140/165 | Batch Energy: 1.3276 | Perplexity: 938.3866
+2025-11-20 13:46:59,095 - INFO -   Batch 150/165 | Batch Energy: 1.3286 | Perplexity: 922.1645
+2025-11-20 13:46:59,650 - INFO -   Batch 160/165 | Batch Energy: 1.3273 | Perplexity: 893.1926
+2025-11-20 13:47:00,196 - INFO - Epoch 13/20 | Train Energy: 1.3263 | Train Perplexity: 923.1112 | Val Energy: 1.3948 | Val Perplexity: 1155.7617
+2025-11-20 13:47:00,196 - INFO - Epoch 14/20
+2025-11-20 13:47:00,758 - INFO -   Batch 10/165 | Batch Energy: 1.3259 | Perplexity: 926.9222
+2025-11-20 13:47:01,316 - INFO -   Batch 20/165 | Batch Energy: 1.3284 | Perplexity: 935.9685
+2025-11-20 13:47:01,861 - INFO -   Batch 30/165 | Batch Energy: 1.3254 | Perplexity: 947.9809
+2025-11-20 13:47:02,416 - INFO -   Batch 40/165 | Batch Energy: 1.3262 | Perplexity: 957.6194
+2025-11-20 13:47:02,962 - INFO -   Batch 50/165 | Batch Energy: 1.3285 | Perplexity: 907.5439
+2025-11-20 13:47:03,501 - INFO -   Batch 60/165 | Batch Energy: 1.3272 | Perplexity: 916.7984
+2025-11-20 13:47:04,040 - INFO -   Batch 70/165 | Batch Energy: 1.3241 | Perplexity: 954.6983
+2025-11-20 13:47:04,587 - INFO -   Batch 80/165 | Batch Energy: 1.3258 | Perplexity: 903.2654
+2025-11-20 13:47:05,153 - INFO -   Batch 90/165 | Batch Energy: 1.3249 | Perplexity: 913.8292
+2025-11-20 13:47:05,733 - INFO -   Batch 100/165 | Batch Energy: 1.3255 | Perplexity: 891.6916
+2025-11-20 13:47:06,308 - INFO -   Batch 110/165 | Batch Energy: 1.3280 | Perplexity: 920.3322
+2025-11-20 13:47:06,862 - INFO -   Batch 120/165 | Batch Energy: 1.3267 | Perplexity: 930.0745
+2025-11-20 13:47:07,400 - INFO -   Batch 130/165 | Batch Energy: 1.3275 | Perplexity: 877.6295
+2025-11-20 13:47:07,943 - INFO -   Batch 140/165 | Batch Energy: 1.3281 | Perplexity: 931.3473
+2025-11-20 13:47:08,482 - INFO -   Batch 150/165 | Batch Energy: 1.3244 | Perplexity: 949.0135
+2025-11-20 13:47:09,035 - INFO -   Batch 160/165 | Batch Energy: 1.3268 | Perplexity: 918.4589
+2025-11-20 13:47:09,567 - INFO - Epoch 14/20 | Train Energy: 1.3263 | Train Perplexity: 926.6754 | Val Energy: 1.3953 | Val Perplexity: 1130.7713
+2025-11-20 13:47:09,568 - INFO - Epoch 15/20
+2025-11-20 13:47:10,113 - INFO -   Batch 10/165 | Batch Energy: 1.3275 | Perplexity: 919.7540
+2025-11-20 13:47:10,665 - INFO -   Batch 20/165 | Batch Energy: 1.3288 | Perplexity: 900.5891
+2025-11-20 13:47:11,202 - INFO -   Batch 30/165 | Batch Energy: 1.3278 | Perplexity: 925.7909
+2025-11-20 13:47:11,736 - INFO -   Batch 40/165 | Batch Energy: 1.3249 | Perplexity: 924.1819
+2025-11-20 13:47:12,287 - INFO -   Batch 50/165 | Batch Energy: 1.3263 | Perplexity: 911.0325
+2025-11-20 13:47:12,827 - INFO -   Batch 60/165 | Batch Energy: 1.3272 | Perplexity: 935.0001
+2025-11-20 13:47:13,363 - INFO -   Batch 70/165 | Batch Energy: 1.3267 | Perplexity: 903.2038
+2025-11-20 13:47:13,901 - INFO -   Batch 80/165 | Batch Energy: 1.3258 | Perplexity: 919.7934
+2025-11-20 13:47:14,436 - INFO -   Batch 90/165 | Batch Energy: 1.3260 | Perplexity: 937.6423
+2025-11-20 13:47:14,969 - INFO -   Batch 100/165 | Batch Energy: 1.3252 | Perplexity: 930.0643
+2025-11-20 13:47:15,518 - INFO -   Batch 110/165 | Batch Energy: 1.3257 | Perplexity: 888.1212
+2025-11-20 13:47:16,058 - INFO -   Batch 120/165 | Batch Energy: 1.3258 | Perplexity: 932.7339
+2025-11-20 13:47:16,596 - INFO -   Batch 130/165 | Batch Energy: 1.3270 | Perplexity: 922.8467
+2025-11-20 13:47:17,135 - INFO -   Batch 140/165 | Batch Energy: 1.3251 | Perplexity: 915.9144
+2025-11-20 13:47:17,673 - INFO -   Batch 150/165 | Batch Energy: 1.3268 | Perplexity: 949.5942
+2025-11-20 13:47:18,218 - INFO -   Batch 160/165 | Batch Energy: 1.3255 | Perplexity: 925.7574
+2025-11-20 13:47:18,762 - INFO - Epoch 15/20 | Train Energy: 1.3265 | Train Perplexity: 923.7911 | Val Energy: 1.3967 | Val Perplexity: 1152.7171
+2025-11-20 13:47:18,776 - INFO - Saved checkpoint to checkpoints/model_epoch_15.pt
+2025-11-20 13:47:18,777 - INFO - Epoch 16/20
+2025-11-20 13:47:19,340 - INFO -   Batch 10/165 | Batch Energy: 1.3268 | Perplexity: 934.0830
+2025-11-20 13:47:19,895 - INFO -   Batch 20/165 | Batch Energy: 1.3290 | Perplexity: 920.0803
+2025-11-20 13:47:20,439 - INFO -   Batch 30/165 | Batch Energy: 1.3285 | Perplexity: 944.5337
+2025-11-20 13:47:20,996 - INFO -   Batch 40/165 | Batch Energy: 1.3258 | Perplexity: 927.1220
+2025-11-20 13:47:21,543 - INFO -   Batch 50/165 | Batch Energy: 1.3297 | Perplexity: 914.1643
+2025-11-20 13:47:22,095 - INFO -   Batch 60/165 | Batch Energy: 1.3263 | Perplexity: 945.0819
+2025-11-20 13:47:22,636 - INFO -   Batch 70/165 | Batch Energy: 1.3260 | Perplexity: 937.0988
+2025-11-20 13:47:23,182 - INFO -   Batch 80/165 | Batch Energy: 1.3268 | Perplexity: 922.6619
+2025-11-20 13:47:23,735 - INFO -   Batch 90/165 | Batch Energy: 1.3253 | Perplexity: 932.7579
+2025-11-20 13:47:24,276 - INFO -   Batch 100/165 | Batch Energy: 1.3266 | Perplexity: 926.0179
+2025-11-20 13:47:24,820 - INFO -   Batch 110/165 | Batch Energy: 1.3280 | Perplexity: 920.5547
+2025-11-20 13:47:25,370 - INFO -   Batch 120/165 | Batch Energy: 1.3277 | Perplexity: 938.4318
+2025-11-20 13:47:25,916 - INFO -   Batch 130/165 | Batch Energy: 1.3280 | Perplexity: 931.8253
+2025-11-20 13:47:26,462 - INFO -   Batch 140/165 | Batch Energy: 1.3253 | Perplexity: 920.4503
+2025-11-20 13:47:27,051 - INFO -   Batch 150/165 | Batch Energy: 1.3276 | Perplexity: 916.7555
+2025-11-20 13:47:27,604 - INFO -   Batch 160/165 | Batch Energy: 1.3267 | Perplexity: 876.8051
+2025-11-20 13:47:28,141 - INFO - Epoch 16/20 | Train Energy: 1.3267 | Train Perplexity: 924.8519 | Val Energy: 1.3964 | Val Perplexity: 1136.6548
+2025-11-20 13:47:28,141 - INFO - Epoch 17/20
+2025-11-20 13:47:28,688 - INFO -   Batch 10/165 | Batch Energy: 1.3255 | Perplexity: 911.1463
+2025-11-20 13:47:29,235 - INFO -   Batch 20/165 | Batch Energy: 1.3262 | Perplexity: 922.8230
+2025-11-20 13:47:29,777 - INFO -   Batch 30/165 | Batch Energy: 1.3274 | Perplexity: 898.1622
+2025-11-20 13:47:30,325 - INFO -   Batch 40/165 | Batch Energy: 1.3269 | Perplexity: 909.3949
+2025-11-20 13:47:30,866 - INFO -   Batch 50/165 | Batch Energy: 1.3255 | Perplexity: 948.6081
+2025-11-20 13:47:31,413 - INFO -   Batch 60/165 | Batch Energy: 1.3270 | Perplexity: 990.5285
+2025-11-20 13:47:31,961 - INFO -   Batch 70/165 | Batch Energy: 1.3258 | Perplexity: 951.1540
+2025-11-20 13:47:32,562 - INFO -   Batch 80/165 | Batch Energy: 1.3280 | Perplexity: 919.6180
+2025-11-20 13:47:33,110 - INFO -   Batch 90/165 | Batch Energy: 1.3274 | Perplexity: 947.3456
+2025-11-20 13:47:33,650 - INFO -   Batch 100/165 | Batch Energy: 1.3250 | Perplexity: 887.2912
+2025-11-20 13:47:34,187 - INFO -   Batch 110/165 | Batch Energy: 1.3260 | Perplexity: 930.1184
+2025-11-20 13:47:34,731 - INFO -   Batch 120/165 | Batch Energy: 1.3273 | Perplexity: 916.6886
+2025-11-20 13:47:35,282 - INFO -   Batch 130/165 | Batch Energy: 1.3260 | Perplexity: 909.3489
+2025-11-20 13:47:35,819 - INFO -   Batch 140/165 | Batch Energy: 1.3287 | Perplexity: 912.8375
+2025-11-20 13:47:36,374 - INFO -   Batch 150/165 | Batch Energy: 1.3253 | Perplexity: 899.7735
+2025-11-20 13:47:36,922 - INFO -   Batch 160/165 | Batch Energy: 1.3299 | Perplexity: 929.4693
+2025-11-20 13:47:37,454 - INFO - Epoch 17/20 | Train Energy: 1.3266 | Train Perplexity: 923.8199 | Val Energy: 1.3959 | Val Perplexity: 1136.2016
+2025-11-20 13:47:37,455 - INFO - Epoch 18/20
+2025-11-20 13:47:38,036 - INFO -   Batch 10/165 | Batch Energy: 1.3281 | Perplexity: 886.0359
+2025-11-20 13:47:38,578 - INFO -   Batch 20/165 | Batch Energy: 1.3267 | Perplexity: 910.7167
+2025-11-20 13:47:39,116 - INFO -   Batch 30/165 | Batch Energy: 1.3232 | Perplexity: 905.1211
+2025-11-20 13:47:39,653 - INFO -   Batch 40/165 | Batch Energy: 1.3272 | Perplexity: 912.9433
+2025-11-20 13:47:40,203 - INFO -   Batch 50/165 | Batch Energy: 1.3292 | Perplexity: 962.7363
+2025-11-20 13:47:40,743 - INFO -   Batch 60/165 | Batch Energy: 1.3259 | Perplexity: 910.1354
+2025-11-20 13:47:41,284 - INFO -   Batch 70/165 | Batch Energy: 1.3262 | Perplexity: 906.6853
+2025-11-20 13:47:41,828 - INFO -   Batch 80/165 | Batch Energy: 1.3257 | Perplexity: 876.6132
+2025-11-20 13:47:42,363 - INFO -   Batch 90/165 | Batch Energy: 1.3279 | Perplexity: 956.9868
+2025-11-20 13:47:42,901 - INFO -   Batch 100/165 | Batch Energy: 1.3280 | Perplexity: 948.6271
+2025-11-20 13:47:43,442 - INFO -   Batch 110/165 | Batch Energy: 1.3242 | Perplexity: 891.8281
+2025-11-20 13:47:43,977 - INFO -   Batch 120/165 | Batch Energy: 1.3269 | Perplexity: 908.9341
+2025-11-20 13:47:44,512 - INFO -   Batch 130/165 | Batch Energy: 1.3283 | Perplexity: 902.4057
+2025-11-20 13:47:45,051 - INFO -   Batch 140/165 | Batch Energy: 1.3268 | Perplexity: 922.6769
+2025-11-20 13:47:45,583 - INFO -   Batch 150/165 | Batch Energy: 1.3274 | Perplexity: 904.5473
+2025-11-20 13:47:46,118 - INFO -   Batch 160/165 | Batch Energy: 1.3277 | Perplexity: 962.3233
+2025-11-20 13:47:46,661 - INFO - Epoch 18/20 | Train Energy: 1.3269 | Train Perplexity: 924.9602 | Val Energy: 1.3955 | Val Perplexity: 1143.8633
+2025-11-20 13:47:46,661 - INFO - Epoch 19/20
+2025-11-20 13:47:47,202 - INFO -   Batch 10/165 | Batch Energy: 1.3255 | Perplexity: 944.1077
+2025-11-20 13:47:47,744 - INFO -   Batch 20/165 | Batch Energy: 1.3277 | Perplexity: 932.4707
+2025-11-20 13:47:48,288 - INFO -   Batch 30/165 | Batch Energy: 1.3241 | Perplexity: 912.3575
+2025-11-20 13:47:48,826 - INFO -   Batch 40/165 | Batch Energy: 1.3272 | Perplexity: 932.5538
+2025-11-20 13:47:49,362 - INFO -   Batch 50/165 | Batch Energy: 1.3287 | Perplexity: 950.4318
+2025-11-20 13:47:49,897 - INFO -   Batch 60/165 | Batch Energy: 1.3234 | Perplexity: 933.8826
+2025-11-20 13:47:50,443 - INFO -   Batch 70/165 | Batch Energy: 1.3294 | Perplexity: 911.6239
+2025-11-20 13:47:50,991 - INFO -   Batch 80/165 | Batch Energy: 1.3273 | Perplexity: 923.9387
+2025-11-20 13:47:51,530 - INFO -   Batch 90/165 | Batch Energy: 1.3289 | Perplexity: 916.8692
+2025-11-20 13:47:52,064 - INFO -   Batch 100/165 | Batch Energy: 1.3281 | Perplexity: 942.0598
+2025-11-20 13:47:52,604 - INFO -   Batch 110/165 | Batch Energy: 1.3279 | Perplexity: 959.5282
+2025-11-20 13:47:53,137 - INFO -   Batch 120/165 | Batch Energy: 1.3249 | Perplexity: 915.3420
+2025-11-20 13:47:53,687 - INFO -   Batch 130/165 | Batch Energy: 1.3258 | Perplexity: 963.0444
+2025-11-20 13:47:54,229 - INFO -   Batch 140/165 | Batch Energy: 1.3256 | Perplexity: 927.3161
+2025-11-20 13:47:54,768 - INFO -   Batch 150/165 | Batch Energy: 1.3271 | Perplexity: 862.8341
+2025-11-20 13:47:55,306 - INFO -   Batch 160/165 | Batch Energy: 1.3287 | Perplexity: 895.7500
+2025-11-20 13:47:55,840 - INFO - Epoch 19/20 | Train Energy: 1.3271 | Train Perplexity: 924.8251 | Val Energy: 1.3957 | Val Perplexity: 1130.7742
+2025-11-20 13:47:55,840 - INFO - Epoch 20/20
+2025-11-20 13:47:56,375 - INFO -   Batch 10/165 | Batch Energy: 1.3268 | Perplexity: 935.9341
+2025-11-20 13:47:56,914 - INFO -   Batch 20/165 | Batch Energy: 1.3287 | Perplexity: 877.6362
+2025-11-20 13:47:57,453 - INFO -   Batch 30/165 | Batch Energy: 1.3266 | Perplexity: 936.7499
+2025-11-20 13:47:58,004 - INFO -   Batch 40/165 | Batch Energy: 1.3266 | Perplexity: 939.5256
+2025-11-20 13:47:58,599 - INFO -   Batch 50/165 | Batch Energy: 1.3260 | Perplexity: 896.8381
+2025-11-20 13:47:59,147 - INFO -   Batch 60/165 | Batch Energy: 1.3254 | Perplexity: 893.1253
+2025-11-20 13:47:59,690 - INFO -   Batch 70/165 | Batch Energy: 1.3277 | Perplexity: 916.7835
+2025-11-20 13:48:00,234 - INFO -   Batch 80/165 | Batch Energy: 1.3278 | Perplexity: 951.5215
+2025-11-20 13:48:00,778 - INFO -   Batch 90/165 | Batch Energy: 1.3263 | Perplexity: 880.4782
+2025-11-20 13:48:01,315 - INFO -   Batch 100/165 | Batch Energy: 1.3276 | Perplexity: 965.0671
+2025-11-20 13:48:01,855 - INFO -   Batch 110/165 | Batch Energy: 1.3290 | Perplexity: 912.6947
+2025-11-20 13:48:02,392 - INFO -   Batch 120/165 | Batch Energy: 1.3270 | Perplexity: 906.8323
+2025-11-20 13:48:02,928 - INFO -   Batch 130/165 | Batch Energy: 1.3262 | Perplexity: 913.9059
+2025-11-20 13:48:03,474 - INFO -   Batch 140/165 | Batch Energy: 1.3269 | Perplexity: 943.8948
+2025-11-20 13:48:04,060 - INFO -   Batch 150/165 | Batch Energy: 1.3272 | Perplexity: 949.7876
+2025-11-20 13:48:04,601 - INFO -   Batch 160/165 | Batch Energy: 1.3259 | Perplexity: 964.6760
+2025-11-20 13:48:05,127 - INFO - Epoch 20/20 | Train Energy: 1.3273 | Train Perplexity: 923.0869 | Val Energy: 1.3960 | Val Perplexity: 1136.6247
+2025-11-20 13:48:05,140 - INFO - Saved checkpoint to checkpoints/model_epoch_20.pt
+2025-11-20 13:48:05,363 - INFO - Training completed in 186.60 seconds
+2025-11-20 13:48:05,363 - INFO - Final model saved to: checkpoints/final_model.pt
+2025-11-20 13:48:05,363 - INFO - ========== Training completed ==========
+2025-11-20 13:49:25,354 - INFO - 
+########################################################################################################################
+2025-11-20 13:49:25,354 - INFO - Using device: cuda:0 (local rank 0)
+2025-11-20 13:49:25,354 - INFO - Saving the hyperparameters configurations:
+2025-11-20 13:49:25,354 - INFO - {
+      "vocab_size": 1024,
+      "block_size": 448,
+      "lr": 0.00048332759589273905,
+      "peak_learning_rate": 0.00483327595892739,
+      "warmup_steps": 82,
+      "n_embed": 64,
+      "dropout": 0.010135021708591482,
+      "T": 2,
+      "update_bias": false,
+      "num_heads": 4,
+      "n_blocks": 4,
+      "batch_size": 4,
+      "num_epochs": 20,
+      "internal_energy_fn_name": "pc_e",
+      "output_energy_fn_name": "pc_e",
+      "combined_internal_weight": 0.502141388705608,
+      "combined_output_weight": 0.497858611294392,
+      "use_flash_attention": false,
+      "alpha": 0.5
+}
+2025-11-20 13:49:26,601 - INFO - ========== Training started ==========
+2025-11-20 13:49:26,602 - INFO - 0.68 M parameters
+2025-11-20 13:49:26,602 - INFO - Epoch 1/20
+2025-11-20 13:49:27,487 - INFO -   Batch 10/165 | Batch Energy: 1.4439 | Perplexity: 1122.1483
+2025-11-20 13:49:28,064 - INFO -   Batch 20/165 | Batch Energy: 1.4215 | Perplexity: 1083.1838
+2025-11-20 13:49:28,608 - INFO -   Batch 30/165 | Batch Energy: 1.3982 | Perplexity: 1075.0368
+2025-11-20 13:49:29,143 - INFO -   Batch 40/165 | Batch Energy: 1.3703 | Perplexity: 1017.3426
+2025-11-20 13:49:29,676 - INFO -   Batch 50/165 | Batch Energy: 1.3621 | Perplexity: 976.7862
+2025-11-20 13:49:30,233 - INFO -   Batch 60/165 | Batch Energy: 1.3548 | Perplexity: 969.1908
+2025-11-20 13:49:30,776 - INFO -   Batch 70/165 | Batch Energy: 1.3452 | Perplexity: 933.3043
+2025-11-20 13:49:31,314 - INFO -   Batch 80/165 | Batch Energy: 1.3381 | Perplexity: 957.5642
+2025-11-20 13:49:31,866 - INFO -   Batch 90/165 | Batch Energy: 1.3414 | Perplexity: 931.5485
+2025-11-20 13:49:32,406 - INFO -   Batch 100/165 | Batch Energy: 1.3351 | Perplexity: 910.8969
+2025-11-20 13:49:32,981 - INFO -   Batch 110/165 | Batch Energy: 1.3369 | Perplexity: 943.7301
+2025-11-20 13:49:33,517 - INFO -   Batch 120/165 | Batch Energy: 1.3343 | Perplexity: 906.7804
+2025-11-20 13:49:34,057 - INFO -   Batch 130/165 | Batch Energy: 1.3299 | Perplexity: 919.6707
+2025-11-20 13:49:34,592 - INFO -   Batch 140/165 | Batch Energy: 1.3324 | Perplexity: 928.3035
+2025-11-20 13:49:35,143 - INFO -   Batch 150/165 | Batch Energy: 1.3322 | Perplexity: 924.5790
+2025-11-20 13:49:35,746 - INFO -   Batch 160/165 | Batch Energy: 1.3307 | Perplexity: 921.4550
+2025-11-20 13:49:36,322 - INFO - Epoch 1/20 | Train Energy: 1.3600 | Train Perplexity: 978.3351 | Val Energy: 1.3437 | Val Perplexity: 1161.4159
+2025-11-20 13:49:36,323 - INFO - Epoch 2/20
+2025-11-20 13:49:36,860 - INFO -   Batch 10/165 | Batch Energy: 1.3300 | Perplexity: 908.8951
+2025-11-20 13:49:37,397 - INFO -   Batch 20/165 | Batch Energy: 1.3263 | Perplexity: 906.3784
+2025-11-20 13:49:37,955 - INFO -   Batch 30/165 | Batch Energy: 1.3298 | Perplexity: 923.7453
+2025-11-20 13:49:38,531 - INFO -   Batch 40/165 | Batch Energy: 1.3279 | Perplexity: 946.3866
+2025-11-20 13:49:39,083 - INFO -   Batch 50/165 | Batch Energy: 1.3273 | Perplexity: 946.7589
+2025-11-20 13:49:39,639 - INFO -   Batch 60/165 | Batch Energy: 1.3259 | Perplexity: 926.0629
+2025-11-20 13:49:40,179 - INFO -   Batch 70/165 | Batch Energy: 1.3285 | Perplexity: 908.3409
+2025-11-20 13:49:40,721 - INFO -   Batch 80/165 | Batch Energy: 1.3268 | Perplexity: 890.9156
+2025-11-20 13:49:41,261 - INFO -   Batch 90/165 | Batch Energy: 1.3270 | Perplexity: 936.4734
+2025-11-20 13:49:41,812 - INFO -   Batch 100/165 | Batch Energy: 1.3283 | Perplexity: 920.8691
+2025-11-20 13:49:42,347 - INFO -   Batch 110/165 | Batch Energy: 1.3257 | Perplexity: 899.9271
+2025-11-20 13:49:42,881 - INFO -   Batch 120/165 | Batch Energy: 1.3277 | Perplexity: 894.9486
+2025-11-20 13:49:43,415 - INFO -   Batch 130/165 | Batch Energy: 1.3258 | Perplexity: 913.6976
+2025-11-20 13:49:43,949 - INFO -   Batch 140/165 | Batch Energy: 1.3282 | Perplexity: 920.2422
+2025-11-20 13:49:44,485 - INFO -   Batch 150/165 | Batch Energy: 1.3246 | Perplexity: 906.1039
+2025-11-20 13:49:45,027 - INFO -   Batch 160/165 | Batch Energy: 1.3265 | Perplexity: 943.0355
+2025-11-20 13:49:45,553 - INFO - Epoch 2/20 | Train Energy: 1.3276 | Train Perplexity: 918.1608 | Val Energy: 1.3398 | Val Perplexity: 1122.5517
+2025-11-20 13:49:45,553 - INFO - Epoch 3/20
+2025-11-20 13:49:46,089 - INFO -   Batch 10/165 | Batch Energy: 1.3281 | Perplexity: 872.9629
+2025-11-20 13:49:46,624 - INFO -   Batch 20/165 | Batch Energy: 1.3244 | Perplexity: 949.4607
+2025-11-20 13:49:47,159 - INFO -   Batch 30/165 | Batch Energy: 1.3300 | Perplexity: 898.6193
+2025-11-20 13:49:47,697 - INFO -   Batch 40/165 | Batch Energy: 1.3240 | Perplexity: 905.2143
+2025-11-20 13:49:48,265 - INFO -   Batch 50/165 | Batch Energy: 1.3269 | Perplexity: 915.9756
+2025-11-20 13:49:48,824 - INFO -   Batch 60/165 | Batch Energy: 1.3257 | Perplexity: 911.5626
+2025-11-20 13:49:49,377 - INFO -   Batch 70/165 | Batch Energy: 1.3285 | Perplexity: 915.6790
+2025-11-20 13:49:49,922 - INFO -   Batch 80/165 | Batch Energy: 1.3247 | Perplexity: 910.0074
+2025-11-20 13:49:50,491 - INFO -   Batch 90/165 | Batch Energy: 1.3256 | Perplexity: 933.8336
+2025-11-20 13:49:51,078 - INFO -   Batch 100/165 | Batch Energy: 1.3250 | Perplexity: 940.2041
+2025-11-20 13:49:51,657 - INFO -   Batch 110/165 | Batch Energy: 1.3238 | Perplexity: 916.5606
+2025-11-20 13:49:52,218 - INFO -   Batch 120/165 | Batch Energy: 1.3261 | Perplexity: 960.2386
+2025-11-20 13:49:52,805 - INFO -   Batch 130/165 | Batch Energy: 1.3255 | Perplexity: 932.7357
+2025-11-20 13:49:53,377 - INFO -   Batch 140/165 | Batch Energy: 1.3252 | Perplexity: 878.2947
+2025-11-20 13:49:53,934 - INFO -   Batch 150/165 | Batch Energy: 1.3262 | Perplexity: 934.4496
+2025-11-20 13:49:54,476 - INFO -   Batch 160/165 | Batch Energy: 1.3269 | Perplexity: 940.1942
+2025-11-20 13:49:55,011 - INFO - Epoch 3/20 | Train Energy: 1.3256 | Train Perplexity: 920.4059 | Val Energy: 1.3383 | Val Perplexity: 1128.0417
+2025-11-20 13:49:55,011 - INFO - Epoch 4/20
+2025-11-20 13:49:55,547 - INFO -   Batch 10/165 | Batch Energy: 1.3249 | Perplexity: 927.8145
+2025-11-20 13:49:56,090 - INFO -   Batch 20/165 | Batch Energy: 1.3264 | Perplexity: 902.1798
+2025-11-20 13:49:56,631 - INFO -   Batch 30/165 | Batch Energy: 1.3270 | Perplexity: 877.7120
+2025-11-20 13:49:57,171 - INFO -   Batch 40/165 | Batch Energy: 1.3236 | Perplexity: 904.6948
+2025-11-20 13:49:57,721 - INFO -   Batch 50/165 | Batch Energy: 1.3245 | Perplexity: 912.2649
+2025-11-20 13:49:58,278 - INFO -   Batch 60/165 | Batch Energy: 1.3264 | Perplexity: 921.6462
+2025-11-20 13:49:58,826 - INFO -   Batch 70/165 | Batch Energy: 1.3261 | Perplexity: 975.7132
+2025-11-20 13:49:59,371 - INFO -   Batch 80/165 | Batch Energy: 1.3296 | Perplexity: 904.7686
+2025-11-20 13:49:59,916 - INFO -   Batch 90/165 | Batch Energy: 1.3250 | Perplexity: 954.8057
+2025-11-20 13:50:00,493 - INFO -   Batch 100/165 | Batch Energy: 1.3280 | Perplexity: 890.6251
+2025-11-20 13:50:01,050 - INFO -   Batch 110/165 | Batch Energy: 1.3259 | Perplexity: 903.4248
+2025-11-20 13:50:01,588 - INFO -   Batch 120/165 | Batch Energy: 1.3265 | Perplexity: 926.6619
+2025-11-20 13:50:02,139 - INFO -   Batch 130/165 | Batch Energy: 1.3258 | Perplexity: 924.1660
+2025-11-20 13:50:02,683 - INFO -   Batch 140/165 | Batch Energy: 1.3252 | Perplexity: 914.2890
+2025-11-20 13:50:03,228 - INFO -   Batch 150/165 | Batch Energy: 1.3223 | Perplexity: 929.7220
+2025-11-20 13:50:03,774 - INFO -   Batch 160/165 | Batch Energy: 1.3275 | Perplexity: 889.6085
+2025-11-20 13:50:04,327 - INFO - Epoch 4/20 | Train Energy: 1.3256 | Train Perplexity: 917.3270 | Val Energy: 1.3395 | Val Perplexity: 1123.5106
+2025-11-20 13:50:04,327 - INFO - Epoch 5/20
+2025-11-20 13:50:04,873 - INFO -   Batch 10/165 | Batch Energy: 1.3241 | Perplexity: 884.7216
+2025-11-20 13:50:05,425 - INFO -   Batch 20/165 | Batch Energy: 1.3259 | Perplexity: 934.2897
+2025-11-20 13:50:05,973 - INFO -   Batch 30/165 | Batch Energy: 1.3257 | Perplexity: 880.4500
+2025-11-20 13:50:06,521 - INFO -   Batch 40/165 | Batch Energy: 1.3277 | Perplexity: 923.4357
+2025-11-20 13:50:07,069 - INFO -   Batch 50/165 | Batch Energy: 1.3253 | Perplexity: 921.3333
+2025-11-20 13:50:07,619 - INFO -   Batch 60/165 | Batch Energy: 1.3241 | Perplexity: 897.8102
+2025-11-20 13:50:08,153 - INFO -   Batch 70/165 | Batch Energy: 1.3249 | Perplexity: 889.1861
+2025-11-20 13:50:08,684 - INFO -   Batch 80/165 | Batch Energy: 1.3257 | Perplexity: 945.9029
+2025-11-20 13:50:09,245 - INFO -   Batch 90/165 | Batch Energy: 1.3252 | Perplexity: 941.1115
+2025-11-20 13:50:09,793 - INFO -   Batch 100/165 | Batch Energy: 1.3239 | Perplexity: 928.5293
+2025-11-20 13:50:10,344 - INFO -   Batch 110/165 | Batch Energy: 1.3265 | Perplexity: 894.7724
+2025-11-20 13:50:10,902 - INFO -   Batch 120/165 | Batch Energy: 1.3234 | Perplexity: 917.6880
+2025-11-20 13:50:11,439 - INFO -   Batch 130/165 | Batch Energy: 1.3260 | Perplexity: 907.5439
+2025-11-20 13:50:11,973 - INFO -   Batch 140/165 | Batch Energy: 1.3258 | Perplexity: 904.5878
+2025-11-20 13:50:12,507 - INFO -   Batch 150/165 | Batch Energy: 1.3246 | Perplexity: 912.4994
+2025-11-20 13:50:13,050 - INFO -   Batch 160/165 | Batch Energy: 1.3251 | Perplexity: 916.8639
+2025-11-20 13:50:13,587 - INFO - Epoch 5/20 | Train Energy: 1.3256 | Train Perplexity: 917.2254 | Val Energy: 1.3394 | Val Perplexity: 1126.3865
+2025-11-20 13:50:13,602 - INFO - Saved checkpoint to checkpoints/model_epoch_5.pt
+2025-11-20 13:50:13,602 - INFO - Epoch 6/20
+2025-11-20 13:50:14,160 - INFO -   Batch 10/165 | Batch Energy: 1.3259 | Perplexity: 885.4623
+2025-11-20 13:50:14,707 - INFO -   Batch 20/165 | Batch Energy: 1.3236 | Perplexity: 918.0942
+2025-11-20 13:50:15,254 - INFO -   Batch 30/165 | Batch Energy: 1.3260 | Perplexity: 897.6685
+2025-11-20 13:50:15,799 - INFO -   Batch 40/165 | Batch Energy: 1.3272 | Perplexity: 915.1548
+2025-11-20 13:50:16,344 - INFO -   Batch 50/165 | Batch Energy: 1.3270 | Perplexity: 933.4044
+2025-11-20 13:50:16,887 - INFO -   Batch 60/165 | Batch Energy: 1.3241 | Perplexity: 931.4121
+2025-11-20 13:50:17,436 - INFO -   Batch 70/165 | Batch Energy: 1.3246 | Perplexity: 942.1298
+2025-11-20 13:50:17,977 - INFO -   Batch 80/165 | Batch Energy: 1.3247 | Perplexity: 909.0138
+2025-11-20 13:50:18,512 - INFO -   Batch 90/165 | Batch Energy: 1.3299 | Perplexity: 901.6074
+2025-11-20 13:50:19,055 - INFO -   Batch 100/165 | Batch Energy: 1.3230 | Perplexity: 943.3301
+2025-11-20 13:50:19,618 - INFO -   Batch 110/165 | Batch Energy: 1.3255 | Perplexity: 894.9110
+2025-11-20 13:50:20,163 - INFO -   Batch 120/165 | Batch Energy: 1.3241 | Perplexity: 963.1367
+2025-11-20 13:50:20,762 - INFO -   Batch 130/165 | Batch Energy: 1.3264 | Perplexity: 927.5283
+2025-11-20 13:50:21,339 - INFO -   Batch 140/165 | Batch Energy: 1.3261 | Perplexity: 931.4055
+2025-11-20 13:50:21,918 - INFO -   Batch 150/165 | Batch Energy: 1.3268 | Perplexity: 906.7497
+2025-11-20 13:50:22,495 - INFO -   Batch 160/165 | Batch Energy: 1.3263 | Perplexity: 917.7217
+2025-11-20 13:50:23,059 - INFO - Epoch 6/20 | Train Energy: 1.3257 | Train Perplexity: 916.4984 | Val Energy: 1.3392 | Val Perplexity: 1113.7468
+2025-11-20 13:50:23,059 - INFO - Epoch 7/20
+2025-11-20 13:50:23,633 - INFO -   Batch 10/165 | Batch Energy: 1.3266 | Perplexity: 936.5766
+2025-11-20 13:50:24,204 - INFO -   Batch 20/165 | Batch Energy: 1.3274 | Perplexity: 877.3442
+2025-11-20 13:50:24,777 - INFO -   Batch 30/165 | Batch Energy: 1.3248 | Perplexity: 896.5324
+2025-11-20 13:50:25,327 - INFO -   Batch 40/165 | Batch Energy: 1.3271 | Perplexity: 915.9821
+2025-11-20 13:50:25,893 - INFO -   Batch 50/165 | Batch Energy: 1.3244 | Perplexity: 872.4415
+2025-11-20 13:50:26,456 - INFO -   Batch 60/165 | Batch Energy: 1.3260 | Perplexity: 910.5326
+2025-11-20 13:50:27,036 - INFO -   Batch 70/165 | Batch Energy: 1.3258 | Perplexity: 903.1827
+2025-11-20 13:50:27,606 - INFO -   Batch 80/165 | Batch Energy: 1.3243 | Perplexity: 903.5545
+2025-11-20 13:50:28,159 - INFO -   Batch 90/165 | Batch Energy: 1.3277 | Perplexity: 938.7804
+2025-11-20 13:50:28,714 - INFO -   Batch 100/165 | Batch Energy: 1.3251 | Perplexity: 967.8469
+2025-11-20 13:50:29,285 - INFO -   Batch 110/165 | Batch Energy: 1.3263 | Perplexity: 909.7236
+2025-11-20 13:50:29,866 - INFO -   Batch 120/165 | Batch Energy: 1.3232 | Perplexity: 922.3140
+2025-11-20 13:50:30,460 - INFO -   Batch 130/165 | Batch Energy: 1.3238 | Perplexity: 921.8563
+2025-11-20 13:50:31,039 - INFO -   Batch 140/165 | Batch Energy: 1.3240 | Perplexity: 903.1272
+2025-11-20 13:50:31,582 - INFO -   Batch 150/165 | Batch Energy: 1.3267 | Perplexity: 944.1225
+2025-11-20 13:50:32,125 - INFO -   Batch 160/165 | Batch Energy: 1.3238 | Perplexity: 868.0685
+2025-11-20 13:50:32,661 - INFO - Epoch 7/20 | Train Energy: 1.3257 | Train Perplexity: 917.6689 | Val Energy: 1.3401 | Val Perplexity: 1129.3756
+2025-11-20 13:50:32,661 - INFO - Epoch 8/20
+2025-11-20 13:50:33,203 - INFO -   Batch 10/165 | Batch Energy: 1.3255 | Perplexity: 935.0019
+2025-11-20 13:50:33,753 - INFO -   Batch 20/165 | Batch Energy: 1.3259 | Perplexity: 920.2787
+2025-11-20 13:50:34,297 - INFO -   Batch 30/165 | Batch Energy: 1.3230 | Perplexity: 923.1332
+2025-11-20 13:50:34,837 - INFO -   Batch 40/165 | Batch Energy: 1.3236 | Perplexity: 901.3310
+2025-11-20 13:50:35,384 - INFO -   Batch 50/165 | Batch Energy: 1.3252 | Perplexity: 897.2894
+2025-11-20 13:50:35,930 - INFO -   Batch 60/165 | Batch Energy: 1.3262 | Perplexity: 906.5858
+2025-11-20 13:50:36,472 - INFO -   Batch 70/165 | Batch Energy: 1.3256 | Perplexity: 914.8481
+2025-11-20 13:50:37,028 - INFO -   Batch 80/165 | Batch Energy: 1.3263 | Perplexity: 905.9899
+2025-11-20 13:50:37,573 - INFO -   Batch 90/165 | Batch Energy: 1.3260 | Perplexity: 949.5444
+2025-11-20 13:50:38,121 - INFO -   Batch 100/165 | Batch Energy: 1.3265 | Perplexity: 938.5606
+2025-11-20 13:50:38,652 - INFO -   Batch 110/165 | Batch Energy: 1.3256 | Perplexity: 939.3594
+2025-11-20 13:50:39,189 - INFO -   Batch 120/165 | Batch Energy: 1.3264 | Perplexity: 892.6910
+2025-11-20 13:50:39,721 - INFO -   Batch 130/165 | Batch Energy: 1.3248 | Perplexity: 909.2154
+2025-11-20 13:50:40,272 - INFO -   Batch 140/165 | Batch Energy: 1.3288 | Perplexity: 950.4731
+2025-11-20 13:50:40,819 - INFO -   Batch 150/165 | Batch Energy: 1.3260 | Perplexity: 867.3109
+2025-11-20 13:50:41,363 - INFO -   Batch 160/165 | Batch Energy: 1.3255 | Perplexity: 941.1470
+2025-11-20 13:50:41,891 - INFO - Epoch 8/20 | Train Energy: 1.3257 | Train Perplexity: 916.3249 | Val Energy: 1.3393 | Val Perplexity: 1109.2724
+2025-11-20 13:50:41,892 - INFO - Epoch 9/20
+2025-11-20 13:50:42,422 - INFO -   Batch 10/165 | Batch Energy: 1.3260 | Perplexity: 945.6589
+2025-11-20 13:50:42,955 - INFO -   Batch 20/165 | Batch Energy: 1.3269 | Perplexity: 956.5137
+2025-11-20 13:50:43,507 - INFO -   Batch 30/165 | Batch Energy: 1.3277 | Perplexity: 931.6018
+2025-11-20 13:50:44,042 - INFO -   Batch 40/165 | Batch Energy: 1.3256 | Perplexity: 865.4672
+2025-11-20 13:50:44,571 - INFO -   Batch 50/165 | Batch Energy: 1.3269 | Perplexity: 932.9256
+2025-11-20 13:50:45,107 - INFO -   Batch 60/165 | Batch Energy: 1.3268 | Perplexity: 955.5960
+2025-11-20 13:50:45,680 - INFO -   Batch 70/165 | Batch Energy: 1.3264 | Perplexity: 939.6748
+2025-11-20 13:50:46,224 - INFO -   Batch 80/165 | Batch Energy: 1.3242 | Perplexity: 919.7913
+2025-11-20 13:50:46,777 - INFO -   Batch 90/165 | Batch Energy: 1.3294 | Perplexity: 885.1850
+2025-11-20 13:50:47,316 - INFO -   Batch 100/165 | Batch Energy: 1.3267 | Perplexity: 900.2842
+2025-11-20 13:50:47,852 - INFO -   Batch 110/165 | Batch Energy: 1.3289 | Perplexity: 898.7316
+2025-11-20 13:50:48,396 - INFO -   Batch 120/165 | Batch Energy: 1.3277 | Perplexity: 957.3323
+2025-11-20 13:50:48,937 - INFO -   Batch 130/165 | Batch Energy: 1.3277 | Perplexity: 921.6119
+2025-11-20 13:50:49,479 - INFO -   Batch 140/165 | Batch Energy: 1.3266 | Perplexity: 931.0134
+2025-11-20 13:50:50,032 - INFO -   Batch 150/165 | Batch Energy: 1.3248 | Perplexity: 894.2686
+2025-11-20 13:50:50,593 - INFO -   Batch 160/165 | Batch Energy: 1.3284 | Perplexity: 902.7147
+2025-11-20 13:50:51,158 - INFO - Epoch 9/20 | Train Energy: 1.3259 | Train Perplexity: 917.4497 | Val Energy: 1.3402 | Val Perplexity: 1128.8108
+2025-11-20 13:50:51,158 - INFO - Epoch 10/20
+2025-11-20 13:50:51,700 - INFO -   Batch 10/165 | Batch Energy: 1.3264 | Perplexity: 882.4183
+2025-11-20 13:50:52,243 - INFO -   Batch 20/165 | Batch Energy: 1.3276 | Perplexity: 938.4403
+2025-11-20 13:50:52,785 - INFO -   Batch 30/165 | Batch Energy: 1.3270 | Perplexity: 900.4062
+2025-11-20 13:50:53,339 - INFO -   Batch 40/165 | Batch Energy: 1.3258 | Perplexity: 938.4689
+2025-11-20 13:50:53,873 - INFO -   Batch 50/165 | Batch Energy: 1.3288 | Perplexity: 910.1424
+2025-11-20 13:50:54,407 - INFO -   Batch 60/165 | Batch Energy: 1.3261 | Perplexity: 920.9854
+2025-11-20 13:50:54,942 - INFO -   Batch 70/165 | Batch Energy: 1.3251 | Perplexity: 944.0991
+2025-11-20 13:50:55,480 - INFO -   Batch 80/165 | Batch Energy: 1.3248 | Perplexity: 907.8845
+2025-11-20 13:50:56,037 - INFO -   Batch 90/165 | Batch Energy: 1.3242 | Perplexity: 899.2014
+2025-11-20 13:50:56,613 - INFO -   Batch 100/165 | Batch Energy: 1.3249 | Perplexity: 952.3095
+2025-11-20 13:50:57,145 - INFO -   Batch 110/165 | Batch Energy: 1.3259 | Perplexity: 890.5567
+2025-11-20 13:50:57,680 - INFO -   Batch 120/165 | Batch Energy: 1.3227 | Perplexity: 925.0443
+2025-11-20 13:50:58,216 - INFO -   Batch 130/165 | Batch Energy: 1.3266 | Perplexity: 909.3147
+2025-11-20 13:50:58,753 - INFO -   Batch 140/165 | Batch Energy: 1.3271 | Perplexity: 911.5556
+2025-11-20 13:50:59,289 - INFO -   Batch 150/165 | Batch Energy: 1.3253 | Perplexity: 955.2862
+2025-11-20 13:50:59,833 - INFO -   Batch 160/165 | Batch Energy: 1.3238 | Perplexity: 910.2027
+2025-11-20 13:51:00,375 - INFO - Epoch 10/20 | Train Energy: 1.3260 | Train Perplexity: 918.2266 | Val Energy: 1.3393 | Val Perplexity: 1133.1908
+2025-11-20 13:51:00,390 - INFO - Saved checkpoint to checkpoints/model_epoch_10.pt
+2025-11-20 13:51:00,390 - INFO - Epoch 11/20
+2025-11-20 13:51:00,928 - INFO -   Batch 10/165 | Batch Energy: 1.3257 | Perplexity: 901.9256
+2025-11-20 13:51:01,489 - INFO -   Batch 20/165 | Batch Energy: 1.3262 | Perplexity: 908.5467
+2025-11-20 13:51:02,050 - INFO -   Batch 30/165 | Batch Energy: 1.3224 | Perplexity: 894.7907
+2025-11-20 13:51:02,584 - INFO -   Batch 40/165 | Batch Energy: 1.3272 | Perplexity: 937.7058
+2025-11-20 13:51:03,126 - INFO -   Batch 50/165 | Batch Energy: 1.3274 | Perplexity: 907.6685
+2025-11-20 13:51:03,659 - INFO -   Batch 60/165 | Batch Energy: 1.3254 | Perplexity: 926.2903
+2025-11-20 13:51:04,190 - INFO -   Batch 70/165 | Batch Energy: 1.3243 | Perplexity: 947.3054
+2025-11-20 13:51:04,720 - INFO -   Batch 80/165 | Batch Energy: 1.3269 | Perplexity: 914.1434
+2025-11-20 13:51:05,252 - INFO -   Batch 90/165 | Batch Energy: 1.3268 | Perplexity: 927.2179
+2025-11-20 13:51:05,785 - INFO -   Batch 100/165 | Batch Energy: 1.3257 | Perplexity: 913.2158
+2025-11-20 13:51:06,328 - INFO -   Batch 110/165 | Batch Energy: 1.3272 | Perplexity: 917.5694
+2025-11-20 13:51:06,855 - INFO -   Batch 120/165 | Batch Energy: 1.3243 | Perplexity: 930.1228
+2025-11-20 13:51:07,388 - INFO -   Batch 130/165 | Batch Energy: 1.3260 | Perplexity: 928.3708
+2025-11-20 13:51:07,923 - INFO -   Batch 140/165 | Batch Energy: 1.3267 | Perplexity: 959.9662
+2025-11-20 13:51:08,455 - INFO -   Batch 150/165 | Batch Energy: 1.3277 | Perplexity: 930.3482
+2025-11-20 13:51:08,990 - INFO -   Batch 160/165 | Batch Energy: 1.3255 | Perplexity: 880.2372
+2025-11-20 13:51:09,532 - INFO - Epoch 11/20 | Train Energy: 1.3259 | Train Perplexity: 919.1591 | Val Energy: 1.3388 | Val Perplexity: 1141.1454
+2025-11-20 13:51:09,532 - INFO - Epoch 12/20
+2025-11-20 13:51:10,069 - INFO -   Batch 10/165 | Batch Energy: 1.3302 | Perplexity: 913.3905
+2025-11-20 14:30:03,761 - INFO - 
+########################################################################################################################
+2025-11-20 14:30:03,762 - INFO - Using device: cuda:0 (local rank 0)
+2025-11-20 14:30:03,762 - INFO - Saving the hyperparameters configurations:
+2025-11-20 14:30:03,762 - INFO - {
+      "vocab_size": 1024,
+      "block_size": 208,
+      "lr": 0.0003223786832283688,
+      "peak_learning_rate": 0.003223786832283688,
+      "warmup_steps": 369,
+      "n_embed": 160,
+      "dropout": 0.4546369920173881,
+      "T": 2,
+      "update_bias": false,
+      "num_heads": 10,
+      "n_blocks": 3,
+      "batch_size": 8,
+      "num_epochs": 10,
+      "internal_energy_fn_name": "pc_e",
+      "output_energy_fn_name": "pc_e",
+      "combined_internal_weight": 0.5094684344308807,
+      "combined_output_weight": 0.49053156556911925,
+      "use_flash_attention": false,
+      "alpha": 0.5
+}
+2025-11-20 14:30:04,991 - INFO - ========== Training started ==========
+2025-11-20 14:30:04,992 - INFO - 2.77 M parameters
+2025-11-20 14:30:04,992 - INFO - Epoch 1/10
+2025-11-20 14:30:05,963 - INFO -   Batch 10/165 | Batch Energy: 1.4889 | Perplexity: 1151.1176
+2025-11-20 14:30:06,616 - INFO -   Batch 20/165 | Batch Energy: 1.4768 | Perplexity: 1119.6117
+2025-11-20 14:30:07,217 - INFO -   Batch 30/165 | Batch Energy: 1.4655 | Perplexity: 1121.4754
+2025-11-20 14:30:07,821 - INFO -   Batch 40/165 | Batch Energy: 1.4536 | Perplexity: 1101.9951
+2025-11-20 14:30:08,431 - INFO -   Batch 50/165 | Batch Energy: 1.4386 | Perplexity: 1084.2199
+2025-11-20 14:30:09,030 - INFO -   Batch 60/165 | Batch Energy: 1.4284 | Perplexity: 1056.5234
+2025-11-20 14:30:09,628 - INFO -   Batch 70/165 | Batch Energy: 1.4179 | Perplexity: 1065.1988
+2025-11-20 14:30:10,237 - INFO -   Batch 80/165 | Batch Energy: 1.4067 | Perplexity: 1032.1918
+2025-11-20 14:30:10,843 - INFO -   Batch 90/165 | Batch Energy: 1.3996 | Perplexity: 1021.5576
+2025-11-20 14:30:11,453 - INFO -   Batch 100/165 | Batch Energy: 1.3898 | Perplexity: 992.7457
+2025-11-20 14:30:12,054 - INFO -   Batch 110/165 | Batch Energy: 1.3830 | Perplexity: 1029.9282
+2025-11-20 14:30:12,657 - INFO -   Batch 120/165 | Batch Energy: 1.3816 | Perplexity: 938.9479
+2025-11-20 14:30:13,260 - INFO -   Batch 130/165 | Batch Energy: 1.3750 | Perplexity: 918.4642
+2025-11-20 14:30:13,861 - INFO -   Batch 140/165 | Batch Energy: 1.3731 | Perplexity: 982.1563
+2025-11-20 14:30:14,474 - INFO -   Batch 150/165 | Batch Energy: 1.3723 | Perplexity: 979.4587
+2025-11-20 14:30:15,082 - INFO -   Batch 160/165 | Batch Energy: 1.3711 | Perplexity: 940.4646
+2025-11-20 14:30:15,595 - INFO - Epoch 1/10 | Train Energy: 1.4163 | Train Perplexity: 1026.1550 | Val Energy: 1.3732 | Val Perplexity: 1166.0733
+2025-11-20 14:30:15,595 - INFO - Epoch 2/10
+2025-11-20 14:30:16,194 - INFO -   Batch 10/165 | Batch Energy: 1.3662 | Perplexity: 888.2657
+2025-11-20 14:30:16,800 - INFO -   Batch 20/165 | Batch Energy: 1.3644 | Perplexity: 888.0382
+2025-11-20 14:30:17,401 - INFO -   Batch 30/165 | Batch Energy: 1.3642 | Perplexity: 947.9063
+2025-11-20 14:30:18,011 - INFO -   Batch 40/165 | Batch Energy: 1.3615 | Perplexity: 885.6667
+2025-11-20 14:30:18,616 - INFO -   Batch 50/165 | Batch Energy: 1.3607 | Perplexity: 850.3446
+2025-11-20 14:30:19,215 - INFO -   Batch 60/165 | Batch Energy: 1.3605 | Perplexity: 884.9630
+2025-11-20 14:30:19,817 - INFO -   Batch 70/165 | Batch Energy: 1.3596 | Perplexity: 884.1890
+2025-11-20 14:30:20,423 - INFO -   Batch 80/165 | Batch Energy: 1.3597 | Perplexity: 891.6576
+2025-11-20 14:30:21,038 - INFO -   Batch 90/165 | Batch Energy: 1.3559 | Perplexity: 850.7567
+2025-11-20 14:30:21,645 - INFO -   Batch 100/165 | Batch Energy: 1.3586 | Perplexity: 818.5061
+2025-11-20 14:30:22,246 - INFO -   Batch 110/165 | Batch Energy: 1.3563 | Perplexity: 811.5995
+2025-11-20 14:30:22,845 - INFO -   Batch 120/165 | Batch Energy: 1.3531 | Perplexity: 834.8742
+2025-11-20 14:30:23,450 - INFO -   Batch 130/165 | Batch Energy: 1.3548 | Perplexity: 822.0534
+2025-11-20 14:30:24,048 - INFO -   Batch 140/165 | Batch Energy: 1.3531 | Perplexity: 821.6255
+2025-11-20 14:30:24,654 - INFO -   Batch 150/165 | Batch Energy: 1.3541 | Perplexity: 780.3770
+2025-11-20 14:30:25,252 - INFO -   Batch 160/165 | Batch Energy: 1.3509 | Perplexity: 800.8600
+2025-11-20 14:30:25,764 - INFO - Epoch 2/10 | Train Energy: 1.3588 | Train Perplexity: 859.3555 | Val Energy: 1.3595 | Val Perplexity: 1170.7766
+2025-11-20 14:30:25,764 - INFO - Epoch 3/10
+2025-11-20 14:30:26,361 - INFO -   Batch 10/165 | Batch Energy: 1.3527 | Perplexity: 774.5105
+2025-11-20 14:30:26,958 - INFO -   Batch 20/165 | Batch Energy: 1.3517 | Perplexity: 799.7785
+2025-11-20 14:30:27,564 - INFO -   Batch 30/165 | Batch Energy: 1.3527 | Perplexity: 787.6535
+2025-11-20 14:30:28,164 - INFO -   Batch 40/165 | Batch Energy: 1.3496 | Perplexity: 786.5977
+2025-11-20 14:30:28,764 - INFO -   Batch 50/165 | Batch Energy: 1.3505 | Perplexity: 834.0713
+2025-11-20 14:30:29,365 - INFO -   Batch 60/165 | Batch Energy: 1.3517 | Perplexity: 803.7254
+2025-11-20 14:30:29,965 - INFO -   Batch 70/165 | Batch Energy: 1.3508 | Perplexity: 755.0330
+2025-11-20 14:30:30,587 - INFO -   Batch 80/165 | Batch Energy: 1.3520 | Perplexity: 802.0642
+2025-11-20 14:30:31,190 - INFO -   Batch 90/165 | Batch Energy: 1.3522 | Perplexity: 817.9658
+2025-11-20 14:30:31,786 - INFO -   Batch 100/165 | Batch Energy: 1.3490 | Perplexity: 815.5857
+2025-11-20 14:30:32,379 - INFO -   Batch 110/165 | Batch Energy: 1.3512 | Perplexity: 823.4002
+2025-11-20 14:30:32,973 - INFO -   Batch 120/165 | Batch Energy: 1.3513 | Perplexity: 791.5116
+2025-11-20 14:30:33,566 - INFO -   Batch 130/165 | Batch Energy: 1.3516 | Perplexity: 818.7747
+2025-11-20 14:30:34,177 - INFO -   Batch 140/165 | Batch Energy: 1.3502 | Perplexity: 767.5468
+2025-11-20 14:30:34,769 - INFO -   Batch 150/165 | Batch Energy: 1.3502 | Perplexity: 840.9810
+2025-11-20 14:30:35,363 - INFO -   Batch 160/165 | Batch Energy: 1.3493 | Perplexity: 852.9225
+2025-11-20 14:30:35,870 - INFO - Epoch 3/10 | Train Energy: 1.3511 | Train Perplexity: 807.6305 | Val Energy: 1.3577 | Val Perplexity: 1226.3847
+2025-11-20 14:30:35,870 - INFO - Epoch 4/10
+2025-11-20 14:30:36,462 - INFO -   Batch 10/165 | Batch Energy: 1.3507 | Perplexity: 826.5338
+2025-11-20 14:30:37,058 - INFO -   Batch 20/165 | Batch Energy: 1.3519 | Perplexity: 838.4920
+2025-11-20 14:30:37,661 - INFO -   Batch 30/165 | Batch Energy: 1.3509 | Perplexity: 777.6579
+2025-11-20 14:30:38,261 - INFO -   Batch 40/165 | Batch Energy: 1.3492 | Perplexity: 786.1305
+2025-11-20 14:30:38,858 - INFO -   Batch 50/165 | Batch Energy: 1.3498 | Perplexity: 841.2120
+2025-11-20 14:30:39,454 - INFO -   Batch 60/165 | Batch Energy: 1.3498 | Perplexity: 835.3318
+2025-11-20 14:30:40,050 - INFO -   Batch 70/165 | Batch Energy: 1.3494 | Perplexity: 844.1509
+2025-11-20 14:30:40,656 - INFO -   Batch 80/165 | Batch Energy: 1.3488 | Perplexity: 841.1017
+2025-11-20 14:30:41,244 - INFO -   Batch 90/165 | Batch Energy: 1.3508 | Perplexity: 845.3299
+2025-11-20 14:30:41,831 - INFO -   Batch 100/165 | Batch Energy: 1.3499 | Perplexity: 802.5244
+2025-11-20 14:30:42,419 - INFO -   Batch 110/165 | Batch Energy: 1.3492 | Perplexity: 763.5394
+2025-11-20 14:30:43,011 - INFO -   Batch 120/165 | Batch Energy: 1.3522 | Perplexity: 751.1063
+2025-11-20 14:30:43,611 - INFO -   Batch 130/165 | Batch Energy: 1.3492 | Perplexity: 806.9207
+2025-11-20 14:30:44,212 - INFO -   Batch 140/165 | Batch Energy: 1.3494 | Perplexity: 830.6183
+2025-11-20 14:30:44,809 - INFO -   Batch 150/165 | Batch Energy: 1.3499 | Perplexity: 831.2626
+2025-11-20 14:30:45,406 - INFO -   Batch 160/165 | Batch Energy: 1.3494 | Perplexity: 834.8221
+2025-11-20 14:30:45,915 - INFO - Epoch 4/10 | Train Energy: 1.3500 | Train Perplexity: 817.3163 | Val Energy: 1.3556 | Val Perplexity: 1265.7270
+2025-11-20 14:30:45,915 - INFO - Epoch 5/10
+2025-11-20 14:30:46,511 - INFO -   Batch 10/165 | Batch Energy: 1.3494 | Perplexity: 802.1870
+2025-11-20 14:30:47,113 - INFO -   Batch 20/165 | Batch Energy: 1.3483 | Perplexity: 847.9755
+2025-11-20 14:30:47,713 - INFO -   Batch 30/165 | Batch Energy: 1.3506 | Perplexity: 779.2043
+2025-11-20 14:30:48,310 - INFO -   Batch 40/165 | Batch Energy: 1.3486 | Perplexity: 821.6905
+2025-11-20 14:30:48,904 - INFO -   Batch 50/165 | Batch Energy: 1.3470 | Perplexity: 790.4883
+2025-11-20 14:30:49,503 - INFO -   Batch 60/165 | Batch Energy: 1.3474 | Perplexity: 802.8145
+2025-11-20 14:30:50,104 - INFO -   Batch 70/165 | Batch Energy: 1.3494 | Perplexity: 832.4672
+2025-11-20 14:30:50,719 - INFO -   Batch 80/165 | Batch Energy: 1.3499 | Perplexity: 812.4975
+2025-11-20 14:30:51,322 - INFO -   Batch 90/165 | Batch Energy: 1.3490 | Perplexity: 831.2392
+2025-11-20 14:30:51,932 - INFO -   Batch 100/165 | Batch Energy: 1.3495 | Perplexity: 816.1817
+2025-11-20 14:30:52,527 - INFO -   Batch 110/165 | Batch Energy: 1.3502 | Perplexity: 765.3441
+2025-11-20 14:30:53,126 - INFO -   Batch 120/165 | Batch Energy: 1.3477 | Perplexity: 820.7746
+2025-11-20 14:30:53,734 - INFO -   Batch 130/165 | Batch Energy: 1.3504 | Perplexity: 804.5578
+2025-11-20 14:30:54,337 - INFO -   Batch 140/165 | Batch Energy: 1.3500 | Perplexity: 785.3111
+2025-11-20 14:30:54,933 - INFO -   Batch 150/165 | Batch Energy: 1.3520 | Perplexity: 811.2088
+2025-11-20 14:30:55,530 - INFO -   Batch 160/165 | Batch Energy: 1.3522 | Perplexity: 797.2107
+2025-11-20 14:30:56,036 - INFO - Epoch 5/10 | Train Energy: 1.3495 | Train Perplexity: 815.0315 | Val Energy: 1.3561 | Val Perplexity: 1229.6831
+2025-11-20 14:30:56,086 - INFO - Saved checkpoint to checkpoints/model_epoch_5.pt
+2025-11-20 14:30:56,086 - INFO - Epoch 6/10
+2025-11-20 14:30:56,684 - INFO -   Batch 10/165 | Batch Energy: 1.3494 | Perplexity: 825.1374
+2025-11-20 14:30:57,282 - INFO -   Batch 20/165 | Batch Energy: 1.3496 | Perplexity: 849.3323
+2025-11-20 14:30:57,879 - INFO -   Batch 30/165 | Batch Energy: 1.3508 | Perplexity: 807.6744
+2025-11-20 14:30:58,475 - INFO -   Batch 40/165 | Batch Energy: 1.3502 | Perplexity: 805.0644
+2025-11-20 14:30:59,074 - INFO -   Batch 50/165 | Batch Energy: 1.3495 | Perplexity: 807.0611
+2025-11-20 14:30:59,675 - INFO -   Batch 60/165 | Batch Energy: 1.3497 | Perplexity: 835.7278
+2025-11-20 14:31:00,291 - INFO -   Batch 70/165 | Batch Energy: 1.3490 | Perplexity: 765.3145
+2025-11-20 14:31:00,906 - INFO -   Batch 80/165 | Batch Energy: 1.3501 | Perplexity: 794.5837
+2025-11-20 14:31:01,515 - INFO -   Batch 90/165 | Batch Energy: 1.3506 | Perplexity: 791.3515
+2025-11-20 14:31:02,119 - INFO -   Batch 100/165 | Batch Energy: 1.3487 | Perplexity: 835.1119
+2025-11-20 14:31:02,718 - INFO -   Batch 110/165 | Batch Energy: 1.3498 | Perplexity: 879.6238
+2025-11-20 14:31:03,322 - INFO -   Batch 120/165 | Batch Energy: 1.3490 | Perplexity: 789.0064
+2025-11-20 14:31:03,924 - INFO -   Batch 130/165 | Batch Energy: 1.3498 | Perplexity: 780.1802
+2025-11-20 14:31:04,526 - INFO -   Batch 140/165 | Batch Energy: 1.3479 | Perplexity: 824.5368
+2025-11-20 14:31:05,124 - INFO -   Batch 150/165 | Batch Energy: 1.3487 | Perplexity: 802.6668
+2025-11-20 14:31:05,722 - INFO -   Batch 160/165 | Batch Energy: 1.3489 | Perplexity: 842.2058
+2025-11-20 14:31:06,231 - INFO - Epoch 6/10 | Train Energy: 1.3494 | Train Perplexity: 817.0730 | Val Energy: 1.3562 | Val Perplexity: 1229.4795
+2025-11-20 14:31:06,231 - INFO - Epoch 7/10
+2025-11-20 14:31:06,842 - INFO -   Batch 10/165 | Batch Energy: 1.3495 | Perplexity: 831.2907
+2025-11-20 14:31:07,445 - INFO -   Batch 20/165 | Batch Energy: 1.3509 | Perplexity: 804.8076
+2025-11-20 14:31:08,042 - INFO -   Batch 30/165 | Batch Energy: 1.3495 | Perplexity: 822.6451
+2025-11-20 14:31:08,638 - INFO -   Batch 40/165 | Batch Energy: 1.3493 | Perplexity: 836.4877
+2025-11-20 14:31:09,237 - INFO -   Batch 50/165 | Batch Energy: 1.3471 | Perplexity: 798.4037
+2025-11-20 14:31:09,854 - INFO -   Batch 60/165 | Batch Energy: 1.3505 | Perplexity: 789.7186
+2025-11-20 14:31:10,458 - INFO -   Batch 70/165 | Batch Energy: 1.3495 | Perplexity: 830.8239
+2025-11-20 14:31:11,067 - INFO -   Batch 80/165 | Batch Energy: 1.3495 | Perplexity: 785.4920
+2025-11-20 14:31:11,663 - INFO -   Batch 90/165 | Batch Energy: 1.3479 | Perplexity: 809.2006
+2025-11-20 14:31:12,256 - INFO -   Batch 100/165 | Batch Energy: 1.3482 | Perplexity: 799.2291
+2025-11-20 14:31:12,854 - INFO -   Batch 110/165 | Batch Energy: 1.3496 | Perplexity: 816.2471
+2025-11-20 14:31:13,456 - INFO -   Batch 120/165 | Batch Energy: 1.3514 | Perplexity: 792.9134
+2025-11-20 14:31:14,056 - INFO -   Batch 130/165 | Batch Energy: 1.3505 | Perplexity: 839.4886
+2025-11-20 14:31:14,650 - INFO -   Batch 140/165 | Batch Energy: 1.3497 | Perplexity: 819.6157
+2025-11-20 14:31:15,245 - INFO -   Batch 150/165 | Batch Energy: 1.3484 | Perplexity: 819.6216
+2025-11-20 14:31:15,844 - INFO -   Batch 160/165 | Batch Energy: 1.3478 | Perplexity: 861.9866
+2025-11-20 14:31:16,362 - INFO - Epoch 7/10 | Train Energy: 1.3494 | Train Perplexity: 818.1697 | Val Energy: 1.3559 | Val Perplexity: 1239.8760
+2025-11-20 14:31:16,362 - INFO - Epoch 8/10
+2025-11-20 14:31:16,967 - INFO -   Batch 10/165 | Batch Energy: 1.3476 | Perplexity: 813.1665
+2025-11-20 14:31:17,575 - INFO -   Batch 20/165 | Batch Energy: 1.3504 | Perplexity: 863.3909
+2025-11-20 14:31:18,169 - INFO -   Batch 30/165 | Batch Energy: 1.3483 | Perplexity: 812.7164
+2025-11-20 14:31:18,768 - INFO -   Batch 40/165 | Batch Energy: 1.3502 | Perplexity: 814.5379
+2025-11-20 14:31:19,372 - INFO -   Batch 50/165 | Batch Energy: 1.3486 | Perplexity: 811.3171
+2025-11-20 14:31:19,975 - INFO -   Batch 60/165 | Batch Energy: 1.3492 | Perplexity: 814.9264
+2025-11-20 14:31:20,584 - INFO -   Batch 70/165 | Batch Energy: 1.3493 | Perplexity: 842.1877
+2025-11-20 14:31:21,178 - INFO -   Batch 80/165 | Batch Energy: 1.3499 | Perplexity: 803.3686
+2025-11-20 14:31:21,770 - INFO -   Batch 90/165 | Batch Energy: 1.3502 | Perplexity: 822.9578
+2025-11-20 14:31:22,365 - INFO -   Batch 100/165 | Batch Energy: 1.3515 | Perplexity: 854.0107
+2025-11-20 14:31:22,969 - INFO -   Batch 110/165 | Batch Energy: 1.3500 | Perplexity: 795.4290
+2025-11-20 14:31:23,576 - INFO -   Batch 120/165 | Batch Energy: 1.3492 | Perplexity: 804.6890
+2025-11-20 14:31:24,170 - INFO -   Batch 130/165 | Batch Energy: 1.3491 | Perplexity: 792.1927
+2025-11-20 14:31:24,767 - INFO -   Batch 140/165 | Batch Energy: 1.3494 | Perplexity: 860.3982
+2025-11-20 14:31:25,363 - INFO -   Batch 150/165 | Batch Energy: 1.3492 | Perplexity: 820.7448
+2025-11-20 14:31:25,961 - INFO -   Batch 160/165 | Batch Energy: 1.3496 | Perplexity: 792.8643
+2025-11-20 14:31:26,476 - INFO - Epoch 8/10 | Train Energy: 1.3494 | Train Perplexity: 815.2676 | Val Energy: 1.3574 | Val Perplexity: 1230.4086
+2025-11-20 14:31:26,476 - INFO - Epoch 9/10
+2025-11-20 14:31:27,071 - INFO -   Batch 10/165 | Batch Energy: 1.3514 | Perplexity: 818.9504
+2025-11-20 14:31:27,664 - INFO -   Batch 20/165 | Batch Energy: 1.3480 | Perplexity: 823.4811
+2025-11-20 14:31:28,256 - INFO -   Batch 30/165 | Batch Energy: 1.3496 | Perplexity: 799.1117
+2025-11-20 14:31:28,849 - INFO -   Batch 40/165 | Batch Energy: 1.3504 | Perplexity: 776.7510
+2025-11-20 14:31:29,456 - INFO -   Batch 50/165 | Batch Energy: 1.3484 | Perplexity: 830.7102
+2025-11-20 14:31:30,054 - INFO -   Batch 60/165 | Batch Energy: 1.3491 | Perplexity: 839.2536
+2025-11-20 14:31:30,658 - INFO -   Batch 70/165 | Batch Energy: 1.3506 | Perplexity: 835.3286
+2025-11-20 14:31:31,259 - INFO -   Batch 80/165 | Batch Energy: 1.3496 | Perplexity: 794.7667
+2025-11-20 14:31:31,875 - INFO -   Batch 90/165 | Batch Energy: 1.3503 | Perplexity: 856.9755
+2025-11-20 14:31:32,476 - INFO -   Batch 100/165 | Batch Energy: 1.3487 | Perplexity: 842.0303
+2025-11-20 14:31:33,081 - INFO -   Batch 110/165 | Batch Energy: 1.3472 | Perplexity: 819.7752
+2025-11-20 14:31:33,682 - INFO -   Batch 120/165 | Batch Energy: 1.3476 | Perplexity: 839.4529
+2025-11-20 14:31:34,281 - INFO -   Batch 130/165 | Batch Energy: 1.3490 | Perplexity: 884.4934
+2025-11-20 14:31:34,880 - INFO -   Batch 140/165 | Batch Energy: 1.3487 | Perplexity: 807.6640
+2025-11-20 14:31:35,475 - INFO -   Batch 150/165 | Batch Energy: 1.3501 | Perplexity: 819.6970
+2025-11-20 14:31:36,080 - INFO -   Batch 160/165 | Batch Energy: 1.3496 | Perplexity: 848.3593
+2025-11-20 14:31:36,589 - INFO - Epoch 9/10 | Train Energy: 1.3495 | Train Perplexity: 818.2878 | Val Energy: 1.3566 | Val Perplexity: 1237.0522
+2025-11-20 14:31:36,589 - INFO - Epoch 10/10
+2025-11-20 14:31:37,182 - INFO -   Batch 10/165 | Batch Energy: 1.3507 | Perplexity: 801.5347
+2025-11-20 14:31:37,777 - INFO -   Batch 20/165 | Batch Energy: 1.3505 | Perplexity: 824.3505
+2025-11-20 14:31:38,375 - INFO -   Batch 30/165 | Batch Energy: 1.3472 | Perplexity: 797.7309
+2025-11-20 14:31:38,970 - INFO -   Batch 40/165 | Batch Energy: 1.3479 | Perplexity: 825.7298
+2025-11-20 14:31:39,576 - INFO -   Batch 50/165 | Batch Energy: 1.3496 | Perplexity: 813.8507
+2025-11-20 14:31:40,175 - INFO -   Batch 60/165 | Batch Energy: 1.3486 | Perplexity: 831.7590
+2025-11-20 14:31:40,777 - INFO -   Batch 70/165 | Batch Energy: 1.3489 | Perplexity: 849.0610
+2025-11-20 14:31:41,377 - INFO -   Batch 80/165 | Batch Energy: 1.3485 | Perplexity: 850.3641
+2025-11-20 14:31:41,975 - INFO -   Batch 90/165 | Batch Energy: 1.3488 | Perplexity: 828.2184
+2025-11-20 14:31:42,585 - INFO -   Batch 100/165 | Batch Energy: 1.3494 | Perplexity: 853.1714
+2025-11-20 14:31:43,185 - INFO -   Batch 110/165 | Batch Energy: 1.3479 | Perplexity: 807.2763
+2025-11-20 14:31:43,783 - INFO -   Batch 120/165 | Batch Energy: 1.3491 | Perplexity: 787.7786
+2025-11-20 14:31:44,381 - INFO -   Batch 130/165 | Batch Energy: 1.3494 | Perplexity: 816.2226
+2025-11-20 14:31:44,978 - INFO -   Batch 140/165 | Batch Energy: 1.3499 | Perplexity: 796.8979
+2025-11-20 14:31:45,572 - INFO -   Batch 150/165 | Batch Energy: 1.3484 | Perplexity: 828.7924
+2025-11-20 14:31:46,174 - INFO -   Batch 160/165 | Batch Energy: 1.3502 | Perplexity: 765.9483
+2025-11-20 14:31:46,682 - INFO - Epoch 10/10 | Train Energy: 1.3492 | Train Perplexity: 818.9117 | Val Energy: 1.3569 | Val Perplexity: 1232.0889
+2025-11-20 14:31:46,715 - INFO - Saved checkpoint to checkpoints/model_epoch_10.pt
+2025-11-20 14:31:46,972 - INFO - Training completed in 101.98 seconds
+2025-11-20 14:31:46,972 - INFO - Final model saved to: checkpoints/final_model.pt
+2025-11-20 14:31:46,972 - INFO - ========== Training completed ==========
+2025-11-20 14:33:50,844 - INFO - 
+########################################################################################################################
+2025-11-20 14:33:50,844 - INFO - Using device: cuda:0 (local rank 0)
+2025-11-20 14:33:50,844 - INFO - Saving the hyperparameters configurations:
+2025-11-20 14:33:50,844 - INFO - {
+      "vocab_size": 1024,
+      "block_size": 208,
+      "lr": 0.0003223786832283688,
+      "peak_learning_rate": 0.003223786832283688,
+      "warmup_steps": 369,
+      "n_embed": 160,
+      "dropout": 0.4546369920173881,
+      "T": 2,
+      "update_bias": false,
+      "num_heads": 10,
+      "n_blocks": 3,
+      "batch_size": 8,
+      "num_epochs": 20,
+      "internal_energy_fn_name": "pc_e",
+      "output_energy_fn_name": "pc_e",
+      "combined_internal_weight": 0.5094684344308807,
+      "combined_output_weight": 0.49053156556911925,
+      "use_flash_attention": false,
+      "alpha": 0.5
+}
+2025-11-20 14:33:52,080 - INFO - ========== Training started ==========
+2025-11-20 14:33:52,081 - INFO - 2.77 M parameters
+2025-11-20 14:33:52,081 - INFO - Epoch 1/20
+2025-11-20 14:33:53,046 - INFO -   Batch 10/165 | Batch Energy: 1.4920 | Perplexity: 1159.8130
+2025-11-20 14:33:53,695 - INFO -   Batch 20/165 | Batch Energy: 1.4783 | Perplexity: 1123.5714
+2025-11-20 14:33:54,290 - INFO -   Batch 30/165 | Batch Energy: 1.4689 | Perplexity: 1065.2588
+2025-11-20 14:33:54,875 - INFO -   Batch 40/165 | Batch Energy: 1.4539 | Perplexity: 1115.5387
+2025-11-20 14:33:55,464 - INFO -   Batch 50/165 | Batch Energy: 1.4415 | Perplexity: 1052.4707
+2025-11-20 14:33:56,064 - INFO -   Batch 60/165 | Batch Energy: 1.4297 | Perplexity: 1045.7483
+2025-11-20 14:33:56,649 - INFO -   Batch 70/165 | Batch Energy: 1.4158 | Perplexity: 1049.7301
+2025-11-20 14:33:57,240 - INFO -   Batch 80/165 | Batch Energy: 1.4084 | Perplexity: 1037.2219
+2025-11-20 14:33:57,833 - INFO -   Batch 90/165 | Batch Energy: 1.3989 | Perplexity: 1032.1342
+2025-11-20 14:33:58,427 - INFO -   Batch 100/165 | Batch Energy: 1.3892 | Perplexity: 1006.6257
+2025-11-20 14:33:59,024 - INFO -   Batch 110/165 | Batch Energy: 1.3834 | Perplexity: 977.0652
+2025-11-20 14:33:59,619 - INFO -   Batch 120/165 | Batch Energy: 1.3794 | Perplexity: 958.3997
+2025-11-20 14:34:00,221 - INFO -   Batch 130/165 | Batch Energy: 1.3750 | Perplexity: 951.8913
+2025-11-20 14:34:00,815 - INFO -   Batch 140/165 | Batch Energy: 1.3741 | Perplexity: 996.4069
+2025-11-20 14:34:01,404 - INFO -   Batch 150/165 | Batch Energy: 1.3718 | Perplexity: 907.4807
+2025-11-20 14:34:01,993 - INFO -   Batch 160/165 | Batch Energy: 1.3715 | Perplexity: 911.6987
+2025-11-20 14:34:02,505 - INFO - Epoch 1/20 | Train Energy: 1.4165 | Train Perplexity: 1024.1384 | Val Energy: 1.3769 | Val Perplexity: 1194.2798
+2025-11-20 14:34:02,505 - INFO - Epoch 2/20
+2025-11-20 14:34:03,095 - INFO -   Batch 10/165 | Batch Energy: 1.3673 | Perplexity: 884.6035
+2025-11-20 14:34:03,687 - INFO -   Batch 20/165 | Batch Energy: 1.3658 | Perplexity: 891.8898
+2025-11-20 14:34:04,280 - INFO -   Batch 30/165 | Batch Energy: 1.3646 | Perplexity: 911.8891
+2025-11-20 14:34:04,876 - INFO -   Batch 40/165 | Batch Energy: 1.3603 | Perplexity: 876.7482
+2025-11-20 14:34:05,472 - INFO -   Batch 50/165 | Batch Energy: 1.3610 | Perplexity: 852.5004
+2025-11-20 14:34:06,068 - INFO -   Batch 60/165 | Batch Energy: 1.3576 | Perplexity: 878.4619
+2025-11-20 14:34:06,662 - INFO -   Batch 70/165 | Batch Energy: 1.3606 | Perplexity: 867.7250
+2025-11-20 14:34:07,252 - INFO -   Batch 80/165 | Batch Energy: 1.3574 | Perplexity: 895.8042
+2025-11-20 14:34:07,843 - INFO -   Batch 90/165 | Batch Energy: 1.3568 | Perplexity: 865.8007
+2025-11-20 14:34:08,436 - INFO -   Batch 100/165 | Batch Energy: 1.3549 | Perplexity: 884.2944
+2025-11-20 14:34:09,037 - INFO -   Batch 110/165 | Batch Energy: 1.3559 | Perplexity: 868.9747
+2025-11-20 14:34:09,625 - INFO -   Batch 120/165 | Batch Energy: 1.3548 | Perplexity: 885.4353
+2025-11-20 14:34:10,229 - INFO -   Batch 130/165 | Batch Energy: 1.3547 | Perplexity: 890.3495
+2025-11-20 14:34:10,827 - INFO -   Batch 140/165 | Batch Energy: 1.3535 | Perplexity: 831.7649
+2025-11-20 14:34:11,425 - INFO -   Batch 150/165 | Batch Energy: 1.3541 | Perplexity: 826.4345
+2025-11-20 14:34:12,027 - INFO -   Batch 160/165 | Batch Energy: 1.3505 | Perplexity: 789.8466
+2025-11-20 14:34:12,536 - INFO - Epoch 2/20 | Train Energy: 1.3587 | Train Perplexity: 862.4913 | Val Energy: 1.3602 | Val Perplexity: 1202.0267
+2025-11-20 14:34:12,536 - INFO - Epoch 3/20
+2025-11-20 14:34:13,133 - INFO -   Batch 10/165 | Batch Energy: 1.3526 | Perplexity: 806.9226
+2025-11-20 14:34:13,732 - INFO -   Batch 20/165 | Batch Energy: 1.3524 | Perplexity: 786.3457
+2025-11-20 14:34:14,335 - INFO -   Batch 30/165 | Batch Energy: 1.3529 | Perplexity: 815.0243
+2025-11-20 14:34:14,934 - INFO -   Batch 40/165 | Batch Energy: 1.3513 | Perplexity: 863.4572
+2025-11-20 14:34:15,540 - INFO -   Batch 50/165 | Batch Energy: 1.3505 | Perplexity: 795.9610
+2025-11-20 14:34:16,136 - INFO -   Batch 60/165 | Batch Energy: 1.3501 | Perplexity: 805.7787
+2025-11-20 14:34:16,732 - INFO -   Batch 70/165 | Batch Energy: 1.3483 | Perplexity: 831.3957
+2025-11-20 14:34:17,326 - INFO -   Batch 80/165 | Batch Energy: 1.3526 | Perplexity: 808.3922
+2025-11-20 14:34:17,923 - INFO -   Batch 90/165 | Batch Energy: 1.3516 | Perplexity: 789.6203
+2025-11-20 14:34:18,520 - INFO -   Batch 100/165 | Batch Energy: 1.3522 | Perplexity: 821.5741
+2025-11-20 14:34:19,117 - INFO -   Batch 110/165 | Batch Energy: 1.3510 | Perplexity: 822.0236
+2025-11-20 14:34:19,713 - INFO -   Batch 120/165 | Batch Energy: 1.3501 | Perplexity: 786.3588
+2025-11-20 14:34:20,313 - INFO -   Batch 130/165 | Batch Energy: 1.3502 | Perplexity: 812.7404
+2025-11-20 14:34:20,914 - INFO -   Batch 140/165 | Batch Energy: 1.3493 | Perplexity: 761.9024
+2025-11-20 14:34:21,511 - INFO -   Batch 150/165 | Batch Energy: 1.3495 | Perplexity: 824.2915
+2025-11-20 14:34:22,111 - INFO -   Batch 160/165 | Batch Energy: 1.3503 | Perplexity: 794.8724
+2025-11-20 14:34:22,620 - INFO - Epoch 3/20 | Train Energy: 1.3510 | Train Perplexity: 811.8340 | Val Energy: 1.3599 | Val Perplexity: 1258.0747
+2025-11-20 14:34:22,620 - INFO - Epoch 4/20
+2025-11-20 14:34:23,212 - INFO -   Batch 10/165 | Batch Energy: 1.3496 | Perplexity: 844.7517
+2025-11-20 14:34:23,817 - INFO -   Batch 20/165 | Batch Energy: 1.3489 | Perplexity: 796.4561
+2025-11-20 14:34:24,406 - INFO -   Batch 30/165 | Batch Energy: 1.3506 | Perplexity: 823.0826
+2025-11-20 14:34:25,000 - INFO -   Batch 40/165 | Batch Energy: 1.3492 | Perplexity: 871.8900
+2025-11-20 14:34:25,597 - INFO -   Batch 50/165 | Batch Energy: 1.3480 | Perplexity: 787.7711
+2025-11-20 14:34:26,191 - INFO -   Batch 60/165 | Batch Energy: 1.3488 | Perplexity: 808.5996
+2025-11-20 14:34:26,780 - INFO -   Batch 70/165 | Batch Energy: 1.3501 | Perplexity: 775.8575
+2025-11-20 14:34:27,372 - INFO -   Batch 80/165 | Batch Energy: 1.3493 | Perplexity: 739.5169
+2025-11-20 14:34:27,963 - INFO -   Batch 90/165 | Batch Energy: 1.3494 | Perplexity: 851.7690
+2025-11-20 14:34:28,569 - INFO -   Batch 100/165 | Batch Energy: 1.3495 | Perplexity: 823.4355
+2025-11-20 14:34:29,162 - INFO -   Batch 110/165 | Batch Energy: 1.3524 | Perplexity: 797.0670
+2025-11-20 14:34:29,749 - INFO -   Batch 120/165 | Batch Energy: 1.3506 | Perplexity: 809.0281
+2025-11-20 14:34:30,359 - INFO -   Batch 130/165 | Batch Energy: 1.3493 | Perplexity: 848.4754
+2025-11-20 14:34:30,961 - INFO -   Batch 140/165 | Batch Energy: 1.3498 | Perplexity: 832.5522
+2025-11-20 14:34:31,564 - INFO -   Batch 150/165 | Batch Energy: 1.3479 | Perplexity: 784.2682
+2025-11-20 14:34:32,152 - INFO -   Batch 160/165 | Batch Energy: 1.3501 | Perplexity: 811.4277
+2025-11-20 14:34:32,654 - INFO - Epoch 4/20 | Train Energy: 1.3499 | Train Perplexity: 819.3890 | Val Energy: 1.3585 | Val Perplexity: 1245.1767
+2025-11-20 14:34:32,654 - INFO - Epoch 5/20
+2025-11-20 14:34:33,237 - INFO -   Batch 10/165 | Batch Energy: 1.3502 | Perplexity: 839.0740
+2025-11-20 14:34:33,829 - INFO -   Batch 20/165 | Batch Energy: 1.3488 | Perplexity: 861.8509
+2025-11-20 14:34:34,416 - INFO -   Batch 30/165 | Batch Energy: 1.3496 | Perplexity: 797.0138
+2025-11-20 14:34:35,016 - INFO -   Batch 40/165 | Batch Energy: 1.3481 | Perplexity: 839.8113
+2025-11-20 14:34:35,605 - INFO -   Batch 50/165 | Batch Energy: 1.3486 | Perplexity: 826.5768
+2025-11-20 14:34:36,193 - INFO -   Batch 60/165 | Batch Energy: 1.3490 | Perplexity: 872.0767
+2025-11-20 14:34:36,779 - INFO -   Batch 70/165 | Batch Energy: 1.3497 | Perplexity: 824.4299
+2025-11-20 14:34:37,370 - INFO -   Batch 80/165 | Batch Energy: 1.3505 | Perplexity: 856.0501
+2025-11-20 14:34:37,965 - INFO -   Batch 90/165 | Batch Energy: 1.3501 | Perplexity: 811.0703
+2025-11-20 14:34:38,565 - INFO -   Batch 100/165 | Batch Energy: 1.3479 | Perplexity: 831.0525
+2025-11-20 14:34:39,153 - INFO -   Batch 110/165 | Batch Energy: 1.3500 | Perplexity: 824.1049
+2025-11-20 14:34:39,739 - INFO -   Batch 120/165 | Batch Energy: 1.3488 | Perplexity: 833.6605
+2025-11-20 14:34:40,337 - INFO -   Batch 130/165 | Batch Energy: 1.3502 | Perplexity: 821.8464
+2025-11-20 14:34:40,940 - INFO -   Batch 140/165 | Batch Energy: 1.3500 | Perplexity: 754.6748
+2025-11-20 14:34:41,543 - INFO -   Batch 150/165 | Batch Energy: 1.3497 | Perplexity: 789.0234
+2025-11-20 14:34:42,137 - INFO -   Batch 160/165 | Batch Energy: 1.3480 | Perplexity: 793.3029
+2025-11-20 14:34:42,643 - INFO - Epoch 5/20 | Train Energy: 1.3493 | Train Perplexity: 818.6666 | Val Energy: 1.3584 | Val Perplexity: 1248.6452
+2025-11-20 14:34:42,682 - INFO - Saved checkpoint to checkpoints/model_epoch_5.pt
+2025-11-20 14:34:42,682 - INFO - Epoch 6/20
+2025-11-20 14:34:43,278 - INFO -   Batch 10/165 | Batch Energy: 1.3513 | Perplexity: 849.7229
+2025-11-20 14:34:43,877 - INFO -   Batch 20/165 | Batch Energy: 1.3504 | Perplexity: 831.2225
+2025-11-20 14:34:44,474 - INFO -   Batch 30/165 | Batch Energy: 1.3488 | Perplexity: 887.5379
+2025-11-20 14:34:45,070 - INFO -   Batch 40/165 | Batch Energy: 1.3472 | Perplexity: 755.1334
+2025-11-20 14:34:45,662 - INFO -   Batch 50/165 | Batch Energy: 1.3499 | Perplexity: 886.5418
+2025-11-20 14:34:46,263 - INFO -   Batch 60/165 | Batch Energy: 1.3489 | Perplexity: 809.4545
+2025-11-20 14:34:46,862 - INFO -   Batch 70/165 | Batch Energy: 1.3495 | Perplexity: 848.5300
+2025-11-20 14:34:47,455 - INFO -   Batch 80/165 | Batch Energy: 1.3502 | Perplexity: 777.9665
+2025-11-20 14:34:48,056 - INFO -   Batch 90/165 | Batch Energy: 1.3505 | Perplexity: 796.3368
+2025-11-20 14:34:48,649 - INFO -   Batch 100/165 | Batch Energy: 1.3492 | Perplexity: 806.2492
+2025-11-20 14:34:49,246 - INFO -   Batch 110/165 | Batch Energy: 1.3494 | Perplexity: 801.7430
+2025-11-20 14:34:49,840 - INFO -   Batch 120/165 | Batch Energy: 1.3498 | Perplexity: 848.8728
+2025-11-20 14:34:50,447 - INFO -   Batch 130/165 | Batch Energy: 1.3489 | Perplexity: 800.8905
+2025-11-20 14:34:51,056 - INFO -   Batch 140/165 | Batch Energy: 1.3482 | Perplexity: 834.5682
+2025-11-20 14:34:51,652 - INFO -   Batch 150/165 | Batch Energy: 1.3503 | Perplexity: 822.8389
+2025-11-20 14:34:52,246 - INFO -   Batch 160/165 | Batch Energy: 1.3491 | Perplexity: 821.6227
+2025-11-20 14:34:52,752 - INFO - Epoch 6/20 | Train Energy: 1.3493 | Train Perplexity: 820.0991 | Val Energy: 1.3586 | Val Perplexity: 1254.2917
+2025-11-20 14:34:52,752 - INFO - Epoch 7/20
+2025-11-20 14:34:53,353 - INFO -   Batch 10/165 | Batch Energy: 1.3498 | Perplexity: 833.0871
+2025-11-20 14:34:53,957 - INFO -   Batch 20/165 | Batch Energy: 1.3495 | Perplexity: 848.1275
+2025-11-20 14:34:54,568 - INFO -   Batch 30/165 | Batch Energy: 1.3511 | Perplexity: 865.3487
+2025-11-20 14:34:55,159 - INFO -   Batch 40/165 | Batch Energy: 1.3504 | Perplexity: 832.8730
+2025-11-20 14:34:55,744 - INFO -   Batch 50/165 | Batch Energy: 1.3483 | Perplexity: 825.4286
+2025-11-20 14:34:56,331 - INFO -   Batch 60/165 | Batch Energy: 1.3484 | Perplexity: 823.9850
+2025-11-20 14:34:56,922 - INFO -   Batch 70/165 | Batch Energy: 1.3494 | Perplexity: 876.4167
+2025-11-20 14:34:57,519 - INFO -   Batch 80/165 | Batch Energy: 1.3494 | Perplexity: 829.9654
+2025-11-20 14:34:58,115 - INFO -   Batch 90/165 | Batch Energy: 1.3507 | Perplexity: 818.1944
+2025-11-20 14:34:58,704 - INFO -   Batch 100/165 | Batch Energy: 1.3492 | Perplexity: 741.5731
+2025-11-20 14:34:59,297 - INFO -   Batch 110/165 | Batch Energy: 1.3476 | Perplexity: 870.7620
+2025-11-20 14:34:59,893 - INFO -   Batch 120/165 | Batch Energy: 1.3487 | Perplexity: 804.1919
+2025-11-20 14:35:00,497 - INFO -   Batch 130/165 | Batch Energy: 1.3511 | Perplexity: 816.2393
+2025-11-20 14:35:01,107 - INFO -   Batch 140/165 | Batch Energy: 1.3485 | Perplexity: 820.0367
+2025-11-20 14:35:01,698 - INFO -   Batch 150/165 | Batch Energy: 1.3490 | Perplexity: 802.5267
+2025-11-20 14:35:02,287 - INFO -   Batch 160/165 | Batch Energy: 1.3492 | Perplexity: 797.9237
+2025-11-20 14:35:02,791 - INFO - Epoch 7/20 | Train Energy: 1.3491 | Train Perplexity: 819.7914 | Val Energy: 1.3588 | Val Perplexity: 1258.0445
+2025-11-20 14:35:02,791 - INFO - Epoch 8/20
+2025-11-20 14:35:03,378 - INFO -   Batch 10/165 | Batch Energy: 1.3502 | Perplexity: 804.0155
+2025-11-20 14:35:03,976 - INFO -   Batch 20/165 | Batch Energy: 1.3485 | Perplexity: 811.8933
+2025-11-20 14:35:04,581 - INFO -   Batch 30/165 | Batch Energy: 1.3506 | Perplexity: 785.6606
+2025-11-20 14:35:05,172 - INFO -   Batch 40/165 | Batch Energy: 1.3481 | Perplexity: 778.4036
+2025-11-20 14:35:05,762 - INFO -   Batch 50/165 | Batch Energy: 1.3494 | Perplexity: 806.8849
+2025-11-20 14:35:06,352 - INFO -   Batch 60/165 | Batch Energy: 1.3501 | Perplexity: 858.5863
+2025-11-20 14:35:06,942 - INFO -   Batch 70/165 | Batch Energy: 1.3485 | Perplexity: 815.9043
+2025-11-20 14:35:07,552 - INFO -   Batch 80/165 | Batch Energy: 1.3483 | Perplexity: 845.1538
+2025-11-20 14:35:08,148 - INFO -   Batch 90/165 | Batch Energy: 1.3501 | Perplexity: 806.6399
+2025-11-20 14:35:08,737 - INFO -   Batch 100/165 | Batch Energy: 1.3493 | Perplexity: 801.4502
+2025-11-20 14:35:09,337 - INFO -   Batch 110/165 | Batch Energy: 1.3487 | Perplexity: 850.7429
+2025-11-20 14:35:09,934 - INFO -   Batch 120/165 | Batch Energy: 1.3492 | Perplexity: 803.0622
+2025-11-20 14:35:10,547 - INFO -   Batch 130/165 | Batch Energy: 1.3497 | Perplexity: 832.6717
+2025-11-20 14:35:11,155 - INFO -   Batch 140/165 | Batch Energy: 1.3484 | Perplexity: 794.4901
+2025-11-20 14:35:11,748 - INFO -   Batch 150/165 | Batch Energy: 1.3486 | Perplexity: 776.0713
+2025-11-20 14:35:12,332 - INFO -   Batch 160/165 | Batch Energy: 1.3495 | Perplexity: 839.3569
+2025-11-20 14:35:12,836 - INFO - Epoch 8/20 | Train Energy: 1.3491 | Train Perplexity: 821.1802 | Val Energy: 1.3582 | Val Perplexity: 1259.6054
+2025-11-20 14:35:12,836 - INFO - Epoch 9/20
+2025-11-20 14:35:13,423 - INFO -   Batch 10/165 | Batch Energy: 1.3488 | Perplexity: 799.9707
+2025-11-20 14:35:14,033 - INFO -   Batch 20/165 | Batch Energy: 1.3486 | Perplexity: 833.8816
+2025-11-20 14:35:14,625 - INFO -   Batch 30/165 | Batch Energy: 1.3492 | Perplexity: 815.0041
+2025-11-20 14:35:15,218 - INFO -   Batch 40/165 | Batch Energy: 1.3480 | Perplexity: 831.5670
+2025-11-20 14:35:15,807 - INFO -   Batch 50/165 | Batch Energy: 1.3479 | Perplexity: 848.6012
+2025-11-20 14:35:16,398 - INFO -   Batch 60/165 | Batch Energy: 1.3490 | Perplexity: 843.0741
+2025-11-20 14:35:16,993 - INFO -   Batch 70/165 | Batch Energy: 1.3497 | Perplexity: 826.7711
+2025-11-20 14:35:17,592 - INFO -   Batch 80/165 | Batch Energy: 1.3487 | Perplexity: 901.6143
+2025-11-20 14:35:18,184 - INFO -   Batch 90/165 | Batch Energy: 1.3488 | Perplexity: 817.3084
+2025-11-20 14:35:18,778 - INFO -   Batch 100/165 | Batch Energy: 1.3495 | Perplexity: 861.3407
+2025-11-20 14:35:19,371 - INFO -   Batch 110/165 | Batch Energy: 1.3498 | Perplexity: 864.6434
+2025-11-20 14:35:19,964 - INFO -   Batch 120/165 | Batch Energy: 1.3492 | Perplexity: 839.9715
+2025-11-20 14:35:20,582 - INFO -   Batch 130/165 | Batch Energy: 1.3491 | Perplexity: 834.3982
+2025-11-20 14:35:21,170 - INFO -   Batch 140/165 | Batch Energy: 1.3482 | Perplexity: 805.9736
+2025-11-20 14:35:21,757 - INFO -   Batch 150/165 | Batch Energy: 1.3485 | Perplexity: 809.3847
+2025-11-20 14:35:22,341 - INFO -   Batch 160/165 | Batch Energy: 1.3491 | Perplexity: 845.6404
+2025-11-20 14:35:22,841 - INFO - Epoch 9/20 | Train Energy: 1.3491 | Train Perplexity: 822.3298 | Val Energy: 1.3584 | Val Perplexity: 1235.9975
+2025-11-20 14:35:22,841 - INFO - Epoch 10/20
+2025-11-20 14:35:23,440 - INFO -   Batch 10/165 | Batch Energy: 1.3494 | Perplexity: 771.6337
+2025-11-20 14:35:24,034 - INFO -   Batch 20/165 | Batch Energy: 1.3478 | Perplexity: 802.4280
+2025-11-20 14:35:24,619 - INFO -   Batch 30/165 | Batch Energy: 1.3497 | Perplexity: 869.5678
+2025-11-20 14:35:25,209 - INFO -   Batch 40/165 | Batch Energy: 1.3480 | Perplexity: 809.8858
+2025-11-20 14:35:25,799 - INFO -   Batch 50/165 | Batch Energy: 1.3483 | Perplexity: 780.9037
+2025-11-20 14:35:26,387 - INFO -   Batch 60/165 | Batch Energy: 1.3503 | Perplexity: 808.8160
+2025-11-20 14:35:26,981 - INFO -   Batch 70/165 | Batch Energy: 1.3480 | Perplexity: 761.4361
+2025-11-20 14:35:27,565 - INFO -   Batch 80/165 | Batch Energy: 1.3492 | Perplexity: 854.1891
+2025-11-20 14:35:28,152 - INFO -   Batch 90/165 | Batch Energy: 1.3496 | Perplexity: 772.0408
+2025-11-20 14:35:28,741 - INFO -   Batch 100/165 | Batch Energy: 1.3476 | Perplexity: 875.8912
+2025-11-20 14:35:29,328 - INFO -   Batch 110/165 | Batch Energy: 1.3492 | Perplexity: 840.0231
+2025-11-20 14:35:29,925 - INFO -   Batch 120/165 | Batch Energy: 1.3466 | Perplexity: 790.5720
+2025-11-20 14:35:30,529 - INFO -   Batch 130/165 | Batch Energy: 1.3499 | Perplexity: 829.3977
+2025-11-20 14:35:31,118 - INFO -   Batch 140/165 | Batch Energy: 1.3512 | Perplexity: 830.4223
+2025-11-20 14:35:31,706 - INFO -   Batch 150/165 | Batch Energy: 1.3498 | Perplexity: 848.2841
+2025-11-20 14:35:32,293 - INFO -   Batch 160/165 | Batch Energy: 1.3487 | Perplexity: 799.0283
+2025-11-20 14:35:32,796 - INFO - Epoch 10/20 | Train Energy: 1.3490 | Train Perplexity: 816.6783 | Val Energy: 1.3584 | Val Perplexity: 1244.4808
+2025-11-20 14:35:32,833 - INFO - Saved checkpoint to checkpoints/model_epoch_10.pt
+2025-11-20 14:35:32,834 - INFO - Epoch 11/20
+2025-11-20 14:35:33,436 - INFO -   Batch 10/165 | Batch Energy: 1.3502 | Perplexity: 805.6350
+2025-11-20 14:35:34,028 - INFO -   Batch 20/165 | Batch Energy: 1.3492 | Perplexity: 820.2722
+2025-11-20 14:35:34,619 - INFO -   Batch 30/165 | Batch Energy: 1.3489 | Perplexity: 833.7786
+2025-11-20 14:35:35,207 - INFO -   Batch 40/165 | Batch Energy: 1.3494 | Perplexity: 773.2581
+2025-11-20 14:35:35,796 - INFO -   Batch 50/165 | Batch Energy: 1.3514 | Perplexity: 856.5450
+2025-11-20 14:35:36,387 - INFO -   Batch 60/165 | Batch Energy: 1.3482 | Perplexity: 836.4693
+2025-11-20 14:35:36,978 - INFO -   Batch 70/165 | Batch Energy: 1.3479 | Perplexity: 840.9670
+2025-11-20 14:35:37,566 - INFO -   Batch 80/165 | Batch Energy: 1.3484 | Perplexity: 801.4017
+2025-11-20 14:35:38,159 - INFO -   Batch 90/165 | Batch Energy: 1.3490 | Perplexity: 796.1591
+2025-11-20 14:35:38,749 - INFO -   Batch 100/165 | Batch Energy: 1.3492 | Perplexity: 816.9550
+2025-11-20 14:35:39,341 - INFO -   Batch 110/165 | Batch Energy: 1.3492 | Perplexity: 830.8342
+2025-11-20 14:35:39,951 - INFO -   Batch 120/165 | Batch Energy: 1.3479 | Perplexity: 802.9363
+2025-11-20 14:35:40,563 - INFO -   Batch 130/165 | Batch Energy: 1.3492 | Perplexity: 879.0401
+2025-11-20 14:35:41,152 - INFO -   Batch 140/165 | Batch Energy: 1.3480 | Perplexity: 811.5980
+2025-11-20 14:35:41,737 - INFO -   Batch 150/165 | Batch Energy: 1.3472 | Perplexity: 821.1715
+2025-11-20 14:35:42,326 - INFO -   Batch 160/165 | Batch Energy: 1.3483 | Perplexity: 818.7267
+2025-11-20 14:35:42,839 - INFO - Epoch 11/20 | Train Energy: 1.3490 | Train Perplexity: 821.2593 | Val Energy: 1.3594 | Val Perplexity: 1242.0763
+2025-11-20 14:35:42,839 - INFO - Epoch 12/20
+2025-11-20 14:35:43,438 - INFO -   Batch 10/165 | Batch Energy: 1.3506 | Perplexity: 853.5010
+2025-11-20 14:35:44,028 - INFO -   Batch 20/165 | Batch Energy: 1.3480 | Perplexity: 815.8650
+2025-11-20 14:35:44,619 - INFO -   Batch 30/165 | Batch Energy: 1.3498 | Perplexity: 791.3602
+2025-11-20 14:35:45,206 - INFO -   Batch 40/165 | Batch Energy: 1.3489 | Perplexity: 805.9774
+2025-11-20 14:35:45,797 - INFO -   Batch 50/165 | Batch Energy: 1.3496 | Perplexity: 828.4989
+2025-11-20 14:35:46,399 - INFO -   Batch 60/165 | Batch Energy: 1.3491 | Perplexity: 869.9145
+2025-11-20 14:35:46,990 - INFO -   Batch 70/165 | Batch Energy: 1.3478 | Perplexity: 801.8137
+2025-11-20 14:35:47,584 - INFO -   Batch 80/165 | Batch Energy: 1.3485 | Perplexity: 772.8769
+2025-11-20 14:35:48,176 - INFO -   Batch 90/165 | Batch Energy: 1.3494 | Perplexity: 806.9030
+2025-11-20 14:35:48,765 - INFO -   Batch 100/165 | Batch Energy: 1.3509 | Perplexity: 793.8781
+2025-11-20 14:35:49,369 - INFO -   Batch 110/165 | Batch Energy: 1.3498 | Perplexity: 829.0628
+2025-11-20 14:35:49,971 - INFO -   Batch 120/165 | Batch Energy: 1.3492 | Perplexity: 852.4866
+2025-11-20 14:35:50,576 - INFO -   Batch 130/165 | Batch Energy: 1.3475 | Perplexity: 851.9478
+2025-11-20 14:35:51,172 - INFO -   Batch 140/165 | Batch Energy: 1.3500 | Perplexity: 848.6996
+2025-11-20 14:35:51,764 - INFO -   Batch 150/165 | Batch Energy: 1.3467 | Perplexity: 848.0349
+2025-11-20 14:35:52,348 - INFO -   Batch 160/165 | Batch Energy: 1.3501 | Perplexity: 807.5851
+2025-11-20 14:35:52,865 - INFO - Epoch 12/20 | Train Energy: 1.3491 | Train Perplexity: 817.7773 | Val Energy: 1.3580 | Val Perplexity: 1235.1907
+2025-11-20 14:35:52,865 - INFO - Epoch 13/20
+2025-11-20 14:35:53,460 - INFO -   Batch 10/165 | Batch Energy: 1.3508 | Perplexity: 838.2214
+2025-11-20 14:35:54,052 - INFO -   Batch 20/165 | Batch Energy: 1.3486 | Perplexity: 810.7343
+2025-11-20 14:35:54,643 - INFO -   Batch 30/165 | Batch Energy: 1.3486 | Perplexity: 792.8650
+2025-11-20 14:35:55,235 - INFO -   Batch 40/165 | Batch Energy: 1.3486 | Perplexity: 865.1280
+2025-11-20 14:35:55,830 - INFO -   Batch 50/165 | Batch Energy: 1.3485 | Perplexity: 761.6198
+2025-11-20 14:35:56,424 - INFO -   Batch 60/165 | Batch Energy: 1.3484 | Perplexity: 875.6949
+2025-11-20 14:35:57,018 - INFO -   Batch 70/165 | Batch Energy: 1.3508 | Perplexity: 840.4619
+2025-11-20 14:35:57,607 - INFO -   Batch 80/165 | Batch Energy: 1.3481 | Perplexity: 855.3870
+2025-11-20 14:35:58,200 - INFO -   Batch 90/165 | Batch Energy: 1.3483 | Perplexity: 783.8528
+2025-11-20 14:35:58,789 - INFO -   Batch 100/165 | Batch Energy: 1.3503 | Perplexity: 820.5386
+2025-11-20 14:35:59,393 - INFO -   Batch 110/165 | Batch Energy: 1.3501 | Perplexity: 826.1563
+2025-11-20 14:35:59,985 - INFO -   Batch 120/165 | Batch Energy: 1.3484 | Perplexity: 833.3533
+2025-11-20 14:36:00,599 - INFO -   Batch 130/165 | Batch Energy: 1.3497 | Perplexity: 879.5110
+2025-11-20 14:36:01,191 - INFO -   Batch 140/165 | Batch Energy: 1.3491 | Perplexity: 885.8530
+2025-11-20 14:36:01,782 - INFO -   Batch 150/165 | Batch Energy: 1.3487 | Perplexity: 810.0484
+2025-11-20 14:36:02,378 - INFO -   Batch 160/165 | Batch Energy: 1.3480 | Perplexity: 854.5798
+2025-11-20 14:36:02,885 - INFO - Epoch 13/20 | Train Energy: 1.3493 | Train Perplexity: 821.7565 | Val Energy: 1.3584 | Val Perplexity: 1242.2341
+2025-11-20 14:36:02,885 - INFO - Epoch 14/20
+2025-11-20 14:36:03,479 - INFO -   Batch 10/165 | Batch Energy: 1.3491 | Perplexity: 811.9607
+2025-11-20 14:36:04,074 - INFO -   Batch 20/165 | Batch Energy: 1.3480 | Perplexity: 784.8963
+2025-11-20 14:36:04,665 - INFO -   Batch 30/165 | Batch Energy: 1.3505 | Perplexity: 874.9528
+2025-11-20 14:36:05,258 - INFO -   Batch 40/165 | Batch Energy: 1.3495 | Perplexity: 853.1901
+2025-11-20 14:36:05,862 - INFO -   Batch 50/165 | Batch Energy: 1.3494 | Perplexity: 860.6300
+2025-11-20 14:36:06,454 - INFO -   Batch 60/165 | Batch Energy: 1.3489 | Perplexity: 829.5484
+2025-11-20 14:36:07,045 - INFO -   Batch 70/165 | Batch Energy: 1.3480 | Perplexity: 807.3113
+2025-11-20 14:36:07,629 - INFO -   Batch 80/165 | Batch Energy: 1.3490 | Perplexity: 825.1595
+2025-11-20 14:36:08,218 - INFO -   Batch 90/165 | Batch Energy: 1.3491 | Perplexity: 792.6065
+2025-11-20 14:36:08,810 - INFO -   Batch 100/165 | Batch Energy: 1.3486 | Perplexity: 808.4061
+2025-11-20 14:36:09,410 - INFO -   Batch 110/165 | Batch Energy: 1.3486 | Perplexity: 831.7118
+2025-11-20 14:36:10,000 - INFO -   Batch 120/165 | Batch Energy: 1.3484 | Perplexity: 802.8830
+2025-11-20 14:36:10,607 - INFO -   Batch 130/165 | Batch Energy: 1.3481 | Perplexity: 777.7443
+2025-11-20 14:36:11,195 - INFO -   Batch 140/165 | Batch Energy: 1.3482 | Perplexity: 846.9697
+2025-11-20 14:36:11,788 - INFO -   Batch 150/165 | Batch Energy: 1.3508 | Perplexity: 762.3858
+2025-11-20 14:36:12,391 - INFO -   Batch 160/165 | Batch Energy: 1.3496 | Perplexity: 808.6617
+2025-11-20 14:36:12,900 - INFO - Epoch 14/20 | Train Energy: 1.3490 | Train Perplexity: 819.4711 | Val Energy: 1.3590 | Val Perplexity: 1206.8149
+2025-11-20 14:36:12,900 - INFO - Epoch 15/20
+2025-11-20 14:36:13,494 - INFO -   Batch 10/165 | Batch Energy: 1.3505 | Perplexity: 839.9494
+2025-11-20 14:36:14,089 - INFO -   Batch 20/165 | Batch Energy: 1.3491 | Perplexity: 818.6873
+2025-11-20 14:36:14,686 - INFO -   Batch 30/165 | Batch Energy: 1.3475 | Perplexity: 803.9055
+2025-11-20 14:36:15,279 - INFO -   Batch 40/165 | Batch Energy: 1.3511 | Perplexity: 829.6536
+2025-11-20 14:36:15,880 - INFO -   Batch 50/165 | Batch Energy: 1.3495 | Perplexity: 831.4651
+2025-11-20 14:36:16,468 - INFO -   Batch 60/165 | Batch Energy: 1.3493 | Perplexity: 813.2646
+2025-11-20 14:36:17,056 - INFO -   Batch 70/165 | Batch Energy: 1.3495 | Perplexity: 823.4226
+2025-11-20 14:36:17,645 - INFO -   Batch 80/165 | Batch Energy: 1.3484 | Perplexity: 797.7719
+2025-11-20 14:36:18,241 - INFO -   Batch 90/165 | Batch Energy: 1.3495 | Perplexity: 798.4585
+2025-11-20 14:36:18,839 - INFO -   Batch 100/165 | Batch Energy: 1.3496 | Perplexity: 864.3586
+2025-11-20 14:36:19,438 - INFO -   Batch 110/165 | Batch Energy: 1.3497 | Perplexity: 819.4469
+2025-11-20 14:36:20,043 - INFO -   Batch 120/165 | Batch Energy: 1.3479 | Perplexity: 756.4658
+2025-11-20 14:36:20,652 - INFO -   Batch 130/165 | Batch Energy: 1.3494 | Perplexity: 820.8935
+2025-11-20 14:36:21,248 - INFO -   Batch 140/165 | Batch Energy: 1.3497 | Perplexity: 802.2646
+2025-11-20 14:36:21,846 - INFO -   Batch 150/165 | Batch Energy: 1.3496 | Perplexity: 864.3491
+2025-11-20 14:36:22,449 - INFO -   Batch 160/165 | Batch Energy: 1.3500 | Perplexity: 793.0280
+2025-11-20 14:36:22,962 - INFO - Epoch 15/20 | Train Energy: 1.3493 | Train Perplexity: 818.0198 | Val Energy: 1.3586 | Val Perplexity: 1263.5024
+2025-11-20 14:36:22,996 - INFO - Saved checkpoint to checkpoints/model_epoch_15.pt
+2025-11-20 14:36:22,996 - INFO - Epoch 16/20
+2025-11-20 14:36:23,598 - INFO -   Batch 10/165 | Batch Energy: 1.3491 | Perplexity: 828.5214
+2025-11-20 14:36:24,193 - INFO -   Batch 20/165 | Batch Energy: 1.3496 | Perplexity: 870.4564
+2025-11-20 14:36:24,788 - INFO -   Batch 30/165 | Batch Energy: 1.3496 | Perplexity: 802.2409
+2025-11-20 14:36:25,394 - INFO -   Batch 40/165 | Batch Energy: 1.3497 | Perplexity: 828.0810
+2025-11-20 14:36:25,995 - INFO -   Batch 50/165 | Batch Energy: 1.3484 | Perplexity: 819.9851
+2025-11-20 14:36:26,595 - INFO -   Batch 60/165 | Batch Energy: 1.3484 | Perplexity: 789.4784
+2025-11-20 14:36:27,188 - INFO -   Batch 70/165 | Batch Energy: 1.3489 | Perplexity: 834.3581
+2025-11-20 14:36:27,782 - INFO -   Batch 80/165 | Batch Energy: 1.3496 | Perplexity: 869.7967
+2025-11-20 14:36:28,379 - INFO -   Batch 90/165 | Batch Energy: 1.3501 | Perplexity: 839.6751
+2025-11-20 14:36:28,977 - INFO -   Batch 100/165 | Batch Energy: 1.3488 | Perplexity: 807.1878
+2025-11-20 14:36:29,574 - INFO -   Batch 110/165 | Batch Energy: 1.3481 | Perplexity: 847.7467
+2025-11-20 14:36:30,173 - INFO -   Batch 120/165 | Batch Energy: 1.3505 | Perplexity: 793.2696
+2025-11-20 14:36:30,779 - INFO -   Batch 130/165 | Batch Energy: 1.3503 | Perplexity: 858.3165
+2025-11-20 14:36:31,375 - INFO -   Batch 140/165 | Batch Energy: 1.3485 | Perplexity: 809.4499
+2025-11-20 14:36:31,978 - INFO -   Batch 150/165 | Batch Energy: 1.3503 | Perplexity: 811.7656
+2025-11-20 14:36:32,571 - INFO -   Batch 160/165 | Batch Energy: 1.3478 | Perplexity: 823.3460
+2025-11-20 14:36:33,077 - INFO - Epoch 16/20 | Train Energy: 1.3489 | Train Perplexity: 823.2730 | Val Energy: 1.3591 | Val Perplexity: 1259.7774
+2025-11-20 14:36:33,077 - INFO - Epoch 17/20
+2025-11-20 14:36:33,666 - INFO -   Batch 10/165 | Batch Energy: 1.3481 | Perplexity: 803.8656
+2025-11-20 14:36:34,261 - INFO -   Batch 20/165 | Batch Energy: 1.3485 | Perplexity: 807.4318
+2025-11-20 14:36:34,857 - INFO -   Batch 30/165 | Batch Energy: 1.3481 | Perplexity: 840.6566
+2025-11-20 14:36:35,459 - INFO -   Batch 40/165 | Batch Energy: 1.3482 | Perplexity: 846.7884
+2025-11-20 14:36:36,061 - INFO -   Batch 50/165 | Batch Energy: 1.3494 | Perplexity: 812.6943
+2025-11-20 14:36:36,661 - INFO -   Batch 60/165 | Batch Energy: 1.3501 | Perplexity: 846.8126
+2025-11-20 14:36:37,257 - INFO -   Batch 70/165 | Batch Energy: 1.3487 | Perplexity: 843.9899
+2025-11-20 14:36:37,850 - INFO -   Batch 80/165 | Batch Energy: 1.3475 | Perplexity: 769.7008
+2025-11-20 14:36:38,451 - INFO -   Batch 90/165 | Batch Energy: 1.3472 | Perplexity: 808.9726
+2025-11-20 14:36:39,044 - INFO -   Batch 100/165 | Batch Energy: 1.3474 | Perplexity: 860.9231
+2025-11-20 14:36:39,633 - INFO -   Batch 110/165 | Batch Energy: 1.3508 | Perplexity: 894.1659
+2025-11-20 14:36:40,235 - INFO -   Batch 120/165 | Batch Energy: 1.3507 | Perplexity: 837.8465
+2025-11-20 14:36:40,846 - INFO -   Batch 130/165 | Batch Energy: 1.3493 | Perplexity: 855.6257
+2025-11-20 14:36:41,438 - INFO -   Batch 140/165 | Batch Energy: 1.3492 | Perplexity: 808.0173
+2025-11-20 14:36:42,032 - INFO -   Batch 150/165 | Batch Energy: 1.3495 | Perplexity: 803.6388
+2025-11-20 14:36:42,625 - INFO -   Batch 160/165 | Batch Energy: 1.3492 | Perplexity: 876.4339
+2025-11-20 14:36:43,127 - INFO - Epoch 17/20 | Train Energy: 1.3491 | Train Perplexity: 821.2260 | Val Energy: 1.3582 | Val Perplexity: 1254.5713
+2025-11-20 14:36:43,128 - INFO - Epoch 18/20
+2025-11-20 14:36:43,720 - INFO -   Batch 10/165 | Batch Energy: 1.3503 | Perplexity: 847.5967
+2025-11-20 14:36:44,313 - INFO -   Batch 20/165 | Batch Energy: 1.3482 | Perplexity: 874.0292
+2025-11-20 14:36:44,912 - INFO -   Batch 30/165 | Batch Energy: 1.3487 | Perplexity: 763.4094
+2025-11-20 14:36:45,502 - INFO -   Batch 40/165 | Batch Energy: 1.3478 | Perplexity: 797.8355
+2025-11-20 14:36:46,099 - INFO -   Batch 50/165 | Batch Energy: 1.3482 | Perplexity: 858.7845
+2025-11-20 14:36:46,689 - INFO -   Batch 60/165 | Batch Energy: 1.3490 | Perplexity: 819.7572
+2025-11-20 14:36:47,277 - INFO -   Batch 70/165 | Batch Energy: 1.3464 | Perplexity: 799.7037
+2025-11-20 14:36:47,868 - INFO -   Batch 80/165 | Batch Energy: 1.3495 | Perplexity: 829.6548
+2025-11-20 14:36:48,459 - INFO -   Batch 90/165 | Batch Energy: 1.3507 | Perplexity: 810.6477
+2025-11-20 14:36:49,051 - INFO -   Batch 100/165 | Batch Energy: 1.3480 | Perplexity: 783.0138
+2025-11-20 14:36:49,641 - INFO -   Batch 110/165 | Batch Energy: 1.3462 | Perplexity: 807.6652
+2025-11-20 14:36:50,234 - INFO -   Batch 120/165 | Batch Energy: 1.3491 | Perplexity: 793.3097
+2025-11-20 14:36:50,828 - INFO -   Batch 130/165 | Batch Energy: 1.3499 | Perplexity: 841.5221
+2025-11-20 14:36:51,440 - INFO -   Batch 140/165 | Batch Energy: 1.3495 | Perplexity: 828.1319
+2025-11-20 14:36:52,035 - INFO -   Batch 150/165 | Batch Energy: 1.3498 | Perplexity: 825.4436
+2025-11-20 14:36:52,622 - INFO -   Batch 160/165 | Batch Energy: 1.3508 | Perplexity: 830.4484
+2025-11-20 14:36:53,125 - INFO - Epoch 18/20 | Train Energy: 1.3492 | Train Perplexity: 818.5234 | Val Energy: 1.3595 | Val Perplexity: 1243.7734
+2025-11-20 14:36:53,126 - INFO - Epoch 19/20
+2025-11-20 14:36:53,720 - INFO -   Batch 10/165 | Batch Energy: 1.3478 | Perplexity: 857.8889
+2025-11-20 14:36:54,312 - INFO -   Batch 20/165 | Batch Energy: 1.3505 | Perplexity: 849.4449
+2025-11-20 14:36:54,908 - INFO -   Batch 30/165 | Batch Energy: 1.3504 | Perplexity: 820.5820
+2025-11-20 14:36:55,496 - INFO -   Batch 40/165 | Batch Energy: 1.3484 | Perplexity: 803.2499
+2025-11-20 14:36:56,087 - INFO -   Batch 50/165 | Batch Energy: 1.3489 | Perplexity: 839.0439
+2025-11-20 14:36:56,676 - INFO -   Batch 60/165 | Batch Energy: 1.3484 | Perplexity: 755.2163
+2025-11-20 14:36:57,264 - INFO -   Batch 70/165 | Batch Energy: 1.3496 | Perplexity: 819.6161
+2025-11-20 14:36:57,862 - INFO -   Batch 80/165 | Batch Energy: 1.3478 | Perplexity: 840.4506
+2025-11-20 14:36:58,446 - INFO -   Batch 90/165 | Batch Energy: 1.3491 | Perplexity: 760.9022
+2025-11-20 14:36:59,032 - INFO -   Batch 100/165 | Batch Energy: 1.3496 | Perplexity: 811.6587
+2025-11-20 14:36:59,628 - INFO -   Batch 110/165 | Batch Energy: 1.3480 | Perplexity: 803.4820
+2025-11-20 14:37:00,224 - INFO -   Batch 120/165 | Batch Energy: 1.3490 | Perplexity: 836.0790
+2025-11-20 14:37:00,837 - INFO -   Batch 130/165 | Batch Energy: 1.3504 | Perplexity: 824.5781
+2025-11-20 14:37:01,440 - INFO -   Batch 140/165 | Batch Energy: 1.3495 | Perplexity: 770.2408
+2025-11-20 14:37:02,030 - INFO -   Batch 150/165 | Batch Energy: 1.3503 | Perplexity: 843.5393
+2025-11-20 14:37:02,623 - INFO -   Batch 160/165 | Batch Energy: 1.3490 | Perplexity: 825.5495
+2025-11-20 14:37:03,127 - INFO - Epoch 19/20 | Train Energy: 1.3495 | Train Perplexity: 818.4999 | Val Energy: 1.3587 | Val Perplexity: 1264.2590
+2025-11-20 14:37:03,127 - INFO - Epoch 20/20
+2025-11-20 14:37:03,710 - INFO -   Batch 10/165 | Batch Energy: 1.3504 | Perplexity: 783.4642
+2025-11-20 14:37:04,313 - INFO -   Batch 20/165 | Batch Energy: 1.3498 | Perplexity: 839.5266
+2025-11-20 14:37:04,913 - INFO -   Batch 30/165 | Batch Energy: 1.3496 | Perplexity: 825.9401
+2025-11-20 14:37:05,506 - INFO -   Batch 40/165 | Batch Energy: 1.3496 | Perplexity: 838.2062
+2025-11-20 14:37:06,114 - INFO -   Batch 50/165 | Batch Energy: 1.3496 | Perplexity: 864.6306
+2025-11-20 14:37:06,707 - INFO -   Batch 60/165 | Batch Energy: 1.3483 | Perplexity: 868.6287
+2025-11-20 14:37:07,301 - INFO -   Batch 70/165 | Batch Energy: 1.3481 | Perplexity: 815.5604
+2025-11-20 14:37:07,911 - INFO -   Batch 80/165 | Batch Energy: 1.3481 | Perplexity: 803.4928
+2025-11-20 14:37:08,511 - INFO -   Batch 90/165 | Batch Energy: 1.3490 | Perplexity: 828.2698
+2025-11-20 14:37:09,115 - INFO -   Batch 100/165 | Batch Energy: 1.3498 | Perplexity: 869.4061
+2025-11-20 14:37:09,717 - INFO -   Batch 110/165 | Batch Energy: 1.3490 | Perplexity: 807.8709
+2025-11-20 14:37:10,315 - INFO -   Batch 120/165 | Batch Energy: 1.3504 | Perplexity: 773.7493
+2025-11-20 14:37:10,918 - INFO -   Batch 130/165 | Batch Energy: 1.3498 | Perplexity: 816.4386
+2025-11-20 14:37:11,515 - INFO -   Batch 140/165 | Batch Energy: 1.3494 | Perplexity: 834.1047
+2025-11-20 14:37:12,101 - INFO -   Batch 150/165 | Batch Energy: 1.3501 | Perplexity: 822.1024
+2025-11-20 14:37:12,680 - INFO -   Batch 160/165 | Batch Energy: 1.3487 | Perplexity: 767.1059
+2025-11-20 14:37:13,175 - INFO - Epoch 20/20 | Train Energy: 1.3494 | Train Perplexity: 817.6238 | Val Energy: 1.3593 | Val Perplexity: 1244.5087
+2025-11-20 14:37:13,210 - INFO - Saved checkpoint to checkpoints/model_epoch_20.pt
+2025-11-20 14:37:13,452 - INFO - Training completed in 201.37 seconds
+2025-11-20 14:37:13,452 - INFO - Final model saved to: checkpoints/final_model.pt
+2025-11-20 14:37:13,452 - INFO - ========== Training completed ==========
+2025-11-21 10:49:31,521 - INFO - 
+########################################################################################################################
+2025-11-21 10:49:31,521 - INFO - Using device: cuda:0 (local rank 0)
+2025-11-21 10:49:31,521 - INFO - Saving the hyperparameters configurations:
+2025-11-21 10:49:31,522 - INFO - {
+      "vocab_size": 1024,
+      "block_size": 112,
+      "lr": 0.0009625830751732409,
+      "peak_learning_rate": 0.009625830751732409,
+      "warmup_steps": 112,
+      "n_embed": 448,
+      "dropout": 0.045380500201275084,
+      "T": 2,
+      "update_bias": true,
+      "num_heads": 7,
+      "n_blocks": 12,
+      "batch_size": 8,
+      "num_epochs": 20,
+      "internal_energy_fn_name": "pc_e",
+      "output_energy_fn_name": "pc_e",
+      "combined_internal_weight": 0.8812754330348704,
+      "combined_output_weight": 0.11872456696512956,
+      "use_flash_attention": false,
+      "alpha": 0.5
+}
+2025-11-21 10:49:33,214 - INFO - ========== Training started ==========
+2025-11-21 10:49:33,215 - INFO - 75.89 M parameters
+2025-11-21 10:49:33,215 - INFO - Epoch 1/20
+2025-11-21 10:49:37,139 - INFO -   Batch 10/165 | Batch Energy: 1.5982 | Perplexity: 582.9362
+2025-11-21 10:49:40,614 - INFO -   Batch 20/165 | Batch Energy: 1.5835 | Perplexity: 470.5881
+2025-11-21 10:49:44,039 - INFO -   Batch 30/165 | Batch Energy: 1.5679 | Perplexity: 395.6552
+2025-11-21 10:49:47,434 - INFO -   Batch 40/165 | Batch Energy: 1.5571 | Perplexity: 347.7112
+2025-11-21 10:49:50,900 - INFO -   Batch 50/165 | Batch Energy: 1.5489 | Perplexity: 326.3907
+2025-11-21 10:49:54,313 - INFO -   Batch 60/165 | Batch Energy: 1.5458 | Perplexity: 342.0527
+2025-11-21 10:49:58,417 - INFO -   Batch 70/165 | Batch Energy: 1.5401 | Perplexity: 315.5537
+2025-11-21 10:50:01,874 - INFO -   Batch 80/165 | Batch Energy: 1.5367 | Perplexity: 322.2540
+2025-11-21 10:50:05,268 - INFO -   Batch 90/165 | Batch Energy: 1.5313 | Perplexity: 306.4310
+2025-11-21 10:50:08,671 - INFO -   Batch 100/165 | Batch Energy: 1.5272 | Perplexity: 340.8270
+2025-11-21 10:50:12,107 - INFO -   Batch 110/165 | Batch Energy: 1.5234 | Perplexity: 342.1298
+2025-11-21 10:50:16,214 - INFO -   Batch 120/165 | Batch Energy: 1.5237 | Perplexity: 312.8221
+2025-11-21 10:50:19,621 - INFO -   Batch 130/165 | Batch Energy: 1.5227 | Perplexity: 348.9866
+2025-11-21 10:50:23,063 - INFO -   Batch 140/165 | Batch Energy: 1.5237 | Perplexity: 336.4126
+2025-11-21 10:50:26,493 - INFO -   Batch 150/165 | Batch Energy: 1.5230 | Perplexity: 375.3016
+2025-11-21 10:50:29,908 - INFO -   Batch 160/165 | Batch Energy: 1.5229 | Perplexity: 291.6431
+2025-11-21 10:50:32,935 - INFO - Epoch 1/20 | Train Energy: 1.5442 | Train Perplexity: 367.9575 | Val Energy: 1.5232 | Val Perplexity: 2140.3027
+2025-11-21 10:50:32,935 - INFO - Epoch 2/20
+2025-11-21 10:50:36,236 - INFO -   Batch 10/165 | Batch Energy: 1.5223 | Perplexity: 334.8953
+2025-11-21 10:50:39,603 - INFO -   Batch 20/165 | Batch Energy: 1.5234 | Perplexity: 362.4673
+2025-11-21 10:50:43,042 - INFO -   Batch 30/165 | Batch Energy: 1.5220 | Perplexity: 371.2403
+2025-11-21 10:50:46,437 - INFO -   Batch 40/165 | Batch Energy: 1.5215 | Perplexity: 339.4473
+2025-11-21 10:50:50,614 - INFO -   Batch 50/165 | Batch Energy: 1.5217 | Perplexity: 353.2861
+2025-11-21 10:50:54,011 - INFO -   Batch 60/165 | Batch Energy: 1.5222 | Perplexity: 373.5101
+2025-11-21 10:50:57,418 - INFO -   Batch 70/165 | Batch Energy: 1.5220 | Perplexity: 326.7039
+2025-11-21 10:51:00,888 - INFO -   Batch 80/165 | Batch Energy: 1.5216 | Perplexity: 378.6638
+2025-11-21 10:51:04,296 - INFO -   Batch 90/165 | Batch Energy: 1.5215 | Perplexity: 358.9250
+2025-11-21 10:51:07,711 - INFO -   Batch 100/165 | Batch Energy: 1.5216 | Perplexity: 354.3664
+2025-11-21 10:51:11,867 - INFO -   Batch 110/165 | Batch Energy: 1.5214 | Perplexity: 360.8575
+2025-11-21 10:51:15,241 - INFO -   Batch 120/165 | Batch Energy: 1.5219 | Perplexity: 381.9112
+2025-11-21 10:51:18,638 - INFO -   Batch 130/165 | Batch Energy: 1.5220 | Perplexity: 355.8621
+2025-11-21 10:51:22,089 - INFO -   Batch 140/165 | Batch Energy: 1.5210 | Perplexity: 357.7612
+2025-11-21 10:51:25,507 - INFO -   Batch 150/165 | Batch Energy: 1.5210 | Perplexity: 354.4432
+2025-11-21 10:51:28,905 - INFO -   Batch 160/165 | Batch Energy: 1.5207 | Perplexity: 370.1675
+2025-11-21 10:51:31,891 - INFO - Epoch 2/20 | Train Energy: 1.5219 | Train Perplexity: 351.6227 | Val Energy: 1.5221 | Val Perplexity: 2096.6592
+2025-11-21 10:51:31,891 - INFO - Epoch 3/20
+2025-11-21 10:51:35,146 - INFO -   Batch 10/165 | Batch Energy: 1.5206 | Perplexity: 341.2772
+2025-11-21 10:51:38,566 - INFO -   Batch 20/165 | Batch Energy: 1.5222 | Perplexity: 345.4703
+2025-11-21 10:51:42,015 - INFO -   Batch 30/165 | Batch Energy: 1.5225 | Perplexity: 326.1032
+2025-11-21 10:51:45,435 - INFO -   Batch 40/165 | Batch Energy: 1.5214 | Perplexity: 338.9604
+2025-11-21 10:51:49,545 - INFO -   Batch 50/165 | Batch Energy: 1.5216 | Perplexity: 358.8158
+2025-11-21 10:51:52,982 - INFO -   Batch 60/165 | Batch Energy: 1.5217 | Perplexity: 327.4896
+2025-11-21 10:51:56,382 - INFO -   Batch 70/165 | Batch Energy: 1.5212 | Perplexity: 380.9289
+2025-11-21 10:51:59,793 - INFO -   Batch 80/165 | Batch Energy: 1.5215 | Perplexity: 309.4289
+2025-11-21 10:52:03,280 - INFO -   Batch 90/165 | Batch Energy: 1.5210 | Perplexity: 349.3089
+2025-11-21 10:52:06,688 - INFO -   Batch 100/165 | Batch Energy: 1.5211 | Perplexity: 387.1794
+2025-11-21 10:52:10,872 - INFO -   Batch 110/165 | Batch Energy: 1.5218 | Perplexity: 343.9155
+2025-11-21 10:52:14,296 - INFO -   Batch 120/165 | Batch Energy: 1.5216 | Perplexity: 336.7521
+2025-11-21 10:52:17,714 - INFO -   Batch 130/165 | Batch Energy: 1.5218 | Perplexity: 351.6486
+2025-11-21 10:52:21,187 - INFO -   Batch 140/165 | Batch Energy: 1.5218 | Perplexity: 325.5692
+2025-11-21 10:52:24,614 - INFO -   Batch 150/165 | Batch Energy: 1.5217 | Perplexity: 380.8684
+2025-11-21 10:52:28,718 - INFO -   Batch 160/165 | Batch Energy: 1.5236 | Perplexity: 337.1605
+2025-11-21 10:52:30,974 - INFO - Epoch 3/20 | Train Energy: 1.5217 | Train Perplexity: 347.5875 | Val Energy: 1.5227 | Val Perplexity: 2076.6368
+2025-11-21 10:52:30,974 - INFO - Epoch 4/20
+2025-11-21 10:52:34,251 - INFO -   Batch 10/165 | Batch Energy: 1.5214 | Perplexity: 365.4999
+2025-11-21 10:52:37,638 - INFO -   Batch 20/165 | Batch Energy: 1.5216 | Perplexity: 351.9866
+2025-11-21 10:52:41,104 - INFO -   Batch 30/165 | Batch Energy: 1.5222 | Perplexity: 324.4556
+2025-11-21 10:52:44,490 - INFO -   Batch 40/165 | Batch Energy: 1.5224 | Perplexity: 321.0332
+2025-11-21 10:52:48,606 - INFO -   Batch 50/165 | Batch Energy: 1.5216 | Perplexity: 314.2612
+2025-11-21 10:52:52,068 - INFO -   Batch 60/165 | Batch Energy: 1.5225 | Perplexity: 338.4711
+2025-11-21 10:52:55,496 - INFO -   Batch 70/165 | Batch Energy: 1.5210 | Perplexity: 371.9037
+2025-11-21 10:52:58,903 - INFO -   Batch 80/165 | Batch Energy: 1.5222 | Perplexity: 324.9240
+2025-11-21 10:53:02,380 - INFO -   Batch 90/165 | Batch Energy: 1.5227 | Perplexity: 345.3498
+2025-11-21 10:53:06,504 - INFO -   Batch 100/165 | Batch Energy: 1.5224 | Perplexity: 329.5102
+2025-11-21 10:53:09,933 - INFO -   Batch 110/165 | Batch Energy: 1.5215 | Perplexity: 306.5949
+2025-11-21 10:53:13,396 - INFO -   Batch 120/165 | Batch Energy: 1.5232 | Perplexity: 310.9642
+2025-11-21 10:53:16,805 - INFO -   Batch 130/165 | Batch Energy: 1.5226 | Perplexity: 369.4111
+2025-11-21 10:53:20,269 - INFO -   Batch 140/165 | Batch Energy: 1.5227 | Perplexity: 348.9955
+2025-11-21 10:53:23,704 - INFO -   Batch 150/165 | Batch Energy: 1.5222 | Perplexity: 343.2588
+2025-11-21 10:53:27,830 - INFO -   Batch 160/165 | Batch Energy: 1.5237 | Perplexity: 333.5019
+2025-11-21 10:53:30,076 - INFO - Epoch 4/20 | Train Energy: 1.5225 | Train Perplexity: 343.3985 | Val Energy: 1.5237 | Val Perplexity: 2041.3834
+2025-11-21 10:53:30,077 - INFO - Epoch 5/20
+2025-11-21 10:53:33,354 - INFO -   Batch 10/165 | Batch Energy: 1.5228 | Perplexity: 351.2995
+2025-11-21 10:53:36,800 - INFO -   Batch 20/165 | Batch Energy: 1.5230 | Perplexity: 359.8617
+2025-11-21 10:53:40,254 - INFO -   Batch 30/165 | Batch Energy: 1.5236 | Perplexity: 331.2757
+2025-11-21 10:53:44,418 - INFO -   Batch 40/165 | Batch Energy: 1.5225 | Perplexity: 349.2268
+2025-11-21 10:53:47,820 - INFO -   Batch 50/165 | Batch Energy: 1.5238 | Perplexity: 387.2150
+2025-11-21 10:53:51,296 - INFO -   Batch 60/165 | Batch Energy: 1.5229 | Perplexity: 360.5147
+2025-11-21 10:53:54,720 - INFO -   Batch 70/165 | Batch Energy: 1.5235 | Perplexity: 340.2155
+2025-11-21 10:53:58,135 - INFO -   Batch 80/165 | Batch Energy: 1.5231 | Perplexity: 345.1371
+2025-11-21 10:54:01,594 - INFO -   Batch 90/165 | Batch Energy: 1.5225 | Perplexity: 334.1633
+2025-11-21 10:54:05,699 - INFO -   Batch 100/165 | Batch Energy: 1.5231 | Perplexity: 352.5033
+2025-11-21 10:54:09,095 - INFO -   Batch 110/165 | Batch Energy: 1.5244 | Perplexity: 313.4973
+2025-11-21 10:54:12,579 - INFO -   Batch 120/165 | Batch Energy: 1.5227 | Perplexity: 377.4459
+2025-11-21 10:54:15,999 - INFO -   Batch 130/165 | Batch Energy: 1.5236 | Perplexity: 354.1008
+2025-11-21 10:54:19,436 - INFO -   Batch 140/165 | Batch Energy: 1.5230 | Perplexity: 342.8095
+2025-11-21 10:54:22,911 - INFO -   Batch 150/165 | Batch Energy: 1.5238 | Perplexity: 280.3430
+2025-11-21 10:54:26,982 - INFO -   Batch 160/165 | Batch Energy: 1.5251 | Perplexity: 357.4520
+2025-11-21 10:54:29,251 - INFO - Epoch 5/20 | Train Energy: 1.5236 | Train Perplexity: 337.4044 | Val Energy: 1.5246 | Val Perplexity: 2033.2691
+2025-11-21 10:54:30,031 - INFO - Saved checkpoint to checkpoints/model_epoch_5.pt
+2025-11-21 10:54:30,031 - INFO - Epoch 6/20
+2025-11-21 10:54:33,307 - INFO -   Batch 10/165 | Batch Energy: 1.5257 | Perplexity: 344.0451
+2025-11-21 10:54:36,708 - INFO -   Batch 20/165 | Batch Energy: 1.5309 | Perplexity: 325.3147
+2025-11-21 10:54:40,845 - INFO -   Batch 30/165 | Batch Energy: 1.5391 | Perplexity: 299.1516
+2025-11-21 10:54:44,252 - INFO -   Batch 40/165 | Batch Energy: 1.5478 | Perplexity: 379.5703
+2025-11-21 10:54:47,663 - INFO -   Batch 50/165 | Batch Energy: 1.5278 | Perplexity: 328.0244
+2025-11-21 10:54:51,078 - INFO -   Batch 60/165 | Batch Energy: 1.5275 | Perplexity: 305.3042
+2025-11-21 10:54:54,459 - INFO -   Batch 70/165 | Batch Energy: 1.5306 | Perplexity: 323.3529
+2025-11-21 10:54:58,589 - INFO -   Batch 80/165 | Batch Energy: 1.5341 | Perplexity: 348.8729
+2025-11-21 10:55:02,015 - INFO -   Batch 90/165 | Batch Energy: 1.5314 | Perplexity: 346.0675
+2025-11-21 10:55:05,394 - INFO -   Batch 100/165 | Batch Energy: 1.5315 | Perplexity: 331.6341
+2025-11-21 10:55:08,804 - INFO -   Batch 110/165 | Batch Energy: 1.5313 | Perplexity: 344.8781
+2025-11-21 10:55:12,291 - INFO -   Batch 120/165 | Batch Energy: 1.5341 | Perplexity: 365.2776
+2025-11-21 10:55:16,326 - INFO -   Batch 130/165 | Batch Energy: 1.5312 | Perplexity: 329.0383
+2025-11-21 10:55:19,741 - INFO -   Batch 140/165 | Batch Energy: 1.5323 | Perplexity: 382.9079
+2025-11-21 10:55:23,195 - INFO -   Batch 150/165 | Batch Energy: 1.5337 | Perplexity: 316.9023
+2025-11-21 10:55:26,586 - INFO -   Batch 160/165 | Batch Energy: 1.5360 | Perplexity: 333.7088
+2025-11-21 10:55:29,504 - INFO - Epoch 6/20 | Train Energy: 1.5331 | Train Perplexity: 333.4402 | Val Energy: 1.5331 | Val Perplexity: 2003.3841
+2025-11-21 10:55:29,505 - INFO - Epoch 7/20
+2025-11-21 10:55:32,847 - INFO -   Batch 10/165 | Batch Energy: 1.5330 | Perplexity: 321.6591
+2025-11-21 10:55:36,270 - INFO -   Batch 20/165 | Batch Energy: 1.5331 | Perplexity: 311.9449
+2025-11-21 10:55:39,689 - INFO -   Batch 30/165 | Batch Energy: 1.5377 | Perplexity: 370.1557
+2025-11-21 10:55:43,123 - INFO -   Batch 40/165 | Batch Energy: 1.5386 | Perplexity: 319.0155
+2025-11-21 10:55:47,123 - INFO -   Batch 50/165 | Batch Energy: 1.5382 | Perplexity: 313.9325
+2025-11-21 10:55:50,556 - INFO -   Batch 60/165 | Batch Energy: 1.5363 | Perplexity: 299.8806
+2025-11-21 10:55:53,934 - INFO -   Batch 70/165 | Batch Energy: 1.5349 | Perplexity: 349.6767
+2025-11-21 10:55:57,269 - INFO -   Batch 80/165 | Batch Energy: 1.5358 | Perplexity: 335.5843
+2025-11-21 10:56:00,689 - INFO -   Batch 90/165 | Batch Energy: 1.5379 | Perplexity: 349.6495
+2025-11-21 10:56:04,762 - INFO -   Batch 100/165 | Batch Energy: 1.5363 | Perplexity: 333.7211
+2025-11-21 10:56:08,107 - INFO -   Batch 110/165 | Batch Energy: 1.5381 | Perplexity: 355.5091
+2025-11-21 10:56:11,532 - INFO -   Batch 120/165 | Batch Energy: 1.5342 | Perplexity: 313.2079
+2025-11-21 10:56:14,930 - INFO -   Batch 130/165 | Batch Energy: 1.5388 | Perplexity: 300.4295
+2025-11-21 10:56:18,974 - INFO -   Batch 140/165 | Batch Energy: 1.5387 | Perplexity: 319.5788
+2025-11-21 10:56:22,363 - INFO -   Batch 150/165 | Batch Energy: 1.5367 | Perplexity: 332.4256
+2025-11-21 10:56:25,779 - INFO -   Batch 160/165 | Batch Energy: 1.5380 | Perplexity: 348.7586
+2025-11-21 10:56:28,719 - INFO - Epoch 7/20 | Train Energy: 1.5357 | Train Perplexity: 328.6557 | Val Energy: 1.5361 | Val Perplexity: 1943.8136
+2025-11-21 10:56:28,719 - INFO - Epoch 8/20
+2025-11-21 10:56:32,130 - INFO -   Batch 10/165 | Batch Energy: 1.5368 | Perplexity: 325.1067
+2025-11-21 10:56:35,520 - INFO -   Batch 20/165 | Batch Energy: 1.5356 | Perplexity: 340.9626
+2025-11-21 10:56:38,923 - INFO -   Batch 30/165 | Batch Energy: 1.5402 | Perplexity: 349.8973
+2025-11-21 10:56:42,378 - INFO -   Batch 40/165 | Batch Energy: 1.5390 | Perplexity: 297.9987
+2025-11-21 10:56:46,400 - INFO -   Batch 50/165 | Batch Energy: 1.5376 | Perplexity: 313.1176
+2025-11-21 10:56:49,790 - INFO -   Batch 60/165 | Batch Energy: 1.5393 | Perplexity: 330.1905
+2025-11-21 10:56:53,255 - INFO -   Batch 70/165 | Batch Energy: 1.5386 | Perplexity: 337.0912
+2025-11-21 10:56:56,622 - INFO -   Batch 80/165 | Batch Energy: 1.5410 | Perplexity: 317.2873
+2025-11-21 10:56:59,983 - INFO -   Batch 90/165 | Batch Energy: 1.5405 | Perplexity: 309.9051
+2025-11-21 10:57:04,125 - INFO -   Batch 100/165 | Batch Energy: 1.5410 | Perplexity: 323.5842
+2025-11-21 10:57:07,478 - INFO -   Batch 110/165 | Batch Energy: 1.5383 | Perplexity: 328.5388
+2025-11-21 10:57:10,895 - INFO -   Batch 120/165 | Batch Energy: 1.5425 | Perplexity: 299.5065
+2025-11-21 10:57:14,301 - INFO -   Batch 130/165 | Batch Energy: 1.5391 | Perplexity: 330.9559
+2025-11-21 10:57:18,348 - INFO -   Batch 140/165 | Batch Energy: 1.5399 | Perplexity: 303.1147
+2025-11-21 10:57:21,768 - INFO -   Batch 150/165 | Batch Energy: 1.5402 | Perplexity: 320.7350
+2025-11-21 10:57:25,150 - INFO -   Batch 160/165 | Batch Energy: 1.5398 | Perplexity: 299.1920
+2025-11-21 10:57:28,080 - INFO - Epoch 8/20 | Train Energy: 1.5392 | Train Perplexity: 323.5181 | Val Energy: 1.5377 | Val Perplexity: 1931.0912
+2025-11-21 10:57:28,080 - INFO - Epoch 9/20
+2025-11-21 10:57:31,480 - INFO -   Batch 10/165 | Batch Energy: 1.5397 | Perplexity: 374.3171
+2025-11-21 10:57:34,853 - INFO -   Batch 20/165 | Batch Energy: 1.5416 | Perplexity: 344.8155
+2025-11-21 10:57:38,262 - INFO -   Batch 30/165 | Batch Energy: 1.5436 | Perplexity: 292.4084
+2025-11-21 10:57:41,692 - INFO -   Batch 40/165 | Batch Energy: 1.5423 | Perplexity: 303.9622
+2025-11-21 10:57:45,711 - INFO -   Batch 50/165 | Batch Energy: 1.5420 | Perplexity: 350.0754
+2025-11-21 10:57:49,080 - INFO -   Batch 60/165 | Batch Energy: 1.5416 | Perplexity: 279.1192
+2025-11-21 10:57:52,507 - INFO -   Batch 70/165 | Batch Energy: 1.5439 | Perplexity: 314.9868
+2025-11-21 10:57:55,879 - INFO -   Batch 80/165 | Batch Energy: 1.5420 | Perplexity: 325.1388
+2025-11-21 10:57:59,234 - INFO -   Batch 90/165 | Batch Energy: 1.5433 | Perplexity: 321.2760
+2025-11-21 10:58:03,347 - INFO -   Batch 100/165 | Batch Energy: 1.5411 | Perplexity: 342.2320
+2025-11-21 10:58:06,694 - INFO -   Batch 110/165 | Batch Energy: 1.5411 | Perplexity: 329.7036
+2025-11-21 10:58:10,051 - INFO -   Batch 120/165 | Batch Energy: 1.5430 | Perplexity: 319.6723
+2025-11-21 10:58:13,470 - INFO -   Batch 130/165 | Batch Energy: 1.5440 | Perplexity: 316.8104
+2025-11-21 10:58:17,532 - INFO -   Batch 140/165 | Batch Energy: 1.5461 | Perplexity: 293.3967
+2025-11-21 10:58:20,929 - INFO -   Batch 150/165 | Batch Energy: 1.5468 | Perplexity: 326.4408
+2025-11-21 10:58:24,320 - INFO -   Batch 160/165 | Batch Energy: 1.5417 | Perplexity: 322.2264
+2025-11-21 10:58:27,254 - INFO - Epoch 9/20 | Train Energy: 1.5426 | Train Perplexity: 320.0035 | Val Energy: 1.5408 | Val Perplexity: 1866.2861
+2025-11-21 10:58:27,254 - INFO - Epoch 10/20
+2025-11-21 10:58:30,639 - INFO -   Batch 10/165 | Batch Energy: 1.5394 | Perplexity: 322.2265
+2025-11-21 10:58:33,988 - INFO -   Batch 20/165 | Batch Energy: 1.5440 | Perplexity: 326.7928
+2025-11-21 10:58:37,374 - INFO -   Batch 30/165 | Batch Energy: 1.5431 | Perplexity: 316.5563
+2025-11-21 10:58:40,820 - INFO -   Batch 40/165 | Batch Energy: 1.5442 | Perplexity: 310.5524
+2025-11-21 10:58:44,834 - INFO -   Batch 50/165 | Batch Energy: 1.5475 | Perplexity: 303.9164
+2025-11-21 10:58:48,237 - INFO -   Batch 60/165 | Batch Energy: 1.5440 | Perplexity: 327.4029
+2025-11-21 10:58:51,719 - INFO -   Batch 70/165 | Batch Energy: 1.5546 | Perplexity: 308.1044
+2025-11-21 10:58:55,098 - INFO -   Batch 80/165 | Batch Energy: 1.5419 | Perplexity: 299.8517
+2025-11-21 10:58:58,460 - INFO -   Batch 90/165 | Batch Energy: 1.5441 | Perplexity: 305.7070
+2025-11-21 10:59:02,622 - INFO -   Batch 100/165 | Batch Energy: 1.5453 | Perplexity: 304.4225
+2025-11-21 10:59:05,957 - INFO -   Batch 110/165 | Batch Energy: 1.5460 | Perplexity: 303.4204
+2025-11-21 10:59:09,289 - INFO -   Batch 120/165 | Batch Energy: 1.5487 | Perplexity: 307.0991
+2025-11-21 10:59:12,728 - INFO -   Batch 130/165 | Batch Energy: 1.5473 | Perplexity: 319.6762
+2025-11-21 10:59:16,757 - INFO -   Batch 140/165 | Batch Energy: 1.5479 | Perplexity: 312.4258
+2025-11-21 10:59:20,084 - INFO -   Batch 150/165 | Batch Energy: 1.5422 | Perplexity: 327.3444
+2025-11-21 10:59:23,504 - INFO -   Batch 160/165 | Batch Energy: 1.5492 | Perplexity: 294.4014
+2025-11-21 10:59:26,427 - INFO - Epoch 10/20 | Train Energy: 1.5456 | Train Perplexity: 315.2337 | Val Energy: 1.5441 | Val Perplexity: 1845.4394
+2025-11-21 10:59:27,224 - INFO - Saved checkpoint to checkpoints/model_epoch_10.pt
+2025-11-21 10:59:27,224 - INFO - Epoch 11/20
+2025-11-21 10:59:30,640 - INFO -   Batch 10/165 | Batch Energy: 1.5501 | Perplexity: 313.2738
+2025-11-21 10:59:33,998 - INFO -   Batch 20/165 | Batch Energy: 1.5426 | Perplexity: 312.3511
+2025-11-21 10:59:37,388 - INFO -   Batch 30/165 | Batch Energy: 1.5501 | Perplexity: 304.0226
+2025-11-21 10:59:40,820 - INFO -   Batch 40/165 | Batch Energy: 1.5466 | Perplexity: 330.0642
+2025-11-21 10:59:44,849 - INFO -   Batch 50/165 | Batch Energy: 1.5423 | Perplexity: 344.8015
+2025-11-21 10:59:48,239 - INFO -   Batch 60/165 | Batch Energy: 1.5491 | Perplexity: 329.4554
+2025-11-21 10:59:51,695 - INFO -   Batch 70/165 | Batch Energy: 1.5483 | Perplexity: 303.8517
+2025-11-21 10:59:55,023 - INFO -   Batch 80/165 | Batch Energy: 1.5451 | Perplexity: 294.1192
+2025-11-21 10:59:58,379 - INFO -   Batch 90/165 | Batch Energy: 1.5466 | Perplexity: 293.2377
+2025-11-21 11:00:02,553 - INFO -   Batch 100/165 | Batch Energy: 1.5440 | Perplexity: 304.6681
+2025-11-21 11:00:05,909 - INFO -   Batch 110/165 | Batch Energy: 1.5559 | Perplexity: 316.7029
+2025-11-21 11:00:09,277 - INFO -   Batch 120/165 | Batch Energy: 1.5519 | Perplexity: 304.6574
+2025-11-21 11:00:12,723 - INFO -   Batch 130/165 | Batch Energy: 1.5505 | Perplexity: 313.4375
+2025-11-21 11:00:16,784 - INFO -   Batch 140/165 | Batch Energy: 1.5531 | Perplexity: 319.1941
+2025-11-21 11:00:20,121 - INFO -   Batch 150/165 | Batch Energy: 1.5400 | Perplexity: 311.5833
+2025-11-21 11:00:23,540 - INFO -   Batch 160/165 | Batch Energy: 1.5569 | Perplexity: 334.0110
+2025-11-21 11:00:26,463 - INFO - Epoch 11/20 | Train Energy: 1.5489 | Train Perplexity: 312.4355 | Val Energy: 1.5468 | Val Perplexity: 1793.0103
+2025-11-21 11:00:26,463 - INFO - Epoch 12/20
+2025-11-21 11:00:29,785 - INFO -   Batch 10/165 | Batch Energy: 1.5466 | Perplexity: 312.8510
+2025-11-21 11:00:33,201 - INFO -   Batch 20/165 | Batch Energy: 1.5469 | Perplexity: 318.3953
+2025-11-21 11:00:36,589 - INFO -   Batch 30/165 | Batch Energy: 1.5453 | Perplexity: 302.1435
+2025-11-21 11:00:39,995 - INFO -   Batch 40/165 | Batch Energy: 1.5513 | Perplexity: 303.3471
+2025-11-21 11:00:44,058 - INFO -   Batch 50/165 | Batch Energy: 1.5439 | Perplexity: 299.2090
+2025-11-21 11:00:47,447 - INFO -   Batch 60/165 | Batch Energy: 1.5485 | Perplexity: 308.3922
+2025-11-21 11:00:50,881 - INFO -   Batch 70/165 | Batch Energy: 1.5541 | Perplexity: 327.1939
+2025-11-21 11:00:54,244 - INFO -   Batch 80/165 | Batch Energy: 1.5583 | Perplexity: 300.0159
+2025-11-21 11:00:57,599 - INFO -   Batch 90/165 | Batch Energy: 1.5486 | Perplexity: 313.9587
+2025-11-21 11:01:01,725 - INFO -   Batch 100/165 | Batch Energy: 1.5476 | Perplexity: 299.3252
+2025-11-21 11:01:05,085 - INFO -   Batch 110/165 | Batch Energy: 1.5534 | Perplexity: 303.7503
+2025-11-21 11:01:08,439 - INFO -   Batch 120/165 | Batch Energy: 1.5507 | Perplexity: 278.4762
+2025-11-21 11:01:11,894 - INFO -   Batch 130/165 | Batch Energy: 1.5539 | Perplexity: 303.4915
+2025-11-21 11:01:15,930 - INFO -   Batch 140/165 | Batch Energy: 1.5441 | Perplexity: 279.2974
+2025-11-21 11:01:19,289 - INFO -   Batch 150/165 | Batch Energy: 1.5569 | Perplexity: 323.9869
+2025-11-21 11:01:22,731 - INFO -   Batch 160/165 | Batch Energy: 1.5539 | Perplexity: 305.8183
+2025-11-21 11:01:25,661 - INFO - Epoch 12/20 | Train Energy: 1.5512 | Train Perplexity: 307.8350 | Val Energy: 1.5495 | Val Perplexity: 1790.1770
+2025-11-21 11:01:25,661 - INFO - Epoch 13/20
+2025-11-21 11:01:29,015 - INFO -   Batch 10/165 | Batch Energy: 1.5479 | Perplexity: 303.6269
+2025-11-21 11:01:32,420 - INFO -   Batch 20/165 | Batch Energy: 1.5590 | Perplexity: 313.6340
+2025-11-21 11:01:35,816 - INFO -   Batch 30/165 | Batch Energy: 1.5570 | Perplexity: 286.4615
+2025-11-21 11:01:39,194 - INFO -   Batch 40/165 | Batch Energy: 1.5555 | Perplexity: 292.4151
+2025-11-21 11:01:43,267 - INFO -   Batch 50/165 | Batch Energy: 1.5501 | Perplexity: 308.0481
+2025-11-21 11:01:46,649 - INFO -   Batch 60/165 | Batch Energy: 1.5511 | Perplexity: 301.9156
+2025-11-21 11:01:50,037 - INFO -   Batch 70/165 | Batch Energy: 1.5524 | Perplexity: 322.3734
+2025-11-21 11:01:53,454 - INFO -   Batch 80/165 | Batch Energy: 1.5472 | Perplexity: 306.4102
+2025-11-21 11:01:56,823 - INFO -   Batch 90/165 | Batch Energy: 1.5477 | Perplexity: 295.6866
+2025-11-21 11:02:00,963 - INFO -   Batch 100/165 | Batch Energy: 1.5533 | Perplexity: 297.3220
+2025-11-21 11:02:04,306 - INFO -   Batch 110/165 | Batch Energy: 1.5533 | Perplexity: 315.4181
+2025-11-21 11:02:07,666 - INFO -   Batch 120/165 | Batch Energy: 1.5609 | Perplexity: 290.6264
+2025-11-21 11:02:11,133 - INFO -   Batch 130/165 | Batch Energy: 1.5611 | Perplexity: 304.2336
+2025-11-21 11:02:15,217 - INFO -   Batch 140/165 | Batch Energy: 1.5550 | Perplexity: 297.6768
+2025-11-21 11:02:18,572 - INFO -   Batch 150/165 | Batch Energy: 1.5525 | Perplexity: 293.4451
+2025-11-21 11:02:22,021 - INFO -   Batch 160/165 | Batch Energy: 1.5576 | Perplexity: 308.5185
+2025-11-21 11:02:24,998 - INFO - Epoch 13/20 | Train Energy: 1.5546 | Train Perplexity: 303.0865 | Val Energy: 1.5504 | Val Perplexity: 1794.2241
+2025-11-21 11:02:24,998 - INFO - Epoch 14/20
+2025-11-21 11:02:28,380 - INFO -   Batch 10/165 | Batch Energy: 1.5557 | Perplexity: 304.7999
+2025-11-21 11:02:31,870 - INFO -   Batch 20/165 | Batch Energy: 1.5581 | Perplexity: 316.3618
+2025-11-21 11:02:35,320 - INFO -   Batch 30/165 | Batch Energy: 1.5594 | Perplexity: 330.4707
+2025-11-21 11:02:38,764 - INFO -   Batch 40/165 | Batch Energy: 1.5575 | Perplexity: 305.0395
+2025-11-21 11:02:42,874 - INFO -   Batch 50/165 | Batch Energy: 1.5670 | Perplexity: 300.1752
+2025-11-21 11:02:46,300 - INFO -   Batch 60/165 | Batch Energy: 1.5636 | Perplexity: 321.7782
+2025-11-21 11:02:49,723 - INFO -   Batch 70/165 | Batch Energy: 1.5533 | Perplexity: 324.0578
+2025-11-21 11:02:53,168 - INFO -   Batch 80/165 | Batch Energy: 1.5627 | Perplexity: 309.7382
+2025-11-21 11:02:56,562 - INFO -   Batch 90/165 | Batch Energy: 1.5496 | Perplexity: 297.8632
+2025-11-21 11:03:00,721 - INFO -   Batch 100/165 | Batch Energy: 1.5545 | Perplexity: 291.7333
+2025-11-21 11:03:04,087 - INFO -   Batch 110/165 | Batch Energy: 1.5629 | Perplexity: 316.6973
+2025-11-21 11:03:07,451 - INFO -   Batch 120/165 | Batch Energy: 1.5703 | Perplexity: 302.0596
+2025-11-21 11:03:10,920 - INFO -   Batch 130/165 | Batch Energy: 1.5518 | Perplexity: 325.2281
+2025-11-21 11:03:15,004 - INFO -   Batch 140/165 | Batch Energy: 1.5602 | Perplexity: 293.8411
+2025-11-21 11:03:18,370 - INFO -   Batch 150/165 | Batch Energy: 1.5500 | Perplexity: 270.6785
+2025-11-21 11:03:21,844 - INFO -   Batch 160/165 | Batch Energy: 1.5514 | Perplexity: 316.5610
+2025-11-21 11:03:24,777 - INFO - Epoch 14/20 | Train Energy: 1.5568 | Train Perplexity: 298.4351 | Val Energy: 1.5468 | Val Perplexity: 1863.8437
+2025-11-21 11:03:24,778 - INFO - Epoch 15/20
+2025-11-21 11:03:28,151 - INFO -   Batch 10/165 | Batch Energy: 1.5546 | Perplexity: 286.8642
+2025-11-21 11:03:31,599 - INFO -   Batch 20/165 | Batch Energy: 1.5492 | Perplexity: 301.7339
+2025-11-21 11:03:35,012 - INFO -   Batch 30/165 | Batch Energy: 1.5678 | Perplexity: 284.8818
+2025-11-21 11:03:38,423 - INFO -   Batch 40/165 | Batch Energy: 1.5544 | Perplexity: 293.1718
+2025-11-21 11:03:42,526 - INFO -   Batch 50/165 | Batch Energy: 1.5625 | Perplexity: 276.4088
+2025-11-21 11:03:45,938 - INFO -   Batch 60/165 | Batch Energy: 1.5503 | Perplexity: 300.7907
+2025-11-21 11:03:49,340 - INFO -   Batch 70/165 | Batch Energy: 1.5509 | Perplexity: 285.6330
+2025-11-21 11:03:52,755 - INFO -   Batch 80/165 | Batch Energy: 1.5561 | Perplexity: 279.8633
+2025-11-21 11:03:56,127 - INFO -   Batch 90/165 | Batch Energy: 1.5511 | Perplexity: 316.1914
+2025-11-21 11:04:00,278 - INFO -   Batch 100/165 | Batch Energy: 1.5537 | Perplexity: 329.2426
+2025-11-21 11:04:03,654 - INFO -   Batch 110/165 | Batch Energy: 1.5628 | Perplexity: 298.8468
+2025-11-21 11:04:07,028 - INFO -   Batch 120/165 | Batch Energy: 1.5714 | Perplexity: 294.8811
+2025-11-21 11:04:10,498 - INFO -   Batch 130/165 | Batch Energy: 1.5675 | Perplexity: 308.1120
+2025-11-21 11:04:14,593 - INFO -   Batch 140/165 | Batch Energy: 1.5564 | Perplexity: 284.8340
+2025-11-21 11:04:17,956 - INFO -   Batch 150/165 | Batch Energy: 1.5668 | Perplexity: 290.9117
+2025-11-21 11:04:21,426 - INFO -   Batch 160/165 | Batch Energy: 1.5620 | Perplexity: 280.2681
+2025-11-21 11:04:24,359 - INFO - Epoch 15/20 | Train Energy: 1.5591 | Train Perplexity: 294.3509 | Val Energy: 1.5595 | Val Perplexity: 1704.4726
+2025-11-21 11:04:25,226 - INFO - Saved checkpoint to checkpoints/model_epoch_15.pt
+2025-11-21 11:04:25,227 - INFO - Epoch 16/20
+2025-11-21 11:04:28,575 - INFO -   Batch 10/165 | Batch Energy: 1.5603 | Perplexity: 309.1363
+2025-11-21 11:04:32,030 - INFO -   Batch 20/165 | Batch Energy: 1.5586 | Perplexity: 268.4399
+2025-11-21 11:04:35,428 - INFO -   Batch 30/165 | Batch Energy: 1.5621 | Perplexity: 293.4165
+2025-11-21 11:04:38,846 - INFO -   Batch 40/165 | Batch Energy: 1.5659 | Perplexity: 287.0636
+2025-11-21 11:04:42,929 - INFO -   Batch 50/165 | Batch Energy: 1.5530 | Perplexity: 289.2390
+2025-11-21 11:04:46,418 - INFO -   Batch 60/165 | Batch Energy: 1.5535 | Perplexity: 282.9259
+2025-11-21 11:04:49,834 - INFO -   Batch 70/165 | Batch Energy: 1.5628 | Perplexity: 310.7757
+2025-11-21 11:04:53,278 - INFO -   Batch 80/165 | Batch Energy: 1.5675 | Perplexity: 309.9874
+2025-11-21 11:04:56,676 - INFO -   Batch 90/165 | Batch Energy: 1.5583 | Perplexity: 283.4273
+2025-11-21 11:05:00,832 - INFO -   Batch 100/165 | Batch Energy: 1.5576 | Perplexity: 269.8698
+2025-11-21 11:05:04,204 - INFO -   Batch 110/165 | Batch Energy: 1.5611 | Perplexity: 299.6076
+2025-11-21 11:05:07,583 - INFO -   Batch 120/165 | Batch Energy: 1.5617 | Perplexity: 293.2952
+2025-11-21 11:05:11,037 - INFO -   Batch 130/165 | Batch Energy: 1.5578 | Perplexity: 287.8667
+2025-11-21 11:05:15,076 - INFO -   Batch 140/165 | Batch Energy: 1.5699 | Perplexity: 302.9792
+2025-11-21 11:05:18,419 - INFO -   Batch 150/165 | Batch Energy: 1.5652 | Perplexity: 285.8471
+2025-11-21 11:05:21,877 - INFO -   Batch 160/165 | Batch Energy: 1.5707 | Perplexity: 277.8133
+2025-11-21 11:05:24,815 - INFO - Epoch 16/20 | Train Energy: 1.5625 | Train Perplexity: 292.0388 | Val Energy: 1.5668 | Val Perplexity: 1736.9150
+2025-11-21 11:05:24,815 - INFO - Epoch 17/20
+2025-11-21 11:05:28,190 - INFO -   Batch 10/165 | Batch Energy: 1.5686 | Perplexity: 280.2086
+2025-11-21 11:05:31,633 - INFO -   Batch 20/165 | Batch Energy: 1.5615 | Perplexity: 284.4248
+2025-11-21 11:05:35,052 - INFO -   Batch 30/165 | Batch Energy: 1.5626 | Perplexity: 251.4909
+2025-11-21 11:05:38,462 - INFO -   Batch 40/165 | Batch Energy: 1.5715 | Perplexity: 304.2580
+2025-11-21 11:05:42,546 - INFO -   Batch 50/165 | Batch Energy: 1.5614 | Perplexity: 277.6193
+2025-11-21 11:05:45,956 - INFO -   Batch 60/165 | Batch Energy: 1.5754 | Perplexity: 315.2004
+2025-11-21 11:05:49,351 - INFO -   Batch 70/165 | Batch Energy: 1.5572 | Perplexity: 266.5900
+2025-11-21 11:05:52,774 - INFO -   Batch 80/165 | Batch Energy: 1.5566 | Perplexity: 318.5081
+2025-11-21 11:05:56,154 - INFO -   Batch 90/165 | Batch Energy: 1.5634 | Perplexity: 289.4355
+2025-11-21 11:06:00,298 - INFO -   Batch 100/165 | Batch Energy: 1.5709 | Perplexity: 296.4829
+2025-11-21 11:06:03,661 - INFO -   Batch 110/165 | Batch Energy: 1.5627 | Perplexity: 286.1513
+2025-11-21 11:06:07,026 - INFO -   Batch 120/165 | Batch Energy: 1.5614 | Perplexity: 249.0218
+2025-11-21 11:06:10,472 - INFO -   Batch 130/165 | Batch Energy: 1.5685 | Perplexity: 330.9921
+2025-11-21 11:06:14,545 - INFO -   Batch 140/165 | Batch Energy: 1.5613 | Perplexity: 270.7404
+2025-11-21 11:06:17,898 - INFO -   Batch 150/165 | Batch Energy: 1.5606 | Perplexity: 299.7491
+2025-11-21 11:06:21,357 - INFO -   Batch 160/165 | Batch Energy: 1.5575 | Perplexity: 277.4048
+2025-11-21 11:06:24,299 - INFO - Epoch 17/20 | Train Energy: 1.5645 | Train Perplexity: 288.1439 | Val Energy: 1.5600 | Val Perplexity: 1638.3854
+2025-11-21 11:06:24,299 - INFO - Epoch 18/20
+2025-11-21 11:06:27,651 - INFO -   Batch 10/165 | Batch Energy: 1.5688 | Perplexity: 298.6975
+2025-11-21 11:06:31,059 - INFO -   Batch 20/165 | Batch Energy: 1.5521 | Perplexity: 291.6413
+2025-11-21 11:06:34,449 - INFO -   Batch 30/165 | Batch Energy: 1.5614 | Perplexity: 269.5164
+2025-11-21 11:06:37,841 - INFO -   Batch 40/165 | Batch Energy: 1.5687 | Perplexity: 284.5980
+2025-11-21 11:06:41,914 - INFO -   Batch 50/165 | Batch Energy: 1.5705 | Perplexity: 298.6354
+2025-11-21 11:06:45,314 - INFO -   Batch 60/165 | Batch Energy: 1.5695 | Perplexity: 279.5822
+2025-11-21 11:06:48,715 - INFO -   Batch 70/165 | Batch Energy: 1.5654 | Perplexity: 272.5605
+2025-11-21 11:06:52,136 - INFO -   Batch 80/165 | Batch Energy: 1.5612 | Perplexity: 268.3932
+2025-11-21 11:06:55,526 - INFO -   Batch 90/165 | Batch Energy: 1.5683 | Perplexity: 279.6342
+2025-11-21 11:06:59,613 - INFO -   Batch 100/165 | Batch Energy: 1.5639 | Perplexity: 282.1779
+2025-11-21 11:07:03,030 - INFO -   Batch 110/165 | Batch Energy: 1.5780 | Perplexity: 284.6206
+2025-11-21 11:07:06,414 - INFO -   Batch 120/165 | Batch Energy: 1.5636 | Perplexity: 277.0580
+2025-11-21 11:07:09,832 - INFO -   Batch 130/165 | Batch Energy: 1.5537 | Perplexity: 284.5201
+2025-11-21 11:07:13,963 - INFO -   Batch 140/165 | Batch Energy: 1.5723 | Perplexity: 268.1450
+2025-11-21 11:07:17,317 - INFO -   Batch 150/165 | Batch Energy: 1.5699 | Perplexity: 288.3800
+2025-11-21 11:07:20,779 - INFO -   Batch 160/165 | Batch Energy: 1.5616 | Perplexity: 295.0356
+2025-11-21 11:07:23,749 - INFO - Epoch 18/20 | Train Energy: 1.5666 | Train Perplexity: 285.6540 | Val Energy: 1.5601 | Val Perplexity: 1699.5065
+2025-11-21 11:07:23,750 - INFO - Epoch 19/20
+2025-11-21 11:07:27,113 - INFO -   Batch 10/165 | Batch Energy: 1.5585 | Perplexity: 277.5024
+2025-11-21 11:07:30,540 - INFO -   Batch 20/165 | Batch Energy: 1.5636 | Perplexity: 287.2912
+2025-11-21 11:07:33,960 - INFO -   Batch 30/165 | Batch Energy: 1.5562 | Perplexity: 301.0682
+2025-11-21 11:07:37,360 - INFO -   Batch 40/165 | Batch Energy: 1.5690 | Perplexity: 286.2286
+2025-11-21 11:07:41,429 - INFO -   Batch 50/165 | Batch Energy: 1.5812 | Perplexity: 275.6746
+2025-11-21 11:07:44,837 - INFO -   Batch 60/165 | Batch Energy: 1.5652 | Perplexity: 308.6492
+2025-11-21 11:07:48,219 - INFO -   Batch 70/165 | Batch Energy: 1.5696 | Perplexity: 264.4469
+2025-11-21 11:07:51,649 - INFO -   Batch 80/165 | Batch Energy: 1.5700 | Perplexity: 257.0316
+2025-11-21 11:07:55,032 - INFO -   Batch 90/165 | Batch Energy: 1.5605 | Perplexity: 279.2096
+2025-11-21 11:07:59,138 - INFO -   Batch 100/165 | Batch Energy: 1.5882 | Perplexity: 297.0108
+2025-11-21 11:08:02,558 - INFO -   Batch 110/165 | Batch Energy: 1.5648 | Perplexity: 239.1594
+2025-11-21 11:08:05,967 - INFO -   Batch 120/165 | Batch Energy: 1.5675 | Perplexity: 258.3848
+2025-11-21 11:08:09,384 - INFO -   Batch 130/165 | Batch Energy: 1.5604 | Perplexity: 287.6943
+2025-11-21 11:08:13,513 - INFO -   Batch 140/165 | Batch Energy: 1.5690 | Perplexity: 301.4196
+2025-11-21 11:08:16,880 - INFO -   Batch 150/165 | Batch Energy: 1.5684 | Perplexity: 279.1512
+2025-11-21 11:08:20,323 - INFO -   Batch 160/165 | Batch Energy: 1.5940 | Perplexity: 281.4105
+2025-11-21 11:08:23,295 - INFO - Epoch 19/20 | Train Energy: 1.5695 | Train Perplexity: 281.1408 | Val Energy: 1.5686 | Val Perplexity: 1670.2492
+2025-11-21 11:08:23,295 - INFO - Epoch 20/20
+2025-11-21 11:08:26,659 - INFO -   Batch 10/165 | Batch Energy: 1.6101 | Perplexity: 280.8453
+2025-11-21 11:08:30,071 - INFO -   Batch 20/165 | Batch Energy: 1.5658 | Perplexity: 314.2154
+2025-11-21 11:08:33,540 - INFO -   Batch 30/165 | Batch Energy: 1.5872 | Perplexity: 292.7791
+2025-11-21 11:08:36,955 - INFO -   Batch 40/165 | Batch Energy: 1.5644 | Perplexity: 297.0871
+2025-11-21 11:08:41,056 - INFO -   Batch 50/165 | Batch Energy: 1.5910 | Perplexity: 285.6287
+2025-11-21 11:08:44,454 - INFO -   Batch 60/165 | Batch Energy: 1.5866 | Perplexity: 271.9970
+2025-11-21 11:08:47,861 - INFO -   Batch 70/165 | Batch Energy: 1.5635 | Perplexity: 285.5972
+2025-11-21 11:08:51,281 - INFO -   Batch 80/165 | Batch Energy: 1.5800 | Perplexity: 283.7448
+2025-11-21 11:08:54,692 - INFO -   Batch 90/165 | Batch Energy: 1.5683 | Perplexity: 281.1638
+2025-11-21 11:08:58,829 - INFO -   Batch 100/165 | Batch Energy: 1.5858 | Perplexity: 261.9528
+2025-11-21 11:09:02,256 - INFO -   Batch 110/165 | Batch Energy: 1.5719 | Perplexity: 255.0705
+2025-11-21 11:09:05,636 - INFO -   Batch 120/165 | Batch Energy: 1.5679 | Perplexity: 278.7052
+2025-11-21 11:09:09,053 - INFO -   Batch 130/165 | Batch Energy: 1.5647 | Perplexity: 277.5636
+2025-11-21 11:09:13,183 - INFO -   Batch 140/165 | Batch Energy: 1.5759 | Perplexity: 264.7466
+2025-11-21 11:09:16,550 - INFO -   Batch 150/165 | Batch Energy: 1.5714 | Perplexity: 274.4739
+2025-11-21 11:09:20,045 - INFO -   Batch 160/165 | Batch Energy: 1.5824 | Perplexity: 260.6883
+2025-11-21 11:09:23,010 - INFO - Epoch 20/20 | Train Energy: 1.5738 | Train Perplexity: 279.0503 | Val Energy: 1.5723 | Val Perplexity: 1622.5381
+2025-11-21 11:09:23,886 - INFO - Saved checkpoint to checkpoints/model_epoch_20.pt
+2025-11-21 11:09:24,871 - INFO - Training completed in 1191.66 seconds
+2025-11-21 11:09:24,871 - INFO - Final model saved to: checkpoints/final_model.pt
+2025-11-21 11:09:24,871 - INFO - ========== Training completed ==========
