@@ -333,112 +333,118 @@ class PCLayer(nn.Module):
         """
         Initialize activity state x for a layer type.
         
-        Args:
-            batch_size: Batch size
-            seq_len: Sequence length
-            layer_type: Type of layer (embed, X_Q, X_K, X_V, X_score, X_A, attn_output, fc1, fc2, output)
-            device: Device to create tensors on
-            word_embeddings: Word embedding layer (for embed)
-            pos_embeddings: Position embedding layer (for embed)
-            input_ids: Input token IDs (for embed)
-            position_ids: Position IDs (for embed)
-            bottom_layer: Bottom layer for shape inference
-            top_layer: Top layer for shape inference
+        Supported layer types: embed, X_Q, X_K, X_V, X_score, X_A, attn_output, fc1, fc2, ln1, ln2, output
         """
-        if layer_type == "embed":
-            assert input_ids is not None and position_ids is not None
-            assert word_embeddings is not None and pos_embeddings is not None
-            
-            # Initialize with embeddings
-            vocab_size = word_embeddings.weight.size(0)
-            max_pos = pos_embeddings.weight.size(0)
-            input_ids = torch.clamp(input_ids, max=vocab_size - 1)
-            position_ids = torch.clamp(position_ids, max=max_pos - 1)
-            
-            x_word = word_embeddings(input_ids)
-            x_pos = pos_embeddings(position_ids)
-            x_embed = x_word + x_pos
-            
-            self._x_cache[layer_type] = x_embed
-            self._mu_cache[layer_type] = x_embed.clone()
+        # Map layer types to initialization functions
+        init_functions = {
+            "embed": self._init_embed,
+            "X_Q": self._init_attention_qkv,
+            "X_K": self._init_attention_qkv,
+            "X_V": self._init_attention_qkv,
+            "X_score": self._init_attention_matrix,
+            "X_A": self._init_attention_matrix,
+            "attn_output": self._init_attention_output,
+            "fc1": self._init_linear,
+            "fc2": self._init_linear,
+            "ln1": self._init_layer_norm,
+            "ln2": self._init_layer_norm,
+            "output": self._init_output,
+        }
         
-        elif layer_type in ["X_Q", "X_K", "X_V"]:
-            assert self.n_embed is not None and self.num_heads is not None
-            head_dim = self.n_embed // self.num_heads
-            
-            # Initialize with small random values
-            x = torch.randn(batch_size, self.num_heads, seq_len, head_dim, device=device) * 0.1
-            self._x_cache[layer_type] = x
-            self._mu_cache[layer_type] = torch.zeros_like(x)
-            
-            # Register lateral connections
-            self.register_lateral(layer_type, head_dim)
+        if layer_type not in init_functions:
+            raise ValueError(f"Unknown layer_type: {layer_type}. Supported types: {list(init_functions.keys())}")
         
-        elif layer_type in ["X_score", "X_A"]:
-            assert self.num_heads is not None
-            
-            # Initialize attention scores/weights (B, H, S, S)
-            x = torch.randn(batch_size, self.num_heads, seq_len, seq_len, device=device) * 0.1
-            self._x_cache[layer_type] = x
-            self._mu_cache[layer_type] = torch.zeros_like(x)
-            
-            # Register lateral connections across heads
-            self.register_lateral(layer_type, self.num_heads)
+        # Call appropriate initialization function
+        init_functions[layer_type](
+            batch_size, seq_len, layer_type, device,
+            word_embeddings, pos_embeddings, input_ids, position_ids,
+            bottom_layer, top_layer
+        )
+    
+    def _init_embed(self, batch_size, seq_len, layer_type, device,
+                    word_embeddings, pos_embeddings, input_ids, position_ids,
+                    bottom_layer, top_layer):
+        """Initialize embedding layer."""
+        assert input_ids is not None and position_ids is not None
+        assert word_embeddings is not None and pos_embeddings is not None
         
-        elif layer_type == "attn_output":
-            assert self.n_embed is not None and self.num_heads is not None
-            head_dim = self.n_embed // self.num_heads
-            
-            # Initialize attention output (B, H, S, D)
-            x = torch.randn(batch_size, self.num_heads, seq_len, head_dim, device=device) * 0.1
-            self._x_cache[layer_type] = x
-            self._mu_cache[layer_type] = torch.zeros_like(x)
-            
-            # Register lateral connections
-            self.register_lateral(layer_type, head_dim)
+        vocab_size = word_embeddings.weight.size(0)
+        max_pos = pos_embeddings.weight.size(0)
+        input_ids = torch.clamp(input_ids, max=vocab_size - 1)
+        position_ids = torch.clamp(position_ids, max=max_pos - 1)
         
-        elif layer_type in ["fc1", "fc2"]:
-            ref_layer = bottom_layer or top_layer
-            assert ref_layer is not None
-            
-            input_dim = ref_layer.weight.shape[1]
-            
-            # Initialize MLP layer (B, S, D)
-            x = torch.randn(batch_size, seq_len, input_dim, device=device) * 0.1
-            self._x_cache[layer_type] = x
-            self._mu_cache[layer_type] = torch.zeros_like(x)
-            
-            # Register lateral connections
-            self.register_lateral(layer_type, input_dim)
+        x_word = word_embeddings(input_ids)
+        x_pos = pos_embeddings(position_ids)
+        x_embed = x_word + x_pos
         
-        elif layer_type in ["ln1", "ln2"]:
-            # Layer norm tracking layers - use n_embed dimension
-            assert self.n_embed is not None, "n_embed must be set for layer norm initialization"
-            
-            # Initialize layer norm state (B, S, D)
-            x = torch.randn(batch_size, seq_len, self.n_embed, device=device) * 0.1
-            self._x_cache[layer_type] = x
-            self._mu_cache[layer_type] = torch.zeros_like(x)
-            
-            # Register lateral connections
-            self.register_lateral(layer_type, self.n_embed)
+        self._x_cache[layer_type] = x_embed
+        self._mu_cache[layer_type] = x_embed.clone()
+    
+    def _init_attention_qkv(self, batch_size, seq_len, layer_type, device, *args, **kwargs):
+        """Initialize Q, K, V projection layers."""
+        assert self.n_embed is not None and self.num_heads is not None
+        head_dim = self.n_embed // self.num_heads
         
-        elif layer_type == "output":
-            ref_layer = bottom_layer or top_layer
-            assert ref_layer is not None
-            
-            output_dim = ref_layer.weight.shape[0]
-            
-            # Initialize output layer (B, S, vocab_size)
-            x = torch.randn(batch_size, seq_len, output_dim, device=device) * 0.1
-            self._x_cache[layer_type] = x
-            self._mu_cache[layer_type] = torch.zeros_like(x)
-            
-            # Register lateral connections
-            self.register_lateral(layer_type, output_dim)
+        x = torch.randn(batch_size, self.num_heads, seq_len, head_dim, device=device) * 0.1
+        self._x_cache[layer_type] = x
+        self._mu_cache[layer_type] = torch.zeros_like(x)
+        self.register_lateral(layer_type, head_dim)
+    
+    def _init_attention_matrix(self, batch_size, seq_len, layer_type, device, *args, **kwargs):
+        """Initialize attention score/weight matrices."""
+        assert self.num_heads is not None
         
-        else:
-            raise ValueError(f"Unknown layer_type: {layer_type}")
+        x = torch.randn(batch_size, self.num_heads, seq_len, seq_len, device=device) * 0.1
+        self._x_cache[layer_type] = x
+        self._mu_cache[layer_type] = torch.zeros_like(x)
+        self.register_lateral(layer_type, self.num_heads)
+    
+    def _init_attention_output(self, batch_size, seq_len, layer_type, device, *args, **kwargs):
+        """Initialize attention output."""
+        assert self.n_embed is not None and self.num_heads is not None
+        head_dim = self.n_embed // self.num_heads
+        
+        x = torch.randn(batch_size, self.num_heads, seq_len, head_dim, device=device) * 0.1
+        self._x_cache[layer_type] = x
+        self._mu_cache[layer_type] = torch.zeros_like(x)
+        self.register_lateral(layer_type, head_dim)
+    
+    def _init_linear(self, batch_size, seq_len, layer_type, device,
+                     word_embeddings, pos_embeddings, input_ids, position_ids,
+                     bottom_layer, top_layer):
+        """Initialize linear/MLP layers (fc1, fc2)."""
+        ref_layer = bottom_layer or top_layer
+        assert ref_layer is not None
+        
+        input_dim = ref_layer.weight.shape[1]
+        
+        x = torch.randn(batch_size, seq_len, input_dim, device=device) * 0.1
+        self._x_cache[layer_type] = x
+        self._mu_cache[layer_type] = torch.zeros_like(x)
+        self.register_lateral(layer_type, input_dim)
+    
+    def _init_layer_norm(self, batch_size, seq_len, layer_type, device, *args, **kwargs):
+        """Initialize layer norm tracking layers (ln1, ln2)."""
+        assert self.n_embed is not None, "n_embed must be set for layer norm initialization"
+        
+        x = torch.randn(batch_size, seq_len, self.n_embed, device=device) * 0.1
+        self._x_cache[layer_type] = x
+        self._mu_cache[layer_type] = torch.zeros_like(x)
+        self.register_lateral(layer_type, self.n_embed)
+    
+    def _init_output(self, batch_size, seq_len, layer_type, device,
+                     word_embeddings, pos_embeddings, input_ids, position_ids,
+                     bottom_layer, top_layer):
+        """Initialize output layer."""
+        ref_layer = bottom_layer or top_layer
+        assert ref_layer is not None
+        
+        output_dim = ref_layer.weight.shape[0]
+        
+        x = torch.randn(batch_size, seq_len, output_dim, device=device) * 0.1
+        self._x_cache[layer_type] = x
+        self._mu_cache[layer_type] = torch.zeros_like(x)
+        self.register_lateral(layer_type, output_dim)
     
     def get_x(self, layer_type: str) -> Optional[torch.Tensor]:
         """Get cached activity for a layer type."""
