@@ -273,6 +273,22 @@ class PCLayer(nn.Module):
             self._error_cache[layer_type] = error
             return x_new, output, error
         
+        elif layer_type in ["ln1", "ln2"]:
+            # Layer norm tracking layers - just pass through
+            # These track the normalized state but don't apply predictive coding
+            if target is not None:
+                error = current_state - target
+                x_new = current_state + self.local_lr * error
+                x_new = torch.clamp(x_new, -abs(self.clamp_value), abs(self.clamp_value))
+            else:
+                x_new = current_state
+                error = torch.zeros_like(current_state)
+            
+            self._x_cache[layer_type] = x_new
+            self._mu_cache[layer_type] = target if target is not None else current_state
+            self._error_cache[layer_type] = error
+            return x_new, target if target is not None else current_state, error
+        
         elif layer_type == "output":
             x_new, logits, error = step_output_layer(
                 x=current_state,
@@ -394,6 +410,18 @@ class PCLayer(nn.Module):
             
             # Register lateral connections
             self.register_lateral(layer_type, input_dim)
+        
+        elif layer_type in ["ln1", "ln2"]:
+            # Layer norm tracking layers - use n_embed dimension
+            assert self.n_embed is not None, "n_embed must be set for layer norm initialization"
+            
+            # Initialize layer norm state (B, S, D)
+            x = torch.randn(batch_size, seq_len, self.n_embed, device=device) * 0.1
+            self._x_cache[layer_type] = x
+            self._mu_cache[layer_type] = torch.zeros_like(x)
+            
+            # Register lateral connections
+            self.register_lateral(layer_type, self.n_embed)
         
         elif layer_type == "output":
             ref_layer = bottom_layer or top_layer
