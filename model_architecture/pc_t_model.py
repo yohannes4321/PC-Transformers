@@ -77,8 +77,8 @@ class PCTransformer(nn.Module):
         self.embedding.pc_layer = PCLayer(
             T=config.T,
             lr=config.lr,
-            update_bias=config.update_bias,
-            energy_fn_name=config.energy_fn_name,
+            update_bias=getattr(config, 'update_bias', True),
+            energy_fn_name=getattr(config, 'energy_fn_name', 'pc_e'),
             optimizer_name=getattr(config, 'optimizer_name', 'adam'),
             optimizer_beta1=getattr(config, 'optimizer_beta1', 0.9),
             optimizer_beta2=getattr(config, 'optimizer_beta2', 0.999),
@@ -92,24 +92,24 @@ class PCTransformer(nn.Module):
             block.attn.pc_X_Q = PCLayer(
                 T=config.T,
                 lr=config.lr,
-                update_bias=config.update_bias,
-                energy_fn_name=config.internal_energy_fn_name,
+                update_bias=getattr(config, 'update_bias', True),
+                energy_fn_name=getattr(config, 'internal_energy_fn_name', 'pc_e'),
                 num_heads=config.num_heads,
                 n_embed=config.n_embed,
             )
             block.attn.pc_X_K = PCLayer(
                 T=config.T,
                 lr=config.lr,
-                update_bias=config.update_bias,
-                energy_fn_name=config.internal_energy_fn_name,
+                update_bias=getattr(config, 'update_bias', True),
+                energy_fn_name=getattr(config, 'internal_energy_fn_name', 'pc_e'),
                 num_heads=config.num_heads,
                 n_embed=config.n_embed,
             )
             block.attn.pc_X_V = PCLayer(
                 T=config.T,
                 lr=config.lr,
-                update_bias=config.update_bias,
-                energy_fn_name=config.internal_energy_fn_name,
+                update_bias=getattr(config, 'update_bias', True),
+                energy_fn_name=getattr(config, 'internal_energy_fn_name', 'pc_e'),
                 num_heads=config.num_heads,
                 n_embed=config.n_embed,
             )
@@ -118,16 +118,16 @@ class PCTransformer(nn.Module):
             block.attn.pc_X_score = PCLayer(
                 T=config.T,
                 lr=config.lr,
-                update_bias=config.update_bias,
-                energy_fn_name=config.internal_energy_fn_name,
+                update_bias=getattr(config, 'update_bias', True),
+                energy_fn_name=getattr(config, 'internal_energy_fn_name', 'pc_e'),
                 num_heads=config.num_heads,
                 n_embed=config.n_embed,
             )
             block.attn.pc_X_A = PCLayer(
                 T=config.T,
                 lr=config.lr,
-                update_bias=config.update_bias,
-                energy_fn_name=config.internal_energy_fn_name,
+                update_bias=getattr(config, 'update_bias', True),
+                energy_fn_name=getattr(config, 'internal_energy_fn_name', 'pc_e'),
                 num_heads=config.num_heads,
                 n_embed=config.n_embed,
             )
@@ -136,8 +136,8 @@ class PCTransformer(nn.Module):
             block.attn.pc_output = PCLayer(
                 T=config.T,
                 lr=config.lr,
-                update_bias=config.update_bias,
-                energy_fn_name=config.internal_energy_fn_name,
+                update_bias=getattr(config, 'update_bias', True),
+                energy_fn_name=getattr(config, 'internal_energy_fn_name', 'pc_e'),
                 num_heads=config.num_heads,
                 n_embed=config.n_embed,
             )
@@ -146,14 +146,14 @@ class PCTransformer(nn.Module):
             block.mlp.pc_layer1 = PCLayer(
                 T=config.T,
                 lr=config.lr,
-                update_bias=config.update_bias,
-                energy_fn_name=config.internal_energy_fn_name,
+                update_bias=getattr(config, 'update_bias', True),
+                energy_fn_name=getattr(config, 'internal_energy_fn_name', 'pc_e'),
             )
             block.mlp.pc_layer2 = PCLayer(
                 T=config.T,
                 lr=config.lr,
-                update_bias=config.update_bias,
-                energy_fn_name=config.internal_energy_fn_name,
+                update_bias=getattr(config, 'update_bias', True),
+                energy_fn_name=getattr(config, 'internal_energy_fn_name', 'pc_e'),
             )
             
             # LayerNorm PC layers (for latent state tracking)
@@ -161,21 +161,21 @@ class PCTransformer(nn.Module):
                 T=config.T,
                 lr=config.lr,
                 update_bias=False,
-                energy_fn_name=config.internal_energy_fn_name,
+                energy_fn_name=getattr(config, 'internal_energy_fn_name', 'pc_e'),
             )
             block.pc_ln2 = PCLayer(
                 T=config.T,
                 lr=config.lr,
                 update_bias=False,
-                energy_fn_name=config.internal_energy_fn_name,
+                energy_fn_name=getattr(config, 'internal_energy_fn_name', 'pc_e'),
             )
         
         # Output PC layer
         self.output.pc_layer = PCLayer(
             T=config.T,
             lr=config.lr,
-            update_bias=config.update_bias,
-            energy_fn_name=config.energy_fn_name,
+            update_bias=getattr(config, 'update_bias', True),
+            energy_fn_name=getattr(config, 'energy_fn_name', 'pc_e'),
         )
     
     def register_all_lateral_weights(self):
