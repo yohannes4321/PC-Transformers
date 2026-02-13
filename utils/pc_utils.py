@@ -839,3 +839,12 @@ def step_output_layer(
         )
     
     return x_new, logits, top_error
+
+
+def cleanup_memory():
+    """Comprehensive memory cleanup for garbage collection and CUDA cache."""
+    import gc
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+        torch.cuda.synchronize()
