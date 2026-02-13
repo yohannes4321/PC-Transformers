@@ -9,6 +9,7 @@ class OutputLayer(nn.Module):
         super().__init__()
         self.config = config
         self.output = nn.Linear(config.n_embed, config.vocab_size)
+        self.fc2_linear_output = self.output
         
         self.pc_layer = PCLayer(
             T=config.T,

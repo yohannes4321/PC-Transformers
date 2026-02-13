@@ -14,6 +14,7 @@ from utils.pc_utils import (
     step_X_score,
     step_X_A,
     step_X_attnOut,
+    
     _reshape_to_heads,
     _merge_heads,
     finalize_step,
@@ -92,31 +93,47 @@ class PCLayer(nn.Module):
         T: int,
         requires_update: bool,
         td_err:  Optional[torch.Tensor] = None,
+        current_state: Optional[torch.Tensor] = None,
+        previous: Optional[torch.Tensor] = None,
+        previous_2: Optional[torch.Tensor] = None,
+        bottom_layer: Optional[nn.Module] = None,
+        bottom_layer_2: Optional[nn.Module] = None,
+        top_layer: Optional[nn.Module] = None,
+        embed_layers: Optional[dict] = None,
+        layer: Optional[nn.Module] = None,
+        proj_layers: Optional[dict] = None,
         q: Optional[torch.Tensor] = None,
         k: Optional[torch.Tensor] = None,
         score: Optional[torch.Tensor] = None,
         a_weights: Optional[torch.Tensor] = None,
         v: Optional[torch.Tensor] = None,
-        layer: Optional[nn.Module] = None,
         layer_norm: Optional[nn.Module] = None,
-        proj_layers: Optional[dict] = None,
         input_ids: Optional[torch.Tensor] = None,
         position_ids: Optional[torch.Tensor] = None,
         flash: bool = False,
         kv_cache: Optional[Tuple[torch.Tensor, torch.Tensor]] = None,  # ADD THIS
         use_cache: bool = False, 
+        top_layers: Optional[dict] = None,
+        target_q_for_embed: Optional[torch.Tensor] = None,
+        target_k_for_embed: Optional[torch.Tensor] = None,
+        target_v_for_embed: Optional[torch.Tensor] = None,
+        **kwargs,
     ):
         """Perform one predictive coding inference step."""
         self._reset_step_state()
         self._td_err_cache[layer_type] = td_err
-        x = self._get_cached_state(layer_type)
+        x = current_state if current_state is not None else self._get_cached_state(layer_type)
 
         if layer_type == "embed":
+            if embed_layers is None and isinstance(layer, dict):
+                embed_layers = layer
+            
+
             mu, mu_word, mu_pos, bu_err = step_embed(
                 t,
                 T,
-                target_activity,
-                layer,
+                 target_activity,
+                embed_layers,
                 layer_type,
                 input_ids,
                 position_ids,
@@ -126,6 +143,10 @@ class PCLayer(nn.Module):
                 requires_update,
                 layer_norm=layer_norm,
                 optimizer=self.optimizer,
+                top_layers=top_layers,
+                target_q=target_q_for_embed,
+                target_k=target_k_for_embed,
+                target_v=target_v_for_embed,
             )            
             # store for later retrieval
             self._x_cache["embed"] = (mu_word, mu_pos)
@@ -134,283 +155,26 @@ class PCLayer(nn.Module):
                 self._error_cache["embed"] = bu_err.detach().clone()
 
             # compute energy
-            error = target_activity - mu
-            energy, step_errors = finalize_step(mu, target_activity, error, t, layer_type, self.energy_fn_name)
-            self._energy += energy
-            self._energy_cache[layer_type] = energy
-            self._errors.extend(step_errors)
+            energy_target = target_activity if target_activity is not None else target_embed
+            if energy_target is not None:
+                error = energy_target - mu
+                energy, step_errors = finalize_step(mu, energy_target, error, t, layer_type, self.energy_fn_name)
+                self._energy += energy
+                self._energy_cache[layer_type] = energy
+                self._errors.extend(step_errors)
             return mu_word, mu_pos
         
-        
-        elif layer_type == "X_Q":
-            lateral_conn = self.lateral_connections.get(layer_type, None)
-            x, mu_Q, bu_err = step_Q(
-                t,
-                T,
-                target_activity,
-                x,
-                lateral_conn,
-                proj_layers,
-                layer_type,
-                self.local_lr,
-                self.clamp_value,
-                self.energy_fn_name,
-                self.update_bias,
-                requires_update,
-                self.n_embed,
-                self.num_heads,
-                td_err=td_err, 
-                layer_norm=layer_norm,
-                optimizer=self.optimizer,
-            )
-            self._x_cache["X_Q"] = x
-            self._mu_cache["X_Q"] = mu_Q.detach().clone()
-            if bu_err is not None:
-                self._error_cache["X_Q"] = bu_err.detach().clone()
+        like embed call calucaute energey input in the x_cache and mu_cache
+        elif layer type =="X_Q": step_X_Q 
+        elif layer type =="X_K": step x_k
+        elif layer type =="X_V": step_X_V
+        elif layer type =="X_SCORE": step x_score
+        elif layer type=="X_A": step_x_A
+        elif layer type =="x_attnout" step_x_attnout
+        elif layer type =="fc1" step_fc1
 
-            # compute energy - X_Q should compute proper prediction error, not compare to score matrices
-            if target_activity is None:
-                # When target is None, use mu_Q + bu_err
-                fallback = mu_Q + bu_err if bu_err is not None else mu_Q
-                target_for_energy = _reshape_to_heads(fallback, self.num_heads) if fallback.dim() == 3 else fallback
-            else:
-                # For X_Q energy, target should be the same space as mu_Q
-                # Use mu_Q itself as the target (self-supervised) or get properly projected target
-                target_for_energy = mu_Q
-            error = target_for_energy - mu_Q
-            energy, step_errors = finalize_step(mu_Q, target_for_energy, error, t, layer_type, self.energy_fn_name)
-            self._energy += energy
-            self._energy_cache[layer_type] = energy
-            self._errors.extend(step_errors)
-            return mu_Q
-            
-        elif layer_type == "X_K":
-            lateral_conn = self.lateral_connections.get(layer_type, None)
-            x, mu_K, bu_err = step_K(
-                t,
-                T,
-                target_activity,
-                x,
-                lateral_conn,
-                proj_layers,
-                layer_type,
-                self.local_lr,
-                self.clamp_value,
-                self.energy_fn_name,
-                self.update_bias,
-                requires_update,
-                self.n_embed,
-                self.num_heads,
-                td_err=td_err, 
-                layer_norm=layer_norm,
-                optimizer=self.optimizer,
-            )
-            self._x_cache["X_K"] = x
-            self._mu_cache["X_K"] = mu_K.detach().clone()
-            if bu_err is not None:
-                self._error_cache["X_K"] = bu_err.detach().clone()
-
-            # compute energy - X_K should compute proper prediction error, not compare to score matrices
-            if target_activity is None:
-                # When target is None, use mu_K + bu_err
-                fallback = mu_K + bu_err if bu_err is not None else mu_K
-                target_for_energy = _reshape_to_heads(fallback, self.num_heads) if fallback.dim() == 3 else fallback
-            else:
-                # For X_K energy, target should be the same space as mu_K
-                # Use mu_K itself as the target (self-supervised) or get properly projected target
-                target_for_energy = mu_K
-            error = target_for_energy - mu_K
-            energy, step_errors = finalize_step(mu_K, target_for_energy, error, t, layer_type, self.energy_fn_name)
-            self._energy += energy
-            self._energy_cache[layer_type] = energy
-            self._errors.extend(step_errors)
-            return mu_K
-        elif layer_type == "X_V":
-            lateral_conn = self.lateral_connections.get(layer_type, None)
-            x, mu_V, bu_err = step_V(
-                t,
-                T,
-                target_activity,
-                x,
-                lateral_conn,
-                proj_layers,
-                layer_type,
-                self.local_lr,
-                self.clamp_value,
-                self.energy_fn_name,
-                self.update_bias,
-                requires_update,
-                self.n_embed,
-                self.num_heads,
-                td_err=td_err, 
-                layer_norm=layer_norm,
-                optimizer=self.optimizer,
-            )
-            self._x_cache["X_V"] = x
-            self._mu_cache["X_V"] = mu_V.detach().clone()
-            if bu_err is not None:
-                self._error_cache["X_V"] = bu_err.detach().clone()
-
-            # compute energy - X_V should compute proper prediction error, not compare to score matrices
-            if target_activity is None:
-                # When target is None, use mu_V + bu_err
-                fallback = mu_V + bu_err if bu_err is not None else mu_V
-                target_for_energy = _reshape_to_heads(fallback, self.num_heads) if fallback.dim() == 3 else fallback
-            else:
-                # For X_V energy, target should be the same space as mu_V
-                # Use mu_V itself as the target (self-supervised) or get properly projected target
-                target_for_energy = mu_V
-            error = target_for_energy - mu_V
-            energy, step_errors = finalize_step(mu_V, target_for_energy, error, t, layer_type, self.energy_fn_name)
-            self._energy += energy
-            self._energy_cache[layer_type] = energy
-            self._errors.extend(step_errors)
-            return mu_V
-        elif layer_type == "X_score":
-            lateral_conn = self.lateral_connections.get(layer_type, None)
-            q_source = q if q is not None else self._mu_cache.get("X_Q")
-            k_source = k if k is not None else self._mu_cache.get("X_K")
-            x, mu_score, bu_err, new_kv_cache = step_X_score(
-                t,
-                T,
-                target_activity,
-                x,
-                lateral_conn,
-                layer_type,
-                self.local_lr,
-                self.clamp_value,
-                self.energy_fn_name,
-                requires_update,
-                self.num_heads,
-                self.n_embed,
-                td_err=td_err, 
-                layer=None,
-                q=q_source,
-                k=k_source,
-                kv_cache=kv_cache,
-                use_cache=use_cache,
-            )
-            self._x_cache["X_score"] = mu_score
-            self._mu_cache["X_score"] = mu_score.detach().clone()
-            if bu_err is not None:
-                self._error_cache["X_score"] = bu_err.detach().clone()
-            # X_score energy: compare softmax probabilities, not raw logits
-            mu_score_prob = F.softmax(mu_score, dim=-1)
-            if td_err is not None:
-                target_for_energy = mu_score + td_err
-            else:
-                target_for_energy = target_activity if target_activity is not None else mu_score
-            # Apply softmax to target as well before computing error
-            target_prob = F.softmax(target_for_energy, dim=-1)
-            error = target_prob - mu_score_prob
-            # Normalize energy by the number of elements to prevent huge values
-            seq_len = mu_score.size(2)
-            energy, step_errors = finalize_step(mu_score_prob, target_prob, error / seq_len, t, layer_type, self.energy_fn_name)
-            self._energy += energy
-            self._energy_cache[layer_type] = energy
-            self._errors.extend(step_errors)
-            return mu_score
-
-        elif layer_type == "X_A":
-            lateral_conn = self.lateral_connections.get(layer_type, None)
-            score_source = score if score is not None else self._mu_cache.get("X_score")
-            energy_fn_name_xa = "pc_e"
-            x, mu_X_A, bu_err = step_X_A(
-                t,
-                T,
-                target_activity,
-                x,
-                lateral_conn,
-                layer_type,
-                self.local_lr,
-                self.clamp_value,
-                energy_fn_name_xa,
-                requires_update,
-                td_err=td_err, 
-                score=score_source,
-            )
-            self._x_cache["X_A"] = mu_X_A
-            self._mu_cache["X_A"] = mu_X_A.detach().clone()
-            if bu_err is not None:
-                self._error_cache["X_A"] = bu_err.detach().clone()
-            mu_logits = x if x is not None else mu_X_A
-            target_for_energy = F.softmax(score_source, dim=-1) if score_source is not None else mu_X_A
-            error = target_for_energy - mu_X_A
-            energy, step_errors = finalize_step(mu_logits, target_for_energy, error, t, layer_type, energy_fn_name_xa)
-            self._energy += energy
-            self._energy_cache[layer_type] = energy
-            self._errors.extend(step_errors)
-            return mu_X_A
-            # Store cache for retrieval
-        elif layer_type == "attn_output":
-            lateral_conn = self.lateral_connections.get(layer_type, None)
-            a_source = a_weights if a_weights is not None else self._mu_cache.get("X_A")
-            v_source = v if v is not None else self._mu_cache.get("X_V")
-            x, mu_attnOut, bu_err = step_X_attnOut(
-                t,
-                T,
-                target_activity,
-                x,
-                lateral_conn,
-                layer,
-                layer_type,
-                self.local_lr,
-                self.clamp_value,
-                self.energy_fn_name,
-                self.update_bias,
-                requires_update,
-                td_err=td_err, 
-                layer_norm=layer_norm,
-                a_weights=a_source,
-                v=v_source,
-                optimizer=self.optimizer,
-            )
-            # Store cache for retrieval
-            self._x_cache["attn_output"] = mu_attnOut
-            self._mu_cache["attn_output"] = mu_attnOut.detach().clone()
-            if bu_err is not None:
-                self._error_cache["attn_output"] = bu_err.detach().clone()
-            error = target_activity - mu_attnOut
-            energy, step_errors = finalize_step(mu_attnOut, target_activity, error, t, layer_type, self.energy_fn_name)
-            self._energy += energy
-            self._energy_cache[layer_type] = energy
-            self._errors.extend(step_errors)
-            return mu_attnOut
-           
-        
-        else:
-            lateral_conn = self.lateral_connections.get(layer_type, None)
-            x, mu, bu_err = step_linear(
-                t,
-                T,
-                target_activity,
-                x,
-                layer, 
-                lateral_conn,  
-                layer_type,
-                self.local_lr, 
-                self.clamp_value, 
-                self.energy_fn_name, 
-                self.update_bias, 
-                requires_update,
-                td_err=td_err, 
-                layer_norm=layer_norm,
-                optimizer=self.optimizer,
-            )
-            
-        # cache and stats
-        self._mu_cache[layer_type] = mu.detach().clone()  
-        if bu_err is not None:
-            self._error_cache[layer_type] = bu_err.detach().clone()
-        
-        error = target_activity - mu
-        energy, step_errors = finalize_step(mu, target_activity, error, t, layer_type, self.energy_fn_name)
-        self._energy += energy
-        self._energy_cache[layer_type] = energy
-        self._errors.extend(step_errors)
-        # update x cache
-        self._x_cache[layer_type] = x
-        return x, mu
+        elif layer type =="fc2" step_fc2
+        elif layer type =="output" step_output
 
     def init_x(
         self,
@@ -418,6 +182,9 @@ class PCLayer(nn.Module):
         seq_len: int,
         layer_type: str,
         device: torch.device,
+        embed_layers: Optional[dict] = None,
+        bottom_layer: Optional[nn.Module] = None,
+        top_layer: Optional[nn.Module] = None,
         layer: Optional[nn.Module] = None,
         proj_layers: Optional[dict] = None,
         input_ids: Optional[torch.Tensor] = None,
@@ -430,25 +197,25 @@ class PCLayer(nn.Module):
         # --- 1. Embedding Layer (3D: Batch, Seq, Embed) ---
         if layer_type == "embed":
             assert input_ids is not None and position_ids is not None
-            vocab_size = layer["word"].weight.size(0)
-            max_pos = layer["pos"].weight.size(0)
+            if embed_layers is None and isinstance(layer, dict):
+                embed_layers = layer
+            vocab_size = embed_layers["word"].weight.size(0)
+            max_pos = embed_layers["pos"].weight.size(0)
             
             # Safety clamp
             input_ids = torch.clamp(input_ids, max=vocab_size-1)
             position_ids = torch.clamp(position_ids, max=max_pos-1)
             
-            x_word = layer["word"].weight[input_ids] 
-            x_pos = layer["pos"].weight[position_ids] 
+            x_word = embed_layers["word"].weight[input_ids] 
+            x_pos = embed_layers["pos"].weight[position_ids] 
             self._x_cache["embed"] = (x_word, x_pos)
             # Embed doesn't usually use a stored '_mu' in the same way, 
             # but if needed, it would be 3D.
 
         # --- 2. Attention Projections (4D: Batch, Head, Seq, Head_Dim) ---
         elif layer_type in {"X_Q", "X_K", "X_V"}:
-            assert proj_layers is not None
-            # Total embedding dim
-            d_model = proj_layers["q_proj"].weight.shape[1] 
-            head_dim = d_model // self.num_heads
+            assert self.n_embed is not None and self.num_heads is not None
+            head_dim = self.n_embed // self.num_heads
 
             # Initialize X as 4D with smaller values to reduce initial energy
             self._x_cache[layer_type] = torch.randn(
@@ -500,8 +267,9 @@ class PCLayer(nn.Module):
 
         # --- 5. Linear / MLP Layers (3D: Batch, Seq, Embed) ---
         else:  
-            assert layer is not None
-            input_dim = layer.weight.shape[1]
+            ref_layer = bottom_layer or top_layer or layer
+            assert ref_layer is not None
+            input_dim = ref_layer.weight.shape[1]
             
             self._x_cache[layer_type] = x_init(batch_size, seq_len, input_dim, device) * 0.1
             # Ensure mu matches x shape (3D)

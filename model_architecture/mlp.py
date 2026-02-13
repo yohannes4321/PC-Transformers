@@ -13,6 +13,10 @@ class MLP(nn.Module):
         self.fc2 = nn.Linear(4 * config.n_embed, config.n_embed)
         self.dropout = nn.Dropout(config.dropout)
 
+        # Connector aliases for latent transitions
+        self.attnoutput_fc1 = self.fc1
+        self.fc1_fc2 = self.fc2
+
         self.pc_layer2 = PCLayer(
             T=config.T,
             lr=config.lr,

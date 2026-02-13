@@ -20,6 +20,13 @@ class Attention(nn.Module):
         self.v = nn.Linear(config.n_embed, config.n_embed)
         self.output = nn.Linear(config.n_embed, config.n_embed)
 
+        # Latent-to-latent connector weights
+        self.q_and_score = nn.Linear(self.head_dim, config.block_size)
+        self.k_and_score = nn.Linear(self.head_dim, config.block_size)
+        self.v_and_attenout = nn.Linear(self.head_dim, self.head_dim)
+        self.score_X_A = nn.Linear(config.block_size, config.block_size)
+        self.X_A_and_Attenout = nn.Linear(config.block_size, self.head_dim)
+
         self.pc_X_Q = PCLayer(
             T=config.T,
             lr=config.lr,
