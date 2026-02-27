@@ -93,25 +93,18 @@ def main():
 
     print("[WARNING] FlashAttention is not installed. Falling back to standard attention.")
     print("[INFO] NumExpr defaulting to 2 threads.")
-    print("Study creation skipped: (sqlite3.OperationalError) unable to open database file")
-    print("(Background on this error at: https://sqlalche.me/e/20/e3q8)")
-    print("[INFO] Running in print-only mode. No database will be used.")
-    import random
-    class DummyTrial:
-        def __init__(self, number):
-            self.number = number
-            self.user_attrs = {}
-        def suggest_int(self, name, low, high):
-            value = random.randint(low, high)
-            setattr(self, name, value)
-            return value
-        def set_user_attr(self, name, value):
-            self.user_attrs[name] = value
-    for trial_num in range(args.n_trials):
-        print(f"[INFO] Running trial {trial_num+1}/{args.n_trials}")
-        trial = DummyTrial(trial_num)
-        per_layer_T_objective(trial, device, args.flash, enable_batch_logging=args.log_batches)
-    print("[INFO] All trials completed. No results saved to database.")
+    print("[INFO] Running Optuna study for per-layer T tuning.")
+
+    study = optuna.create_study(direction="minimize")
+    study.optimize(lambda trial: per_layer_T_objective(trial, device, args.flash, enable_batch_logging=args.log_batches), n_trials=args.n_trials)
+
+    print("[INFO] All trials completed.")
+    print("Best trial:")
+    best_trial = study.best_trial
+    print(f"Trial {best_trial.number}: Value={best_trial.value}")
+    print("Params:")
+    for key, value in best_trial.params.items():
+        print(f"  {key}: {value}")
 
 if __name__ == "__main__":
     main()
