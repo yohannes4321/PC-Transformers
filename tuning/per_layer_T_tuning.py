@@ -96,9 +96,21 @@ def main():
     print("Study creation skipped: (sqlite3.OperationalError) unable to open database file")
     print("(Background on this error at: https://sqlalche.me/e/20/e3q8)")
     print("[INFO] Running in print-only mode. No database will be used.")
+    import random
+    class DummyTrial:
+        def __init__(self, number):
+            self.number = number
+            self.user_attrs = {}
+        def suggest_int(self, name, low, high):
+            value = random.randint(low, high)
+            setattr(self, name, value)
+            return value
+        def set_user_attr(self, name, value):
+            self.user_attrs[name] = value
     for trial_num in range(args.n_trials):
         print(f"[INFO] Running trial {trial_num+1}/{args.n_trials}")
-        per_layer_T_objective(optuna.trial.FixedTrial({}), device, args.flash, enable_batch_logging=args.log_batches)
+        trial = DummyTrial(trial_num)
+        per_layer_T_objective(trial, device, args.flash, enable_batch_logging=args.log_batches)
     print("[INFO] All trials completed. No results saved to database.")
 
 if __name__ == "__main__":
