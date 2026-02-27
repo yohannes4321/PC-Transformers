@@ -111,12 +111,11 @@ def train(model, dataloader, config, global_step, device, logger):
 
         perplexity = math.exp(ce_loss.item()) if ce_loss.item() < 100 else float("inf")
 
-        if not dist.is_initialized() or dist.get_rank() == 0:
-            tvals = f"embed_T={getattr(config, 'embed_T', 1)}, attn_T={getattr(config, 'attn_T', 1)}, linear_attn_T={getattr(config, 'linear_attn_T', 1)}, fc1_T={getattr(config, 'fc1_T', 1)}, fc2_T={getattr(config, 'fc2_T', 1)}, linear_output_T={getattr(config, 'linear_output_T', 1)}"
+        if (not dist.is_initialized() or dist.get_rank() == 0) and (batch_idx + 1) % 10 == 0:
             if logger:
-                logger.info(f"Batch {batch_idx + 1}/{len(dataloader)} | Energy: {batch_energy:.4f} | Perplexity: {perplexity:.4f} | {tvals}")
+                logger.info(f"Batch {batch_idx + 1}/{len(dataloader)} | Energy: {batch_energy:.4f} | Perplexity: {perplexity:.4f}")
             else:
-                print(f"Batch {batch_idx + 1}/{len(dataloader)} | Energy: {batch_energy:.4f} | Perplexity: {perplexity:.4f} | {tvals}")
+                print(f"Batch {batch_idx + 1}/{len(dataloader)} | Energy: {batch_energy:.4f} | Perplexity: {perplexity:.4f}")
 
     avg_energy = total_energy / batch_count if batch_count > 0 else 0.0
     avg_ce_loss = total_ce_loss / batch_count if batch_count > 0 else 0.0
