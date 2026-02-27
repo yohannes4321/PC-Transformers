@@ -3,6 +3,9 @@ import optuna
 import argparse
 import os
 import sys
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from tuning.trial_objective import objective
 from utils.device_utils import setup_device
 from utils.model_utils import set_seed
