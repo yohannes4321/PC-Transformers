@@ -34,6 +34,9 @@ def train(model, dataloader, config, global_step, device, logger):
     total_ce_loss = 0.0
     total_energy = 0.0
     batch_count = 0
+    last_ce_loss = None
+    last_energy = None
+    last_perplexity = None
 
     base_model = model.module if hasattr(model, 'module') else model
     output_pc_layer = base_model.output.pc_layer
@@ -82,6 +85,7 @@ def train(model, dataloader, config, global_step, device, logger):
             ignore_index=0
         )
         total_ce_loss += ce_loss.item()
+        last_ce_loss = ce_loss.item()
 
         internal_energies = []
         output_energy = None
@@ -113,6 +117,8 @@ def train(model, dataloader, config, global_step, device, logger):
             batch_energy = avg_internal_energy
         total_energy += batch_energy
         batch_count += 1
+        last_energy = batch_energy
+        last_perplexity = perplexity
 
         # Early stopping logic: track recent EFE values
         recent_efe.append(batch_energy)
@@ -128,14 +134,15 @@ def train(model, dataloader, config, global_step, device, logger):
 
         if (not dist.is_initialized() or dist.get_rank() == 0) and (batch_idx + 1) % 10 == 0:
             if logger:
-                logger.info(f"Batch {batch_idx + 1}/{len(dataloader)} | Energy: {batch_energy:.4f} | Perplexity: {perplexity:.4f}")
+                logger.info(f"Batch {batch_idx + 1}/{len(dataloader)} | Energy: {batch_energy:.4f} | CE: {ce_loss.item():.4f} | Perplexity: {perplexity:.4f}")
             else:
-                print(f"Batch {batch_idx + 1}/{len(dataloader)} | Energy: {batch_energy:.4f} | Perplexity: {perplexity:.4f}")
+                print(f"Batch {batch_idx + 1}/{len(dataloader)} | Energy: {batch_energy:.4f} | CE: {ce_loss.item():.4f} | Perplexity: {perplexity:.4f}")
 
     avg_energy = total_energy / batch_count if batch_count > 0 else 0.0
     avg_ce_loss = total_ce_loss / batch_count if batch_count > 0 else 0.0
     avg_perplexity = math.exp(avg_ce_loss) if avg_ce_loss < 100 else float("inf")
-    return avg_energy, avg_perplexity, global_step
+    # Also return last batch values for reporting
+    return avg_energy, avg_perplexity, global_step, last_energy, last_ce_loss, last_perplexity
 
 
 def main():

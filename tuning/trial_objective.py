@@ -74,14 +74,20 @@ def objective(trial, device = None, flash=False, enable_batch_logging=False):
         trial_logger = trial_batch_logger(trial_number=trial.number) if enable_batch_logging else None
 
         model.train()
-        train_energy, train_perplexity, _ = train(model, train_loader, config, global_step = 0, device = device, logger=trial_logger)
+        train_energy, train_perplexity, _, last_energy, last_ce_loss, last_perplexity = train(model, train_loader, config, global_step = 0, device = device, logger=trial_logger)
 
         trial_time = (time.time() - start_time)
 
         trial.set_user_attr("config", config.__dict__)
         trial.set_user_attr("energy", train_energy)
         trial.set_user_attr("perplexity", train_perplexity)
+        trial.set_user_attr("last_energy", last_energy)
+        trial.set_user_attr("last_ce_loss", last_ce_loss)
+        trial.set_user_attr("last_perplexity", last_perplexity)
         trial.set_user_attr("trial_time", trial_time)
+
+        # Print final batch EFE, CE, and PPL for this trial
+        print(f"[Trial {trial.number}] embed_T={getattr(config, 'embed_T', None)}, attn_T={getattr(config, 'attn_T', None)}, linear_attn_T={getattr(config, 'linear_attn_T', None)}, fc1_T={getattr(config, 'fc1_T', None)}, fc2_T={getattr(config, 'fc2_T', None)}, linear_output_T={getattr(config, 'linear_output_T', None)} | EFE={last_energy} | CE={last_ce_loss} | PPL={last_perplexity}")
 
         # Return only EFE for Optuna optimization
         return train_energy
