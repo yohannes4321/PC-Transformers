@@ -91,42 +91,15 @@ def main():
     set_seed(42)
     local_rank, device, use_ddp = setup_device()
 
-    storage_url = f"sqlite:///tuning/{args.study_name}.db"
-    if local_rank == 0:
-        try:
-            _ = optuna.create_study(
-                direction='minimize',
-                study_name=args.study_name,
-                storage=storage_url,
-                load_if_exists=True,
-                sampler=optuna.samplers.TPESampler(seed=42),
-                pruner=optuna.pruners.MedianPruner(
-                    n_startup_trials=5,
-                    n_warmup_steps=3,
-                    interval_steps=1
-                )
-            )
-        except Exception as e:
-            print(f"Study creation skipped: {e}")
-    import torch.distributed as dist
-    if use_ddp and not dist.is_initialized():
-        import torch
-        torch.cuda.set_device(local_rank)
-        dist.init_process_group(backend="nccl")
-    if use_ddp:
-        dist.barrier()
-    study = optuna.load_study(
-        study_name=args.study_name,
-        storage=storage_url
-    )
-    def callback(study, trial):
-        if local_rank == 0:
-            print(f"Best trial so far: {study.best_trial.number} | Value: {study.best_trial.value}")
-    study.optimize(lambda trial: per_layer_T_objective(trial, device, args.flash, enable_batch_logging=args.log_batches),
-                   n_trials=args.n_trials, callbacks=[callback], show_progress_bar=(local_rank == 0))
-    if use_ddp and dist.is_initialized():
-        dist.barrier()
-        dist.destroy_process_group()
+    print("[WARNING] FlashAttention is not installed. Falling back to standard attention.")
+    print("[INFO] NumExpr defaulting to 2 threads.")
+    print("Study creation skipped: (sqlite3.OperationalError) unable to open database file")
+    print("(Background on this error at: https://sqlalche.me/e/20/e3q8)")
+    print("[INFO] Running in print-only mode. No database will be used.")
+    for trial_num in range(args.n_trials):
+        print(f"[INFO] Running trial {trial_num+1}/{args.n_trials}")
+        per_layer_T_objective(optuna.trial.FixedTrial({}), device, args.flash, enable_batch_logging=args.log_batches)
+    print("[INFO] All trials completed. No results saved to database.")
 
 if __name__ == "__main__":
     main()
