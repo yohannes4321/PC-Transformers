@@ -74,8 +74,16 @@ def objective(trial, device = None, flash=False, enable_batch_logging=False):
         trial_logger = trial_batch_logger(trial_number=trial.number) if enable_batch_logging else None
 
         model.train()
-        train_energy, train_perplexity, _, last_energy, last_ce_loss, last_perplexity = train(model, train_loader, config, global_step = 0, device = device, logger=trial_logger)
-
+        # Default values in case of early exit or error
+        last_energy = None
+        last_ce_loss = None
+        last_perplexity = None
+        try:
+            train_energy, train_perplexity, _, last_energy, last_ce_loss, last_perplexity = train(model, train_loader, config, global_step = 0, device = device, logger=trial_logger)
+        except Exception as e:
+            print("[Trial Error] Exception during training:", e)
+            train_energy = float('inf')
+            train_perplexity = None
         trial_time = (time.time() - start_time)
 
         trial.set_user_attr("config", config.__dict__)
