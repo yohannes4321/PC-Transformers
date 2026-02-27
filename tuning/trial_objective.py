@@ -67,9 +67,8 @@ def objective(trial, device = None, flash=False, enable_batch_logging=False):
             else:
                 model = DDP(model)
        
-        train_loader, valid_loader, _ = get_loaders(distributed=dist.is_initialized())
-        
-        if len(train_loader) == 0 or len(valid_loader) == 0:
+        train_loader, _, _ = get_loaders(distributed=dist.is_initialized())
+        if len(train_loader) == 0:
             return float("inf")
 
         trial_logger = trial_batch_logger(trial_number=trial.number) if enable_batch_logging else None
@@ -77,16 +76,11 @@ def objective(trial, device = None, flash=False, enable_batch_logging=False):
         model.train()
         train_energy, train_perplexity, _ = train(model, train_loader, config, global_step = 0, device = device, logger=trial_logger)
 
-        model.eval()
-        avg_energy, avg_perplexity = evaluate(model, config, valid_loader, max_batches=None, device=device)
-        
         train_ce_loss = torch.log(torch.tensor(train_perplexity)).item()
-        
         alpha = 0.5
         combined_objective = combined_loss(train_energy, train_ce_loss, alpha=alpha)
-        
-        trial_time = (time.time() - start_time) 
-        
+        trial_time = (time.time() - start_time)
+
         trial.set_user_attr("config", config.__dict__)
         trial.set_user_attr("energy", train_energy)
         trial.set_user_attr("perplexity", train_perplexity)
@@ -96,9 +90,8 @@ def objective(trial, device = None, flash=False, enable_batch_logging=False):
         trial.set_user_attr("trial_time", trial_time)
 
         trial_path = "tuning/bayesian_tuning_trials.txt"
-
         if not dist.is_initialized() or dist.get_rank() == 0:
-            write_header = trial.number == 0 
+            write_header = trial.number == 0
             log_trial_to_detailed_log(trial_path, trial, config, trial_time, train_energy, write_header=write_header)
 
         return combined_objective
