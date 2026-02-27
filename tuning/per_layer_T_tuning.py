@@ -20,35 +20,35 @@ def per_layer_T_objective(trial, device=None, flash=False, enable_batch_logging=
     fc2_T = trial.suggest_int('fc2_T', 1, 10)
     linear_output_T = trial.suggest_int('linear_output_T', 1, 10)
 
-    # Fixed config values (set as needed for your model)
+    # Fixed config values from best config
     from predictive_coding.config import GPTConfig
     config = GPTConfig(
-        vocab_size=vocab_size,
-        block_size=128,
-        peak_learning_rate=1e-3,
-        warmup_steps=100,
-        n_embed=128,
-        dropout=0.1,
-        lr=1e-4,
-        T=1,  # Not used, just for compatibility
-        num_heads=4,
-        n_blocks=2,
+        vocab_size=1024,
+        block_size=208,
+        lr=0.0003223786832283688,
+        peak_learning_rate=0.003223786832283688,
+        warmup_steps=369,
+        n_embed=160,
+        dropout=0.4546369920173881,
+        T=2,
+        update_bias=False,
+        num_heads=10,
+        n_blocks=3,
         batch_size=8,
-        num_epochs=2,
-        update_bias=True,
+        num_epochs=5,
         internal_energy_fn_name="pc_e",
         output_energy_fn_name="pc_e",
-        combined_internal_weight=0.5,
-        combined_output_weight=0.5,
-        use_flash_attention=flash,
-        alpha=0.5
+        combined_internal_weight=0.5094684344308807,
+        combined_output_weight=0.49053156556911925,
+        use_flash_attention=False,
+        alpha=0.5,
+        embed_T=embed_T,
+        attn_T=attn_T,
+        linear_attn_T=linear_attn_T,
+        fc1_T=fc1_T,
+        fc2_T=fc2_T,
+        linear_output_T=linear_output_T
     )
-    config.embed_T = embed_T
-    config.attn_T = attn_T
-    config.linear_attn_T = linear_attn_T
-    config.fc1_T = fc1_T
-    config.fc2_T = fc2_T
-    config.linear_output_T = linear_output_T
 
     def wrapped_objective(trial_, device_=device, flash_=flash, enable_batch_logging_=enable_batch_logging):
         trial_.set_user_attr('embed_T', embed_T)
