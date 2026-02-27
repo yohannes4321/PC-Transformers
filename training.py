@@ -38,6 +38,11 @@ def train(model, dataloader, config, global_step, device, logger):
     base_model = model.module if hasattr(model, 'module') else model
     output_pc_layer = base_model.output.pc_layer
     
+    # Early stopping parameters
+    early_stop_window = 50  # Number of batches to check for EFE improvement
+    early_stop_threshold = 0.01  # Minimum EFE improvement to continue
+    recent_efe = []
+
     for batch_idx, batch in enumerate(dataloader):
         input_ids = batch["input_ids"].to(device)
         target_ids = batch["target_ids"].to(device)
@@ -108,6 +113,16 @@ def train(model, dataloader, config, global_step, device, logger):
             batch_energy = avg_internal_energy
         total_energy += batch_energy
         batch_count += 1
+
+        # Early stopping logic: track recent EFE values
+        recent_efe.append(batch_energy)
+        if len(recent_efe) > early_stop_window:
+            recent_efe.pop(0)
+            efe_change = abs(recent_efe[-1] - recent_efe[0])
+            if efe_change < early_stop_threshold:
+                if (not dist.is_initialized() or dist.get_rank() == 0):
+                    print(f"[Early Stop] EFE change < {early_stop_threshold} over last {early_stop_window} batches. Stopping trial early at batch {batch_idx+1}.")
+                break
 
         perplexity = math.exp(ce_loss.item()) if ce_loss.item() < 100 else float("inf")
 

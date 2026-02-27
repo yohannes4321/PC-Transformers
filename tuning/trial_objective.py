@@ -76,38 +76,25 @@ def objective(trial, device = None, flash=False, enable_batch_logging=False):
         model.train()
         train_energy, train_perplexity, _ = train(model, train_loader, config, global_step = 0, device = device, logger=trial_logger)
 
-        train_ce_loss = torch.log(torch.tensor(train_perplexity)).item()
-        alpha = 0.5
-        combined_objective = combined_loss(train_energy, train_ce_loss, alpha=alpha)
         trial_time = (time.time() - start_time)
 
         trial.set_user_attr("config", config.__dict__)
         trial.set_user_attr("energy", train_energy)
         trial.set_user_attr("perplexity", train_perplexity)
-        trial.set_user_attr("ce_loss", train_ce_loss)
-        trial.set_user_attr("combined_loss", combined_objective)
-        trial.set_user_attr("alpha", alpha)
         trial.set_user_attr("trial_time", trial_time)
 
-        # No logging to txt file
-        return combined_objective
+        # Return only EFE for Optuna optimization
+        return train_energy
     
     except Exception as e:
         print("Trial failed:", e)
-        # If partial results exist, use them; otherwise, return inf
-        if 'train_energy' in locals() and 'train_perplexity' in locals():
-            train_ce_loss = torch.log(torch.tensor(train_perplexity)).item()
-            alpha = 0.5
-            combined_objective = combined_loss(train_energy, train_ce_loss, alpha=alpha)
+        # If partial results exist, use EFE; otherwise, return inf
+        if 'train_energy' in locals():
             trial.set_user_attr("energy", train_energy)
-            trial.set_user_attr("perplexity", train_perplexity)
-            trial.set_user_attr("combined_loss", combined_objective)
             trial.set_user_attr("trial_time", (time.time() - start_time))
-            return combined_objective
+            return train_energy
         else:
             trial.set_user_attr("energy", "N/A")
-            trial.set_user_attr("perplexity", "N/A")
-            trial.set_user_attr("combined_loss", "N/A")
             trial.set_user_attr("trial_time", (time.time() - start_time))
             return float("inf")
     
