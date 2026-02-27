@@ -1,4 +1,3 @@
-def per_layer_T_objective(trial, device=None, flash=False, enable_batch_logging=False):
 
 import optuna
 import argparse
