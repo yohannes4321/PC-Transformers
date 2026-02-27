@@ -121,6 +121,7 @@ def train(model, dataloader, config, global_step, device, logger):
             batch_energy = avg_internal_energy
         total_energy += batch_energy
         batch_count += 1
+        perplexity = math.exp(ce_loss.item()) if ce_loss.item() < 100 else float("inf")
         last_energy = batch_energy
         last_perplexity = perplexity
 
