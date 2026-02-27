@@ -38,6 +38,10 @@ def train(model, dataloader, config, global_step, device, logger):
     last_energy = None
     last_perplexity = None
 
+    # If dataloader is empty, return inf for EFE and None for others
+    if len(dataloader) == 0:
+        return float('inf'), None, global_step, None, None, None
+
     base_model = model.module if hasattr(model, 'module') else model
     output_pc_layer = base_model.output.pc_layer
     
