@@ -89,21 +89,27 @@ def objective(trial, device = None, flash=False, enable_batch_logging=False):
         trial.set_user_attr("alpha", alpha)
         trial.set_user_attr("trial_time", trial_time)
 
-        trial_path = "tuning/bayesian_tuning_trials.txt"
-        if not dist.is_initialized() or dist.get_rank() == 0:
-            write_header = trial.number == 0
-            log_trial_to_detailed_log(trial_path, trial, config, trial_time, train_energy, write_header=write_header)
-
+        # No logging to txt file
         return combined_objective
     
     except Exception as e:
         print("Trial failed:", e)
-        trial.set_user_attr("energy", "N/A")
-        trial.set_user_attr("perplexity", "N/A")
-        trial.set_user_attr("combined_loss", "N/A")
-        trial.set_user_attr("trial_time", (time.time() - start_time))
-
-        return float("inf")
+        # If partial results exist, use them; otherwise, return inf
+        if 'train_energy' in locals() and 'train_perplexity' in locals():
+            train_ce_loss = torch.log(torch.tensor(train_perplexity)).item()
+            alpha = 0.5
+            combined_objective = combined_loss(train_energy, train_ce_loss, alpha=alpha)
+            trial.set_user_attr("energy", train_energy)
+            trial.set_user_attr("perplexity", train_perplexity)
+            trial.set_user_attr("combined_loss", combined_objective)
+            trial.set_user_attr("trial_time", (time.time() - start_time))
+            return combined_objective
+        else:
+            trial.set_user_attr("energy", "N/A")
+            trial.set_user_attr("perplexity", "N/A")
+            trial.set_user_attr("combined_loss", "N/A")
+            trial.set_user_attr("trial_time", (time.time() - start_time))
+            return float("inf")
     
     finally:
         if model:
