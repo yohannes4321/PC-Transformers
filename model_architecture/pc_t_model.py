@@ -51,14 +51,7 @@ class PCTransformer(nn.Module):
         Returns:
             logits (torch.Tensor): Tensor of shape (B, T, vocab_size), the model's output logits for each token position.
         """
-        if not hasattr(self, '_printed_T_params') or not self._printed_T_params:
-            print(f"[INFO] embed_T={getattr(self.config, 'embed_T', 1)}")
-            print(f"[INFO] attn_T={getattr(self.config, 'attn_T', 1)}")
-            print(f"[INFO] linear_attn_T={getattr(self.config, 'linear_attn_T', 1)}")
-            print(f"[INFO] fc1_T={getattr(self.config, 'fc1_T', 1)}")
-            print(f"[INFO] fc2_T={getattr(self.config, 'fc2_T', 1)}")
-            print(f"[INFO] linear_output_T={getattr(self.config, 'linear_output_T', 1)}")
-            self._printed_T_params = True
+
         for module in self.modules():
             if hasattr(module, "clear_energy"):
                 module.clear_energy()
