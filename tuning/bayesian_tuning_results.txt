@@ -26,3 +26,14 @@ combined_internal_weight: 0.5094684344308807
 combined_output_weight: 0.49053156556911925
 use_flash_attention: False
 alpha: 0.5
+
+
+
+
+
+embed_T 
+attn_T 
+linear_attn_T 
+fc1_T
+fc2_T
+linear_output_T 

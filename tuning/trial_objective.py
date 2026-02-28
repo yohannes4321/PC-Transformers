@@ -67,50 +67,82 @@ def objective(trial, device = None, flash=False, enable_batch_logging=False):
             else:
                 model = DDP(model)
        
-        train_loader, _, _ = get_loaders(distributed=dist.is_initialized())
-        if len(train_loader) == 0:
+        train_loader, valid_loader, _ = get_loaders(distributed=dist.is_initialized())
+        
+        if len(train_loader) == 0 or len(valid_loader) == 0:
             return float("inf")
 
         trial_logger = trial_batch_logger(trial_number=trial.number) if enable_batch_logging else None
 
         model.train()
-        # Default values in case of early exit or error
-        last_energy = None
-        last_ce_loss = None
-        last_perplexity = None
-        try:
-            train_energy, train_perplexity, _, last_energy, last_ce_loss, last_perplexity = train(model, train_loader, config, global_step = 0, device = device, logger=trial_logger)
-        except Exception as e:
-            print("[Trial Error] Exception during training:", e)
-            train_energy = float('inf')
-            train_perplexity = None
-        trial_time = (time.time() - start_time)
+        train_energy, train_perplexity, _ = train(model, train_loader, config, global_step = 0, device = device, logger=trial_logger, max_batches=50)
+
+        train_ce_loss = torch.log(torch.tensor(train_perplexity)).item()
+        alpha = 0.5
+        combined_objective = combined_loss(train_energy, train_ce_loss, alpha=alpha)
+        trial_time = (time.time() - start_time) 
+
+        # Print all parameters and results for this trial
+        if not dist.is_initialized() or dist.get_rank() == 0:
+            print("\nCOMBINED ENERGY OPTIMIZATION RESULTS\n====================================")
+            print(f"Trial {trial.number}")
+            print("Parameters:")
+            print(f"  embed_T: {config.embed_T}")
+            print(f"  attn_T: {config.attn_T}")
+            print(f"  linear_attn_T: {config.linear_attn_T}")
+            print(f"  fc1_T: {config.fc1_T}")
+            print(f"  fc2_T: {config.fc2_T}")
+            print(f"  linear_output_T: {config.linear_output_T}")
+            print(f"  vocab_size: {config.vocab_size}")
+            print(f"  block_size: {config.block_size}")
+            print(f"  lr: {config.lr}")
+            print(f"  peak_learning_rate: {config.peak_learning_rate}")
+            print(f"  warmup_steps: {config.warmup_steps}")
+            print(f"  n_embed: {config.n_embed}")
+            print(f"  dropout: {config.dropout}")
+            print(f"  T: {config.T}")
+            print(f"  update_bias: {config.update_bias}")
+            print(f"  num_heads: {config.num_heads}")
+            print(f"  n_blocks: {config.n_blocks}")
+            print(f"  batch_size: {config.batch_size}")
+            print(f"  num_epochs: {config.num_epochs}")
+            print(f"  internal_energy_fn_name: {config.internal_energy_fn_name}")
+            print(f"  output_energy_fn_name: {config.output_energy_fn_name}")
+            print(f"  combined_internal_weight: {config.combined_internal_weight}")
+            print(f"  combined_output_weight: {config.combined_output_weight}")
+            print(f"  use_flash_attention: {config.use_flash_attention}")
+            print(f"  alpha: {config.alpha}")
+            print("Results (1 epoch):")
+            print(f"  Train Energy: {train_energy}")
+            print(f"  Train Perplexity: {train_perplexity}")
+            print(f"  Train CE Loss: {train_ce_loss}")
+            print(f"  Combined Loss: {combined_objective}")
+            print(f"  Trial Time (s): {trial_time:.2f}")
 
         trial.set_user_attr("config", config.__dict__)
         trial.set_user_attr("energy", train_energy)
         trial.set_user_attr("perplexity", train_perplexity)
-        trial.set_user_attr("last_energy", last_energy)
-        trial.set_user_attr("last_ce_loss", last_ce_loss)
-        trial.set_user_attr("last_perplexity", last_perplexity)
+        trial.set_user_attr("ce_loss", train_ce_loss)
+        trial.set_user_attr("combined_loss", combined_objective)
+        trial.set_user_attr("alpha", alpha)
         trial.set_user_attr("trial_time", trial_time)
 
-        # Print final batch EFE, CE, and PPL for this trial
-        print(f"[Trial {trial.number}] embed_T={getattr(config, 'embed_T', None)}, attn_T={getattr(config, 'attn_T', None)}, linear_attn_T={getattr(config, 'linear_attn_T', None)}, fc1_T={getattr(config, 'fc1_T', None)}, fc2_T={getattr(config, 'fc2_T', None)}, linear_output_T={getattr(config, 'linear_output_T', None)} | EFE={last_energy} | CE={last_ce_loss} | PPL={last_perplexity}")
+        trial_path = "tuning/bayesian_tuning_trials.txt"
 
-        # Return only EFE for Optuna optimization
-        return train_energy
+        if not dist.is_initialized() or dist.get_rank() == 0:
+            write_header = trial.number == 0 
+            log_trial_to_detailed_log(trial_path, trial, config, trial_time, train_energy, write_header=write_header)
+
+        return combined_objective
     
     except Exception as e:
         print("Trial failed:", e)
-        # If partial results exist, use EFE; otherwise, return inf
-        if 'train_energy' in locals():
-            trial.set_user_attr("energy", train_energy)
-            trial.set_user_attr("trial_time", (time.time() - start_time))
-            return train_energy
-        else:
-            trial.set_user_attr("energy", "N/A")
-            trial.set_user_attr("trial_time", (time.time() - start_time))
-            return float("inf")
+        trial.set_user_attr("energy", "N/A")
+        trial.set_user_attr("perplexity", "N/A")
+        trial.set_user_attr("combined_loss", "N/A")
+        trial.set_user_attr("trial_time", (time.time() - start_time))
+
+        return float("inf")
     
     finally:
         if model:

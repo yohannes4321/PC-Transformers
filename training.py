@@ -34,22 +34,13 @@ def train(model, dataloader, config, global_step, device, logger):
     total_ce_loss = 0.0
     total_energy = 0.0
     batch_count = 0
-    last_ce_loss = None
-    last_energy = None
-    last_perplexity = None
-
-    # If dataloader is empty, return inf for EFE and None for others
-    if len(dataloader) == 0:
-        return float('inf'), None, global_step, None, None, None
 
     base_model = model.module if hasattr(model, 'module') else model
+        early_stop_threshold = 1e-3  # You can adjust this threshold for 'meaningful change'
+        last_energy = None
+        no_change_count = 0
     output_pc_layer = base_model.output.pc_layer
     
-    # Early stopping parameters
-    early_stop_window = 50  # Number of batches to check for EFE improvement
-    early_stop_threshold = 0.01  # Minimum EFE improvement to continue
-    recent_efe = []
-
     for batch_idx, batch in enumerate(dataloader):
         input_ids = batch["input_ids"].to(device)
         target_ids = batch["target_ids"].to(device)
@@ -89,7 +80,6 @@ def train(model, dataloader, config, global_step, device, logger):
             ignore_index=0
         )
         total_ce_loss += ce_loss.item()
-        last_ce_loss = ce_loss.item()
 
         internal_energies = []
         output_energy = None
@@ -116,38 +106,35 @@ def train(model, dataloader, config, global_step, device, logger):
         avg_internal_energy = sum(internal_energies) / len(internal_energies) if internal_energies else ce_loss.item()
                 
         if output_energy is not None:
+            # Early stopping logic after 50 batches
+            if batch_idx >= 49:
+                current_energy = batch_energy  # get current energy value for this batch
+                if last_energy is not None and abs(current_energy - last_energy) < early_stop_threshold:
+                    no_change_count += 1
+                else:
+                    no_change_count = 0
+                last_energy = current_energy
+                if no_change_count >= 5:
+                    print(f"Early stopping: No meaningful change in energy after 50 batches (batch {batch_idx+1})")
+                    break
             batch_energy = config.combined_internal_weight * avg_internal_energy + config.combined_output_weight * output_energy 
         else:
             batch_energy = avg_internal_energy
         total_energy += batch_energy
         batch_count += 1
-        perplexity = math.exp(ce_loss.item()) if ce_loss.item() < 100 else float("inf")
-        last_energy = batch_energy
-        last_perplexity = perplexity
-
-        # Early stopping logic: track recent EFE values
-        recent_efe.append(batch_energy)
-        if len(recent_efe) > early_stop_window:
-            recent_efe.pop(0)
-            efe_change = abs(recent_efe[-1] - recent_efe[0])
-            if efe_change < early_stop_threshold:
-                if (not dist.is_initialized() or dist.get_rank() == 0):
-                    print(f"[Early Stop] EFE change < {early_stop_threshold} over last {early_stop_window} batches. Stopping trial early at batch {batch_idx+1}.")
-                break
 
         perplexity = math.exp(ce_loss.item()) if ce_loss.item() < 100 else float("inf")
 
         if (not dist.is_initialized() or dist.get_rank() == 0) and (batch_idx + 1) % 10 == 0:
             if logger:
-                logger.info(f"Batch {batch_idx + 1}/{len(dataloader)} | Energy: {batch_energy:.4f} | CE: {ce_loss.item():.4f} | Perplexity: {perplexity:.4f}")
+                logger.info(f"  Batch {batch_idx + 1}/{len(dataloader)} | Batch Energy: {batch_energy:.4f} | Perplexity: {perplexity:.4f}")
             else:
-                print(f"Batch {batch_idx + 1}/{len(dataloader)} | Energy: {batch_energy:.4f} | CE: {ce_loss.item():.4f} | Perplexity: {perplexity:.4f}")
+                print(f"  Batch {batch_idx + 1}/{len(dataloader)} | Batch Energy: {batch_energy:.4f} | Perplexity: {perplexity:.4f}")
 
     avg_energy = total_energy / batch_count if batch_count > 0 else 0.0
     avg_ce_loss = total_ce_loss / batch_count if batch_count > 0 else 0.0
     avg_perplexity = math.exp(avg_ce_loss) if avg_ce_loss < 100 else float("inf")
-    # Also return last batch values for reporting
-    return avg_energy, avg_perplexity, global_step, last_energy, last_ce_loss, last_perplexity
+    return avg_energy, avg_perplexity, global_step
 
 
 def main():
