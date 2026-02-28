@@ -111,12 +111,7 @@ def objective(trial, device = None, flash=False, enable_batch_logging=False):
             print(f"  combined_output_weight: {config.combined_output_weight}")
             print(f"  use_flash_attention: {config.use_flash_attention}")
             print(f"  alpha: {config.alpha}")
-            print("Results (1 epoch):")
-            print(f"  Train Energy: {train_energy}")
-            print(f"  Train Perplexity: {train_perplexity}")
-            print(f"  Train CE Loss: {train_ce_loss}")
-            print(f"  Combined Loss: {combined_objective}")
-            print(f"  Trial Time (s): {trial_time:.2f}")
+            # ...existing code...
 
         trial.set_user_attr("config", dict(config.__dict__))
         trial.set_user_attr("energy", train_energy)
