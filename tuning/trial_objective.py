@@ -74,7 +74,7 @@ def objective(trial, device = None, flash=False, enable_batch_logging=False):
         trial_logger = trial_batch_logger(trial_number=trial.number) if enable_batch_logging else None
 
         model.train()
-        train_energy, train_perplexity, _ = train(model, train_loader, config, global_step = 0, device = device, logger=trial_logger, max_batches=50)
+        train_energy, train_perplexity, _ = train(model, train_loader, config, global_step = 0, device = device, logger=trial_logger)
 
         train_ce_loss = torch.log(torch.tensor(train_perplexity)).item()
         alpha = 0.5
