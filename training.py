@@ -36,9 +36,9 @@ def train(model, dataloader, config, global_step, device, logger):
     batch_count = 0
 
     base_model = model.module if hasattr(model, 'module') else model
-        early_stop_threshold = 1e-3  # You can adjust this threshold for 'meaningful change'
-        last_energy = None
-        no_change_count = 0
+    early_stop_threshold = 1e-3  # You can adjust this threshold for 'meaningful change'
+    last_energy = None
+    no_change_count = 0
     output_pc_layer = base_model.output.pc_layer
     
     for batch_idx, batch in enumerate(dataloader):
