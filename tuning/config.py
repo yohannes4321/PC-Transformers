@@ -25,13 +25,6 @@ def get_dynamic_model_config(trial, vocab_size, flash=False):
     combined_output_weight = 1.0 - combined_internal_weight
     num_epochs = 10
     alpha = 0.5
-    optimizer_name = "adam"
-    optimizer_beta1 = 0.9
-    optimizer_beta2 = 0.999
-    optimizer_eps = 1e-8
-    optimizer_sign_value = -1.0
-    optimizer_weight_bound = 0.0
-
     # Per-layer inference steps
     embed_T = trial.suggest_int('embed_T', 1, 10)
     attn_T = trial.suggest_int('attn_T', 1, 10)
@@ -60,12 +53,6 @@ def get_dynamic_model_config(trial, vocab_size, flash=False):
         combined_output_weight = combined_output_weight,
         use_flash_attention=flash,
         alpha=alpha,
-        optimizer_name=optimizer_name,
-        optimizer_beta1=optimizer_beta1,
-        optimizer_beta2=optimizer_beta2,
-        optimizer_eps=optimizer_eps,
-        optimizer_sign_value=optimizer_sign_value,
-        optimizer_weight_bound=optimizer_weight_bound,
         embed_T=embed_T,
         attn_T=attn_T,
         linear_attn_T=linear_attn_T,
@@ -82,8 +69,6 @@ def update_global_config(config):
         'update_bias', 'T', 'internal_energy_fn_name', 'output_energy_fn_name',
         'batch_size', 'num_epochs', 'combined_internal_weight', 
         'combined_output_weight', 'alpha',
-        'optimizer_name', 'optimizer_beta1', 'optimizer_beta2', 'optimizer_eps',
-        'optimizer_sign_value', 'optimizer_weight_bound',
         'embed_T', 'attn_T', 'linear_attn_T', 'fc1_T', 'fc2_T', 'linear_output_T'
     ]
     

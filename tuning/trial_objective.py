@@ -57,7 +57,7 @@ def objective(trial, device = None, flash=False, enable_batch_logging=False):
             config_dict = broadcast_config(config_dict, device)
         
         config = GPTConfig(**config_dict)
-        update_global_config(config.__dict__)
+        update_global_config(dict(config.__dict__))
 
         model = PCTransformer(config).to(device)  
        
@@ -119,7 +119,7 @@ def objective(trial, device = None, flash=False, enable_batch_logging=False):
             print(f"  Combined Loss: {combined_objective}")
             print(f"  Trial Time (s): {trial_time:.2f}")
 
-        trial.set_user_attr("config", config.__dict__)
+        trial.set_user_attr("config", dict(config.__dict__))
         trial.set_user_attr("energy", train_energy)
         trial.set_user_attr("perplexity", train_perplexity)
         trial.set_user_attr("ce_loss", train_ce_loss)
