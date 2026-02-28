@@ -126,8 +126,9 @@ def train(model, dataloader, config, global_step, device, logger):
         perplexity = math.exp(ce_loss.item()) if ce_loss.item() < 100 else float("inf")
 
         if (not dist.is_initialized() or dist.get_rank() == 0) and (batch_idx + 1) % 10 == 0:
+            ce_loss_val = ce_loss.item()
             if logger:
-                logger.info(f"  Batch {batch_idx + 1}/{len(dataloader)} | Batch Energy: {batch_energy:.4f} | Perplexity: {perplexity:.4f}")
+                logger.info(f"  Batch {batch_idx + 1}/{len(dataloader)} | Batch Energy: {batch_energy:.4f} | Perplexity: {perplexity:.4f} | CE Loss: {ce_loss_val:.4f}")
             else:
                 print(f"  Batch {batch_idx + 1}/{len(dataloader)} | Batch Energy: {batch_energy:.4f} | Perplexity: {perplexity:.4f}")
 

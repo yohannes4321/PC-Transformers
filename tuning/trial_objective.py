@@ -42,7 +42,7 @@ def objective(trial, device = None, flash=False, enable_batch_logging=False):
     start_time = time.time()
     model = None
     
-    print(f"\nStarting Trial {trial.number}")
+    print(f"\nStarting Trial {trial.number + 1}")
     
     try:       
         if not dist.is_initialized() or dist.get_rank() == 0:
@@ -81,10 +81,8 @@ def objective(trial, device = None, flash=False, enable_batch_logging=False):
         combined_objective = combined_loss(train_energy, train_ce_loss, alpha=alpha)
         trial_time = (time.time() - start_time) 
 
-        # Print all parameters and results for this trial
+        # Print parameters only once before batch progress
         if not dist.is_initialized() or dist.get_rank() == 0:
-            print("\nCOMBINED ENERGY OPTIMIZATION RESULTS\n====================================")
-            print(f"Trial {trial.number}")
             print("Parameters:")
             print(f"  embed_T: {config.embed_T}")
             print(f"  attn_T: {config.attn_T}")
