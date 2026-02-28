@@ -97,7 +97,6 @@ def objective(trial, device = None, flash=False, enable_batch_logging=False):
             print(f"  warmup_steps: {config.warmup_steps}")
             print(f"  n_embed: {config.n_embed}")
             print(f"  dropout: {config.dropout}")
-            print(f"  T: {config.T}")
             print(f"  update_bias: {config.update_bias}")
             print(f"  num_heads: {config.num_heads}")
             print(f"  n_blocks: {config.n_blocks}")
@@ -140,3 +139,5 @@ def objective(trial, device = None, flash=False, enable_batch_logging=False):
         if model:
             del model
         cleanup_memory()
+
+
