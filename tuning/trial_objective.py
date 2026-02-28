@@ -57,7 +57,6 @@ def objective(trial, device = None, flash=False, enable_batch_logging=False):
             config_dict = broadcast_config(config_dict, device)
         
         config = GPTConfig(**config_dict)
-        update_global_config(dict(config.__dict__))
 
         model = PCTransformer(config).to(device)  
        
