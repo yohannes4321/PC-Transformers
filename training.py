@@ -29,11 +29,29 @@ Usage: torchrun --nproc-per-node=<NUM_GPU> training.py
 
 """
 
+
+def compute_local_lr(config, global_step, total_steps):
+    """Warmup + cosine decay learning-rate schedule."""
+    peak_lr = float(getattr(config, "peak_learning_rate", getattr(config, "lr", 1e-4)))
+    min_lr = float(getattr(config, "lr", 0.1 * peak_lr))
+    warmup_steps = int(max(0, getattr(config, "warmup_steps", 0)))
+
+    if warmup_steps > 0 and global_step < warmup_steps:
+        warmup_progress = (global_step + 1) / warmup_steps
+        return min_lr + (peak_lr - min_lr) * warmup_progress
+
+    decay_steps = max(1, total_steps - warmup_steps)
+    decay_step = min(max(0, global_step - warmup_steps), decay_steps)
+    progress = decay_step / decay_steps
+    cosine_decay = 0.5 * (1.0 + math.cos(math.pi * progress))
+    return min_lr + (peak_lr - min_lr) * cosine_decay
+
 def train(model, dataloader, config, global_step, device, logger):
     model.train()
     total_ce_loss = 0.0
     total_energy = 0.0
     batch_count = 0
+    total_steps = max(1, len(dataloader) * max(1, config.num_epochs))
 
     base_model = model.module if hasattr(model, 'module') else model
     output_pc_layer = base_model.output.pc_layer
@@ -42,24 +60,13 @@ def train(model, dataloader, config, global_step, device, logger):
         input_ids = batch["input_ids"].to(device)
         target_ids = batch["target_ids"].to(device)
 
-        # total_steps = len(dataloader) * config.num_epochs
-        
+        if hasattr(base_model, "reset_pc_state"):
+            base_model.reset_pc_state(clear_kv_cache=True)
+
         if target_ids.max() >= vocab_size:
             target_ids = torch.clamp(target_ids, max=vocab_size - 1)
 
-        if global_step < config.warmup_steps:
-            lr = config.lr + global_step / config.warmup_steps * (
-                config.peak_learning_rate - config.lr)
-        else:
-            # # Cosine decay after warmup
-            # decay_step = global_step - config.warmup_steps
-            # decay_total = total_steps - config.warmup_steps
-            # cosine_decay = 0.5 * (1 + math.cos(math.pi * decay_step / decay_total))
-            
-            # # Minimum learning rate = 10% of peak_lr
-            # min_lr = 0.1 * config.peak_learning_rate
-            # lr = min_lr + (config.peak_learning_rate - min_lr) * cosine_decay
-            lr = config.peak_learning_rate
+        lr = compute_local_lr(config, global_step, total_steps)
 
         for module in model.modules():
             if hasattr(module, 'local_lr'):
@@ -153,6 +160,15 @@ def main():
         root_logger.addHandler(file_h)
 
     logger = logging.getLogger(__name__)
+    print("\nModel configuration parameters for this training run:")
+    for k in [
+        "vocab_size", "block_size", "peak_learning_rate", "warmup_steps", "n_embed",
+        "dropout", "lr", "embed_T", "attn_T", "linear_attn_T", "fc1_T", "fc2_T", "linear_output_T",
+        "num_heads", "n_blocks", "batch_size", "num_epochs", "update_bias",
+        "internal_energy_fn_name", "output_energy_fn_name", "combined_internal_weight",
+        "combined_output_weight", "use_flash_attention", "alpha"
+    ]:
+        print(f"{k}={best_config.get(k)}")
    
     config = GPTConfig(
         vocab_size = vocab_size,
@@ -162,7 +178,6 @@ def main():
         warmup_steps = best_config["warmup_steps"],
         n_embed = best_config["n_embed"],
         dropout = best_config["dropout"],
-        T = best_config["T"],
         num_heads = best_config["num_heads"],
         n_blocks = best_config["n_blocks"],
         batch_size = best_config["batch_size"],
@@ -173,7 +188,13 @@ def main():
         combined_internal_weight=best_config["combined_internal_weight"],
         combined_output_weight=best_config["combined_output_weight"],
         use_flash_attention=best_config["use_flash_attention"],
-        alpha = best_config["alpha"]
+        alpha = best_config["alpha"],
+        embed_T = best_config.get("embed_T", 1),
+        attn_T = best_config.get("attn_T", 1),
+        linear_attn_T = best_config.get("linear_attn_T", 2),
+        fc1_T = best_config.get("fc1_T", 1),
+        fc2_T = best_config.get("fc2_T", 1),
+        linear_output_T = best_config.get("linear_output_T", 8)
     )
     
     # Create a separate logger for hyperparameters
