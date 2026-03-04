@@ -89,9 +89,9 @@ def run_tuning(n_trials=70, study_name="bayesian_tuning", local_rank=0, device=N
                 return
             train_energy = best_trial.user_attrs.get("energy", "N/A")
             train_perplexity = best_trial.user_attrs.get("perplexity", "N/A")
-            combined_loss = best_trial.user_attrs.get("combined_loss", "N/A")
+            efe_objective = best_trial.user_attrs.get("efe_objective", best_trial.value)
             logger.info(
-                f"\nBest trial so far: {best_trial.number} | Combined Loss: {_fmt_metric(combined_loss, 5)} "
+                f"\nBest trial so far: {best_trial.number} | EFE Objective: {_fmt_metric(efe_objective, 5)} "
                 f"| Train Energy: {_fmt_metric(train_energy, 4)} | Train Perplexity: {_fmt_metric(train_perplexity, 4)}\n"
             )
 
@@ -106,9 +106,9 @@ def run_tuning(n_trials=70, study_name="bayesian_tuning", local_rank=0, device=N
             else:
                 train_energy = best_trial.user_attrs.get("energy", "N/A")
                 train_perplexity = best_trial.user_attrs.get("perplexity", "N/A")
-                combined_loss = best_trial.user_attrs.get("combined_loss", "N/A")
+                efe_objective = best_trial.user_attrs.get("efe_objective", best_trial.value)
                 logger.info(
-                    f"\nFinal Best trial: {best_trial.number} | Combined Loss: {_fmt_metric(combined_loss, 5)} "
+                    f"\nFinal Best trial: {best_trial.number} | EFE Objective: {_fmt_metric(efe_objective, 5)} "
                     f"| Train Energy: {_fmt_metric(train_energy, 4)} | Train Perplexity: {_fmt_metric(train_perplexity, 4)}\n"
                 )
                 write_final_results(f"tuning/{study_name}_results.txt", best_trial)

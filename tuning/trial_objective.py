@@ -1,7 +1,8 @@
 import torch
 import pickle
 import time
-import pickle
+import math
+import optuna
 from training import train
 from eval import evaluate
 from utils.pc_utils import cleanup_memory
@@ -12,16 +13,8 @@ from tuning.config import get_dynamic_model_config, update_global_config
 from tuning.tuning_logs import log_trial_to_detailed_log, trial_batch_logger
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
-import torch.nn.functional as F
 from data_preparation.dataloader import get_loaders
 from data_preparation.config import vocab_size
-
-def combined_loss(energy, ce_loss, alpha=0.5):
-    """
-    Combine energy and cross-entropy loss.
-    alpha: weight between energy and CE loss (0.0 = only CE, 1.0 = only energy)
-    """
-    return alpha * energy + (1 - alpha) * ce_loss
 
 def broadcast_config(config_dict, device):
     """Broadcast config from rank 0 to all other ranks"""
@@ -41,6 +34,7 @@ def objective(trial, device = None, flash=False, enable_batch_logging=False):
     set_seed(42 + trial.number)
     start_time = time.time()
     model = None
+    cleanup_memory()
     
     print(f"\nStarting Trial {trial.number}")
     
@@ -48,7 +42,8 @@ def objective(trial, device = None, flash=False, enable_batch_logging=False):
         if not dist.is_initialized() or dist.get_rank() == 0:
             config = get_dynamic_model_config(trial, vocab_size, flash)
             if config is None:
-                return float("inf")
+                trial.set_user_attr("skip_reason", "invalid_config")
+                raise optuna.TrialPruned("Invalid configuration generated")
             config_dict = config.__dict__
         else:
             config_dict = None
@@ -70,29 +65,84 @@ def objective(trial, device = None, flash=False, enable_batch_logging=False):
         train_loader, valid_loader, _ = get_loaders(distributed=dist.is_initialized())
         
         if len(train_loader) == 0 or len(valid_loader) == 0:
-            return float("inf")
+            trial.set_user_attr("skip_reason", "empty_dataloader")
+            raise optuna.TrialPruned("Empty train/validation loader")
 
         trial_logger = trial_batch_logger(trial_number=trial.number) if enable_batch_logging else None
+        # Print all model configuration parameters before starting training
+        print("\nModel configuration parameters for this trial:")
+        print(f"vocab_size={config.vocab_size}")
+        print(f"block_size={config.block_size}")
+        print(f"peak_learning_rate={config.peak_learning_rate}")
+        print(f"warmup_steps={config.warmup_steps}")
+        print(f"n_embed={config.n_embed}")
+        print(f"dropout={config.dropout}")
+        print(f"lr={config.lr}")
+        print(f"embed_T={config.embed_T}")
+        print(f"attn_T={config.attn_T}")
+        print(f"linear_attn_T={config.linear_attn_T}")
+        print(f"fc1_T={config.fc1_T}")
+        print(f"fc2_T={config.fc2_T}")
+        print(f"linear_output_T={config.linear_output_T}")
+        print(f"num_heads={config.num_heads}")
+        print(f"n_blocks={config.n_blocks}")
+        print(f"batch_size={config.batch_size}")
+        print(f"num_epochs={config.num_epochs}")
+        print(f"update_bias={config.update_bias}")
+        print(f"internal_energy_fn_name={config.internal_energy_fn_name}")
+        print(f"output_energy_fn_name={config.output_energy_fn_name}")
+        print(f"combined_internal_weight={config.combined_internal_weight}")
+        print(f"combined_output_weight={config.combined_output_weight}")
+        print(f"use_flash_attention={config.use_flash_attention}")
+        print(f"alpha={config.alpha}")
+        global_step = 0
+        train_energy = float("inf")
+        train_perplexity = float("inf")
+        avg_energy = float("inf")
+        avg_perplexity = float("inf")
+        val_epoch_energies = []
+        val_epoch_perplexities = []
 
-        model.train()
-        train_energy, train_perplexity, _ = train(model, train_loader, config, global_step = 0, device = device, logger=trial_logger)
+        for _ in range(config.num_epochs):
+            model.train()
+            train_energy, train_perplexity, global_step = train(
+                model,
+                train_loader,
+                config,
+                global_step=global_step,
+                device=device,
+                logger=trial_logger,
+            )
 
-        model.eval()
-        avg_energy, avg_perplexity = evaluate(model, config, valid_loader, max_batches=None, device=device)
+            model.eval()
+            avg_energy, avg_perplexity = evaluate(model, config, valid_loader, max_batches=None, device=device)
+            val_epoch_energies.append(avg_energy)
+            val_epoch_perplexities.append(avg_perplexity)
         
+        if not math.isfinite(avg_energy):
+            trial.set_user_attr("skip_reason", "non_finite_energy")
+            raise optuna.TrialPruned("Validation energy is non-finite")
+
         train_ce_loss = torch.log(torch.tensor(train_perplexity)).item()
-        
-        alpha = 0.5
-        combined_objective = combined_loss(train_energy, train_ce_loss, alpha=alpha)
+        val_ce_loss = torch.log(torch.tensor(avg_perplexity)).item()
+        energy_objective = float(avg_energy)
+
+        if not math.isfinite(energy_objective):
+            trial.set_user_attr("skip_reason", "non_finite_objective")
+            raise optuna.TrialPruned("Energy objective is non-finite")
         
         trial_time = (time.time() - start_time) 
         
         trial.set_user_attr("config", config.__dict__)
+        trial.set_user_attr("val_energy", avg_energy)
+        trial.set_user_attr("val_perplexity", avg_perplexity)
         trial.set_user_attr("energy", train_energy)
         trial.set_user_attr("perplexity", train_perplexity)
         trial.set_user_attr("ce_loss", train_ce_loss)
-        trial.set_user_attr("combined_loss", combined_objective)
-        trial.set_user_attr("alpha", alpha)
+        trial.set_user_attr("val_ce_loss", val_ce_loss)
+        trial.set_user_attr("val_epoch_energies", val_epoch_energies)
+        trial.set_user_attr("val_epoch_perplexities", val_epoch_perplexities)
+        trial.set_user_attr("efe_objective", energy_objective)
         trial.set_user_attr("trial_time", trial_time)
 
         trial_path = "tuning/bayesian_tuning_trials.txt"
@@ -101,13 +151,17 @@ def objective(trial, device = None, flash=False, enable_batch_logging=False):
             write_header = trial.number == 0 
             log_trial_to_detailed_log(trial_path, trial, config, trial_time, train_energy, write_header=write_header)
 
-        return combined_objective
+        return energy_objective
     
     except Exception as e:
+        if isinstance(e, optuna.TrialPruned):
+            raise
         print("Trial failed:", e)
+        if "out of memory" in str(e).lower():
+            cleanup_memory()
         trial.set_user_attr("energy", "N/A")
         trial.set_user_attr("perplexity", "N/A")
-        trial.set_user_attr("combined_loss", "N/A")
+        trial.set_user_attr("efe_objective", "N/A")
         trial.set_user_attr("trial_time", (time.time() - start_time))
 
         return float("inf")
