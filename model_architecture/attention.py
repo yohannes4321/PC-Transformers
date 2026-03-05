@@ -20,94 +20,20 @@ class Attention(nn.Module):
         self.v = nn.Linear(config.n_embed, config.n_embed)
         self.output = nn.Linear(config.n_embed, config.n_embed)
 
-        self.pc_X_Q = PCLayer(
+        self.pc_qkv = PCLayer(
             T=config.T,
             lr=config.lr,
-            update_bias=config.update_bias,
+            update_bias = config.update_bias,
             energy_fn_name=config.internal_energy_fn_name,
             num_heads=config.num_heads,
             n_embed=config.n_embed,
-            optimizer_name=config.optimizer_name,
-            optimizer_beta1=config.optimizer_beta1,
-            optimizer_beta2=config.optimizer_beta2,
-            optimizer_eps=config.optimizer_eps,
-            optimizer_sign_value=config.optimizer_sign_value,
-            optimizer_weight_bound=config.optimizer_weight_bound,
-        )
-
-        self.pc_X_K = PCLayer(
-            T=config.T,
-            lr=config.lr,
-            update_bias=config.update_bias,
-            energy_fn_name=config.internal_energy_fn_name,
-            num_heads=config.num_heads,
-            n_embed=config.n_embed,
-            optimizer_name=config.optimizer_name,
-            optimizer_beta1=config.optimizer_beta1,
-            optimizer_beta2=config.optimizer_beta2,
-            optimizer_eps=config.optimizer_eps,
-            optimizer_sign_value=config.optimizer_sign_value,
-            optimizer_weight_bound=config.optimizer_weight_bound,
-        )
-
-        self.pc_X_V = PCLayer(
-            T=config.T,
-            lr=config.lr,
-            update_bias=config.update_bias,
-            energy_fn_name=config.internal_energy_fn_name,
-            num_heads=config.num_heads,
-            n_embed=config.n_embed,
-            optimizer_name=config.optimizer_name,
-            optimizer_beta1=config.optimizer_beta1,
-            optimizer_beta2=config.optimizer_beta2,
-            optimizer_eps=config.optimizer_eps,
-            optimizer_sign_value=config.optimizer_sign_value,
-            optimizer_weight_bound=config.optimizer_weight_bound,
-        )
-
-        self.pc_X_score = PCLayer(
-            T=config.T,
-            lr=config.lr,
-            update_bias=config.update_bias,
-            energy_fn_name=config.internal_energy_fn_name,
-            num_heads=config.num_heads,
-            n_embed=config.n_embed,
-            optimizer_name=config.optimizer_name,
-            optimizer_beta1=config.optimizer_beta1,
-            optimizer_beta2=config.optimizer_beta2,
-            optimizer_eps=config.optimizer_eps,
-            optimizer_sign_value=config.optimizer_sign_value,
-            optimizer_weight_bound=config.optimizer_weight_bound,
-        )
-
-        self.pc_X_A = PCLayer(
-            T=config.T,
-            lr=config.lr,
-            update_bias=config.update_bias,
-            energy_fn_name=config.internal_energy_fn_name,
-            num_heads=config.num_heads,
-            n_embed=config.n_embed,
-            optimizer_name=config.optimizer_name,
-            optimizer_beta1=config.optimizer_beta1,
-            optimizer_beta2=config.optimizer_beta2,
-            optimizer_eps=config.optimizer_eps,
-            optimizer_sign_value=config.optimizer_sign_value,
-            optimizer_weight_bound=config.optimizer_weight_bound,
         )
 
         self.pc_output = PCLayer(
             T=config.T,
             lr=config.lr,
-            update_bias=config.update_bias,
+            update_bias = config.update_bias,
             energy_fn_name=config.internal_energy_fn_name,
-            num_heads=config.num_heads,
-            n_embed=config.n_embed,
-            optimizer_name=config.optimizer_name,
-            optimizer_beta1=config.optimizer_beta1,
-            optimizer_beta2=config.optimizer_beta2,
-            optimizer_eps=config.optimizer_eps,
-            optimizer_sign_value=config.optimizer_sign_value,
-            optimizer_weight_bound=config.optimizer_weight_bound,
         )
         
         # KV cache for generation: stores (K, V) tensors
