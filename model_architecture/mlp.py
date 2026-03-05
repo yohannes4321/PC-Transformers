@@ -5,7 +5,7 @@ class MLP(nn.Module):
     """
     Multi-Layer Perceptron (MLP) block used within the transformer architecture.
     Includes two linear layers and two predictive coding layers for local learning.
-    """
+    """ 
 
     def __init__(self, config):
         super().__init__()
