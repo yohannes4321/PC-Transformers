@@ -42,3 +42,11 @@ class GPTConfig:
     combined_output_weight: float
     use_flash_attention: bool
     alpha: float
+    init_strategy: str = "hybrid"
+    stream_num_classes: int = 64
+    stream_momentum: float = 0.1
+    memory_obs_dim: int = 8
+    memory_slots: int = 128
+    memory_temperature: float = 1.0
+    memory_lr: float = 0.05
+    hybrid_forward_layers: int = 1

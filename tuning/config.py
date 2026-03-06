@@ -26,6 +26,13 @@ def get_dynamic_model_config(trial, vocab_size, flash=False):
     combined_output_weight = 1.0 - combined_internal_weight
     num_epochs = num_epochs = 10
     alpha = 0.5
+    init_strategy = trial.suggest_categorical("init_strategy", ["hybrid", "stream_avg", "memory"])
+    stream_num_classes = trial.suggest_categorical("stream_num_classes", [32, 64, 128])
+    stream_momentum = trial.suggest_float("stream_momentum", 0.05, 0.3)
+    memory_slots = trial.suggest_categorical("memory_slots", [64, 128, 256])
+    memory_temperature = trial.suggest_float("memory_temperature", 0.5, 2.0)
+    memory_lr = trial.suggest_float("memory_lr", 1e-3, 2e-1, log=True)
+    hybrid_forward_layers = trial.suggest_int("hybrid_forward_layers", 0, 2)
     
     return GPTConfig(
         vocab_size=vocab_size,
@@ -46,7 +53,15 @@ def get_dynamic_model_config(trial, vocab_size, flash=False):
         combined_internal_weight = combined_internal_weight,
         combined_output_weight = combined_output_weight,
         use_flash_attention=flash,
-        alpha=alpha
+        alpha=alpha,
+        init_strategy=init_strategy,
+        stream_num_classes=stream_num_classes,
+        stream_momentum=stream_momentum,
+        memory_obs_dim=8,
+        memory_slots=memory_slots,
+        memory_temperature=memory_temperature,
+        memory_lr=memory_lr,
+        hybrid_forward_layers=hybrid_forward_layers,
     )
 
 def update_global_config(config):
@@ -56,7 +71,9 @@ def update_global_config(config):
         'dropout', 'lr', 'peak_learning_rate', 'warmup_steps',
         'update_bias', 'T', 'internal_energy_fn_name', 'output_energy_fn_name',
         'batch_size', 'num_epochs', 'combined_internal_weight', 
-        'combined_output_weight', 'alpha'
+        'combined_output_weight', 'alpha', 'init_strategy',
+        'stream_num_classes', 'stream_momentum', 'memory_obs_dim',
+        'memory_slots', 'memory_temperature', 'memory_lr', 'hybrid_forward_layers'
     ]
     
     for key in config_keys:

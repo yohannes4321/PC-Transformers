@@ -12,7 +12,9 @@ def load_best_config():
         "dropout", "T", "num_heads", "n_blocks", "update_bias", "alpha",
         "lr", "batch_size", "num_epochs", "internal_energy_fn_name",
         "output_energy_fn_name", "combined_internal_weight",
-        "combined_output_weight", "use_flash_attention"
+        "combined_output_weight", "use_flash_attention", "init_strategy",
+        "stream_num_classes", "stream_momentum", "memory_obs_dim",
+        "memory_slots", "memory_temperature", "memory_lr", "hybrid_forward_layers"
     }
 
     fallback_values = {
@@ -33,7 +35,15 @@ def load_best_config():
         "output_energy_fn_name": "pc_e",
         "combined_internal_weight": 0.8779955579743048,
         "combined_output_weight": 0.12200444202569516,
-        "use_flash_attention": False
+        "use_flash_attention": False,
+        "init_strategy": "hybrid",
+        "stream_num_classes": 64,
+        "stream_momentum": 0.1,
+        "memory_obs_dim": 8,
+        "memory_slots": 128,
+        "memory_temperature": 1.0,
+        "memory_lr": 0.05,
+        "hybrid_forward_layers": 1
     }
 
     config = {}

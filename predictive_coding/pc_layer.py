@@ -10,6 +10,7 @@ from utils.pc_utils import (
     finalize_step,
 )
 from predictive_coding.lateral_connc import LateralConnections
+from predictive_coding.init_memory import StreamAverageMemory, HopfieldInitMemory
 
 class PCLayer(nn.Module):
     """
@@ -41,6 +42,8 @@ class PCLayer(nn.Module):
         self._error_cache: Dict[str, torch.Tensor] = {}
         self._energy = 0.0
         self._errors = []
+        self.stream_memories = nn.ModuleDict()
+        self.hopfield_memories = nn.ModuleDict()
     
     def register_lateral(self, layer_type: str, size: int):
         """Create and register lateral connections for layer_type."""
@@ -54,6 +57,51 @@ class PCLayer(nn.Module):
     
     def _get_cached_state(self, layer_type: str):
         return self._x_cache.get(layer_type, None)
+
+    def _init_stream_memory(self, layer_type: str, hidden_dim: int, num_classes: int, momentum: float):
+        module_name = f"stream_{layer_type}"
+        if module_name not in self.stream_memories:
+            self.stream_memories[module_name] = StreamAverageMemory(num_classes, hidden_dim, momentum)
+
+    def _init_hopfield_memory(
+        self,
+        layer_type: str,
+        hidden_dim: int,
+        obs_dim: int,
+        memory_slots: int,
+        memory_temperature: float,
+        memory_lr: float,
+    ):
+        module_name = f"hopfield_{layer_type}"
+        if module_name not in self.hopfield_memories:
+            self.hopfield_memories[module_name] = HopfieldInitMemory(
+                obs_dim=obs_dim,
+                hidden_dim=hidden_dim,
+                num_slots=memory_slots,
+                temperature=memory_temperature,
+                memory_lr=memory_lr,
+            )
+
+    def update_initialization_memory(
+        self,
+        layer_type: str,
+        settled_x: torch.Tensor,
+        stream_labels: Optional[torch.Tensor] = None,
+        observation: Optional[torch.Tensor] = None,
+    ) -> None:
+        if settled_x is None:
+            return
+
+        stream_name = f"stream_{layer_type}"
+        if stream_labels is not None and stream_name in self.stream_memories:
+            self.stream_memories[stream_name].update(settled_x.detach(), stream_labels.detach())
+
+        hopfield_name = f"hopfield_{layer_type}"
+        if observation is not None and hopfield_name in self.hopfield_memories:
+            self.hopfield_memories[hopfield_name].update(observation.detach(), settled_x.detach())
+
+    def set_x(self, layer_type: str, x_value: torch.Tensor) -> None:
+        self._x_cache[layer_type] = x_value
     
     def forward(
         self,
@@ -174,6 +222,15 @@ class PCLayer(nn.Module):
         proj_layers: Optional[dict] = None,
         input_ids: Optional[torch.Tensor] = None,
         position_ids: Optional[torch.Tensor] = None,
+        init_strategy: str = "random",
+        stream_labels: Optional[torch.Tensor] = None,
+        observation: Optional[torch.Tensor] = None,
+        num_classes: int = 64,
+        stream_momentum: float = 0.1,
+        obs_dim: int = 8,
+        memory_slots: int = 128,
+        memory_temperature: float = 1.0,
+        memory_lr: float = 0.05,
     ):
         """
         Initialize cached activity `x` for the layer type.
@@ -199,7 +256,20 @@ class PCLayer(nn.Module):
             assert proj_layers is not None, "Attention layer requires proj_layers"
             H_in = proj_layers["q_proj"].weight.shape[1]
             H_out = proj_layers["v_proj"].weight.shape[0] 
-            self._x_cache["attn"] = x_init(batch_size, seq_len, H_out, device)
+            x_tensor = None
+
+            if init_strategy in {"stream_avg", "hybrid"} and stream_labels is not None:
+                self._init_stream_memory(layer_type, H_out, num_classes, stream_momentum)
+                stream_memory = self.stream_memories[f"stream_{layer_type}"]
+                x_tensor = stream_memory.retrieve(stream_labels.to(device)).unsqueeze(1).expand(-1, seq_len, -1).clone()
+
+            if x_tensor is None and init_strategy in {"memory", "hybrid"} and observation is not None:
+                self._init_hopfield_memory(layer_type, H_out, obs_dim, memory_slots, memory_temperature, memory_lr)
+                hopfield_memory = self.hopfield_memories[f"hopfield_{layer_type}"]
+                retrieved, _ = hopfield_memory.retrieve(observation.to(device))
+                x_tensor = retrieved.unsqueeze(1).expand(-1, seq_len, -1).clone()
+
+            self._x_cache["attn"] = x_tensor if x_tensor is not None else x_init(batch_size, seq_len, H_out, device)
             
             self.register_lateral(layer_type, H_in)
             if layer_type in self.lateral_connections:
@@ -208,7 +278,20 @@ class PCLayer(nn.Module):
         else:  
             assert layer is not None, "Linear layer requires layer parameter"
             input_dim = layer.weight.shape[1]
-            self._x_cache[layer_type] = x_init(batch_size, seq_len, input_dim, device)
+            x_tensor = None
+
+            if init_strategy in {"stream_avg", "hybrid"} and stream_labels is not None:
+                self._init_stream_memory(layer_type, input_dim, num_classes, stream_momentum)
+                stream_memory = self.stream_memories[f"stream_{layer_type}"]
+                x_tensor = stream_memory.retrieve(stream_labels.to(device)).unsqueeze(1).expand(-1, seq_len, -1).clone()
+
+            if x_tensor is None and init_strategy in {"memory", "hybrid"} and observation is not None:
+                self._init_hopfield_memory(layer_type, input_dim, obs_dim, memory_slots, memory_temperature, memory_lr)
+                hopfield_memory = self.hopfield_memories[f"hopfield_{layer_type}"]
+                retrieved, _ = hopfield_memory.retrieve(observation.to(device))
+                x_tensor = retrieved.unsqueeze(1).expand(-1, seq_len, -1).clone()
+
+            self._x_cache[layer_type] = x_tensor if x_tensor is not None else x_init(batch_size, seq_len, input_dim, device)
             
             self.register_lateral(layer_type, input_dim)  
             if layer_type in self.lateral_connections:

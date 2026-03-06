@@ -22,6 +22,79 @@ class PCTransformer(nn.Module):
         self.blocks = nn.ModuleList([TransformerBlock(config) for _ in range(config.n_blocks)])
         self.output = OutputLayer(config)
 
+    def _build_observation_features(self, input_ids: torch.Tensor, target_ids: torch.Tensor) -> torch.Tensor:
+        """Build compact sequence-level observations for memory-based initialization."""
+        vocab_size = max(int(self.config.vocab_size), 1)
+        in_float = input_ids.float()
+        tgt_float = target_ids.float()
+
+        features = torch.stack(
+            [
+                in_float.mean(dim=1) / vocab_size,
+                tgt_float.mean(dim=1) / vocab_size,
+                in_float.std(dim=1) / vocab_size,
+                tgt_float.std(dim=1) / vocab_size,
+                in_float[:, 0] / vocab_size,
+                tgt_float[:, 0] / vocab_size,
+                in_float[:, -1] / vocab_size,
+                tgt_float[:, -1] / vocab_size,
+            ],
+            dim=-1,
+        )
+        return features
+
+    def _infer_stream_labels(self, target_ids: torch.Tensor, stream_labels: torch.Tensor | None = None) -> torch.Tensor:
+        """Use provided labels when available, otherwise derive stable pseudo-labels from targets."""
+        num_classes = max(int(getattr(self.config, "stream_num_classes", 64)), 1)
+        if stream_labels is not None:
+            return stream_labels.long().to(target_ids.device) % num_classes
+        return target_ids[:, 0].long() % num_classes
+
+    def _layer_init_strategy(self, block_idx: int | None = None) -> str:
+        strategy = getattr(self.config, "init_strategy", "hybrid")
+        if not self.training:
+            return "random"
+        if strategy != "hybrid" or block_idx is None:
+            return strategy
+
+        # Keep first layers close to forward-style behavior, apply stream/memory deeper.
+        forward_layers = int(getattr(self.config, "hybrid_forward_layers", 1))
+        return "random" if block_idx < max(forward_layers, 0) else "hybrid"
+
+    def _update_initialization_memories(self, stream_labels: torch.Tensor, observation: torch.Tensor) -> None:
+        for block in self.blocks:
+            block.attn.pc_qkv.update_initialization_memory(
+                layer_type="attn",
+                settled_x=block.attn.pc_qkv.get_x("attn"),
+                stream_labels=stream_labels,
+                observation=observation,
+            )
+            block.attn.pc_output.update_initialization_memory(
+                layer_type="linear_attn",
+                settled_x=block.attn.pc_output.get_x("linear_attn"),
+                stream_labels=stream_labels,
+                observation=observation,
+            )
+            block.mlp.pc_layer1.update_initialization_memory(
+                layer_type="fc1",
+                settled_x=block.mlp.pc_layer1.get_x("fc1"),
+                stream_labels=stream_labels,
+                observation=observation,
+            )
+            block.mlp.pc_layer2.update_initialization_memory(
+                layer_type="fc2",
+                settled_x=block.mlp.pc_layer2.get_x("fc2"),
+                stream_labels=stream_labels,
+                observation=observation,
+            )
+
+        self.output.pc_layer.update_initialization_memory(
+            layer_type="linear_output",
+            settled_x=self.output.pc_layer.get_x("linear_output"),
+            stream_labels=stream_labels,
+            observation=observation,
+        )
+
     def register_all_lateral_weights(self):
         """
         Register lateral weights for all predictive coding layers in the model.
@@ -40,7 +113,7 @@ class PCTransformer(nn.Module):
                     if module.W_latents[key] is not None:
                         module.W_latents[key] = module.W_latents[key].to(next(self.parameters()).device)
 
-    def forward(self, target_ids, input_ids, use_kv_cache=False):
+    def forward(self, target_ids, input_ids, use_kv_cache=False, stream_labels=None):
         """
         Forward pass of the PCTransformer model, using device-specific parallelism (CUDA streams or torch.jit.fork).
 
@@ -71,6 +144,19 @@ class PCTransformer(nn.Module):
         
         target_logits = ids_to_one_hot(target_ids, vocab_size).to(device)
         position_ids = torch.arange(S, device=input_ids.device).unsqueeze(0).expand(B, S)
+        observation = self._build_observation_features(input_ids, target_ids)
+        batch_stream_labels = self._infer_stream_labels(target_ids, stream_labels=stream_labels)
+
+        init_kwargs = {
+            "stream_labels": batch_stream_labels,
+            "observation": observation,
+            "num_classes": int(getattr(self.config, "stream_num_classes", 64)),
+            "stream_momentum": float(getattr(self.config, "stream_momentum", 0.1)),
+            "obs_dim": int(getattr(self.config, "memory_obs_dim", 8)),
+            "memory_slots": int(getattr(self.config, "memory_slots", 128)),
+            "memory_temperature": float(getattr(self.config, "memory_temperature", 1.0)),
+            "memory_lr": float(getattr(self.config, "memory_lr", 0.05)),
+        }
 
         # Initialize all predictive coding layers
         self.embedding.pc_layer.init_x(
@@ -82,9 +168,11 @@ class PCTransformer(nn.Module):
             proj_layers=None,
             input_ids=input_ids,
             position_ids=position_ids,
+            init_strategy="forward",
         )
 
-        for block in self.blocks:
+        for idx, block in enumerate(self.blocks):
+            layer_init = self._layer_init_strategy(block_idx=idx)
             block.attn.pc_qkv.init_x(
                 batch_size=B,
                 seq_len=S,
@@ -94,6 +182,8 @@ class PCTransformer(nn.Module):
                 proj_layers={"q_proj": block.attn.q, "k_proj": block.attn.k, "v_proj": block.attn.v},
                 input_ids = None,
                 position_ids = None,
+                init_strategy=layer_init,
+                **init_kwargs,
             )
             block.attn.pc_output.init_x(
                 batch_size=B,
@@ -104,6 +194,8 @@ class PCTransformer(nn.Module):
                 proj_layers= None, 
                 input_ids = None,
                 position_ids = None,
+                init_strategy=layer_init,
+                **init_kwargs,
             )
             block.mlp.pc_layer1.init_x(
                 batch_size=B,
@@ -114,6 +206,8 @@ class PCTransformer(nn.Module):
                 proj_layers= None, 
                 input_ids = None,
                 position_ids = None,
+                init_strategy=layer_init,
+                **init_kwargs,
             )
             block.mlp.pc_layer2.init_x(
                 batch_size=B,
@@ -124,6 +218,8 @@ class PCTransformer(nn.Module):
                 proj_layers= None, 
                 input_ids = None,
                 position_ids = None,
+                init_strategy=layer_init,
+                **init_kwargs,
             )
         self.output.pc_layer.init_x(
             batch_size=B,
@@ -134,6 +230,8 @@ class PCTransformer(nn.Module):
             proj_layers= None, 
             input_ids = None,
             position_ids = None,
+            init_strategy=self._layer_init_strategy(block_idx=len(self.blocks)),
+            **init_kwargs,
         )
 
         # Initialize streams or futures for parallel execution
@@ -291,5 +389,9 @@ class PCTransformer(nn.Module):
             # Synchronize all parallel tasks
             synchronize_execution(use_cuda, streams_or_futures)
         logits = self.output.pc_layer.get_mu("linear_output")
+
+        if self.training:
+            self._update_initialization_memories(batch_stream_labels, observation)
+
         return logits
     

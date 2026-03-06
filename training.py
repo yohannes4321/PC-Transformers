@@ -41,6 +41,9 @@ def train(model, dataloader, config, global_step, device, logger):
     for batch_idx, batch in enumerate(dataloader):
         input_ids = batch["input_ids"].to(device)
         target_ids = batch["target_ids"].to(device)
+        stream_labels = batch.get("labels", None)
+        if stream_labels is not None:
+            stream_labels = stream_labels.to(device)
 
         # total_steps = len(dataloader) * config.num_epochs
         
@@ -70,7 +73,7 @@ def train(model, dataloader, config, global_step, device, logger):
             target_ids = torch.clamp(target_ids, max=vocab_size-1)
             
             
-        logits = model(target_ids, input_ids)
+        logits = model(target_ids, input_ids, stream_labels=stream_labels)
         ce_loss = F.cross_entropy(
             logits.view(-1, logits.size(-1)),
             target_ids.view(-1),
@@ -173,7 +176,15 @@ def main():
         combined_internal_weight=best_config["combined_internal_weight"],
         combined_output_weight=best_config["combined_output_weight"],
         use_flash_attention=best_config["use_flash_attention"],
-        alpha = best_config["alpha"]
+        alpha = best_config["alpha"],
+        init_strategy=best_config.get("init_strategy", "hybrid"),
+        stream_num_classes=best_config.get("stream_num_classes", 64),
+        stream_momentum=best_config.get("stream_momentum", 0.1),
+        memory_obs_dim=best_config.get("memory_obs_dim", 8),
+        memory_slots=best_config.get("memory_slots", 128),
+        memory_temperature=best_config.get("memory_temperature", 1.0),
+        memory_lr=best_config.get("memory_lr", 0.05),
+        hybrid_forward_layers=best_config.get("hybrid_forward_layers", 1),
     )
     
     # Create a separate logger for hyperparameters
