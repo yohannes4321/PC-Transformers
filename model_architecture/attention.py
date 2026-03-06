@@ -20,6 +20,8 @@ class Attention(nn.Module):
         self.v = nn.Linear(config.n_embed, config.n_embed)
         self.output = nn.Linear(config.n_embed, config.n_embed)
 
+        init_method = getattr(config, 'init_method', 'random')
+        
         self.pc_qkv = PCLayer(
             T=config.T,
             lr=config.lr,
@@ -27,6 +29,7 @@ class Attention(nn.Module):
             energy_fn_name=config.internal_energy_fn_name,
             num_heads=config.num_heads,
             n_embed=config.n_embed,
+            init_method=init_method,
         )
 
         self.pc_output = PCLayer(
@@ -34,6 +37,7 @@ class Attention(nn.Module):
             lr=config.lr,
             update_bias = config.update_bias,
             energy_fn_name=config.internal_energy_fn_name,
+            init_method=init_method,
         )
         
         # KV cache for generation: stores (K, V) tensors

@@ -13,11 +13,14 @@ class MLP(nn.Module):
         self.fc2 = nn.Linear(4 * config.n_embed, config.n_embed)
         self.dropout = nn.Dropout(config.dropout)
 
+        init_method = getattr(config, 'init_method', 'random')
+        
         self.pc_layer2 = PCLayer(
             T=config.T,
             lr=config.lr,
             update_bias=config.update_bias,
             energy_fn_name=config.internal_energy_fn_name,
+            init_method=init_method,
         )
 
         self.pc_layer1 = PCLayer(
@@ -25,4 +28,5 @@ class MLP(nn.Module):
             lr=config.lr,
             update_bias=config.update_bias,
             energy_fn_name=config.internal_energy_fn_name,
+            init_method=init_method,
         )

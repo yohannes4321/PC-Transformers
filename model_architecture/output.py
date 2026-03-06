@@ -10,9 +10,12 @@ class OutputLayer(nn.Module):
         self.config = config
         self.output = nn.Linear(config.n_embed, config.vocab_size)
         
+        init_method = getattr(config, 'init_method', 'random')
+        
         self.pc_layer = PCLayer(
             T=config.T,
             lr=config.lr,
             update_bias = config.update_bias,
             energy_fn_name=config.output_energy_fn_name,
+            init_method=init_method,
         )

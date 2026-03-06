@@ -2,12 +2,197 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import gc
-from typing import Optional, Tuple, Any
+from typing import Optional, Tuple, Any, List
 from utils.attention_utils import apply_flash_attention, apply_standard_attention
+
+
+VALID_INIT_METHODS = ['avg', 'mem']
+
+
+def init_avg_from_hidden_states(
+    batch_size: int,
+    seq_len: int,
+    embedding_size: int,
+    device: torch.device,
+    labels: torch.Tensor,
+    prev_hidden_states: List[torch.Tensor],
+) -> torch.Tensor:
+    """
+    Iavg (Average Initialization) from research paper.
     
-def x_init(batch_size: int, seq_len: int, embedding_size: int, device: torch.device = None) -> torch.Tensor:
+    h^{(0,b+1)}_{l,i} = (C/n) * sum_{{j:yj=yi}} h^{(T,b)}_{l,j}
+    
+    Initialize neurons by averaging hidden states from previous batch for samples with same label.
+    This is the key innovation from the research paper for stream-aligned training.
+    
+    Args:
+        batch_size: Number of samples in current batch
+        seq_len: Sequence length
+        embedding_size: Embedding dimension
+        device: Device to create tensor on
+        labels: Labels for each sample in current batch (next token predictions)
+        prev_hidden_states: List of hidden states from previous batch for each layer
+    
+    Returns:
+        Initialized tensor with averaged values per class
+    """
+    if labels is None or prev_hidden_states is None or len(prev_hidden_states) == 0:
+        return torch.zeros(batch_size, seq_len, embedding_size, device=device)
+    
+    labels = labels.to(device)
+    unique_labels = torch.unique(labels)
+    C = len(unique_labels)
+    n = batch_size
+    
+    if C == 0 or n == 0:
+        return torch.zeros(batch_size, seq_len, embedding_size, device=device)
+    
+    init_x = torch.zeros(batch_size, seq_len, embedding_size, device=device)
+    
+    label_to_indices = {}
+    for idx, label in enumerate(labels):
+        label_val = label.item() if label.dim() > 0 else label
+        if label_val not in label_to_indices:
+            label_to_indices[label_val] = []
+        label_to_indices[label_val].append(idx)
+    
+    for label_val, indices in label_to_indices.items():
+        if len(indices) == 0:
+            continue
+        indices_tensor = torch.tensor(indices, device=device)
+        
+        for layer_hidden in prev_hidden_states:
+            if layer_hidden is None:
+                continue
+            layer_hidden = layer_hidden.to(device)
+            
+            if layer_hidden.shape[0] >= n:
+                class_hidden = layer_hidden[:n]
+            else:
+                continue
+                
+            class_sum = class_hidden[indices_tensor].sum(dim=0)
+            init_x[indices] = init_x[indices] + class_sum
+    
+    for label_val in label_to_indices:
+        init_x[label_to_indices[label_val]] = init_x[label_to_indices[label_val]] / max(len(label_to_indices[label_val]), 1)
+    
+    return init_x
+
+
+def x_init(
+    batch_size: int, 
+    seq_len: int, 
+    embedding_size: int, 
+    device: torch.device = None, 
+    init_method: str = 'avg',
+    labels: Optional[torch.Tensor] = None, 
+    prev_hidden_states: Optional[List[torch.Tensor]] = None,
+    memory_layers: Optional[dict] = None
+) -> torch.Tensor:
+    """
+    Initialize cached activity `x` for the layer using research paper initialization methods.
+    
+    Methods:
+        - 'avg' (Iavg): Average initialization from previous batch hidden states (stream-aligned)
+        - 'mem' (Imem): Memory-based initialization using Hopfield networks
+    
+    Args:
+        batch_size: Number of samples in batch
+        seq_len: Sequence length
+        embedding_size: Dimension of the embeddings
+        device: Device to create tensor on
+        init_method: Initialization method ('avg' or 'mem')
+        labels: Labels for the batch (next token for language modeling)
+        prev_hidden_states: Previous batch's final hidden states for Iavg
+        memory_layers: Dictionary containing memory parameters (for 'mem' method)
+    
+    Returns:
+        Initialized tensor
+    """
     device = device or (torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu"))
-    return torch.randn(batch_size, seq_len, embedding_size, device = device)
+    
+    if init_method == 'avg':
+        if labels is None or prev_hidden_states is None:
+            return torch.zeros(batch_size, seq_len, embedding_size, device=device)
+        return init_avg_from_hidden_states(batch_size, seq_len, embedding_size, device, labels, prev_hidden_states)
+    
+    elif init_method == 'mem':
+        if memory_layers is None:
+            return torch.zeros(batch_size, seq_len, embedding_size, device=device)
+        return init_mem(batch_size, seq_len, embedding_size, device, memory_layers)
+    
+    else:
+        return torch.zeros(batch_size, seq_len, embedding_size, device=device)
+
+
+def init_avg(batch_size: int, seq_len: int, embedding_size: int, device: torch.device,
+             labels: torch.Tensor) -> torch.Tensor:
+    """Legacy function - use init_avg_from_hidden_states instead."""
+    return torch.zeros(batch_size, seq_len, embedding_size, device=device)
+
+
+def init_mem(batch_size: int, seq_len: int, embedding_size: int, device: torch.device,
+             memory_layers: dict) -> torch.Tensor:
+    """
+    Memory-based initialization (Imem) using Hopfield networks.
+    
+    h^{(0)}_{l,i} = σ(δ_l(o_i Q_l + b_l) K_l^T) V_l
+    
+    Args:
+        batch_size: Number of samples
+        seq_len: Sequence length
+        embedding_size: Embedding dimension
+        device: Device to create tensor on
+        memory_layers: Dictionary containing Q, K, V matrices and bias
+    
+    Returns:
+        Initialized tensor from memory
+    """
+    Q = memory_layers.get('Q', None)
+    K = memory_layers.get('K', None)
+    V = memory_layers.get('V', None)
+    bias = memory_layers.get('bias', None)
+    delta = memory_layers.get('delta', 1.0)
+    observations = memory_layers.get('observations', None)
+    
+    if Q is None or K is None or V is None:
+        return torch.zeros(batch_size, seq_len, embedding_size, device=device)
+    
+    if observations is None:
+        return torch.zeros(batch_size, seq_len, embedding_size, device=device)
+    
+    Q = Q.to(device)
+    K = K.to(device)
+    V = V.to(device)
+    if bias is not None:
+        bias = bias.to(device)
+    
+    if observations.shape[0] != batch_size:
+        if observations.shape[0] > batch_size:
+            observations = observations[:batch_size]
+        else:
+            padding = torch.zeros(batch_size - observations.shape[0], observations.shape[1], device=observations.device)
+            observations = torch.cat([observations, padding], dim=0)
+    
+    obs_proj = observations @ Q.T
+    if bias is not None:
+        obs_proj = obs_proj + bias
+    
+    obs_proj = obs_proj * delta
+    
+    attention_scores = obs_proj @ K.T
+    attention_weights = F.softmax(attention_scores, dim=-1)
+    
+    init_x = attention_weights @ V
+    
+    if init_x.shape[1] < seq_len:
+        padding = torch.zeros(init_x.shape[0], seq_len - init_x.shape[1], init_x.shape[2], device=device)
+        init_x = torch.cat([init_x, padding], dim=1)
+    elif init_x.shape[1] > seq_len:
+        init_x = init_x[:, :seq_len, :]
+    
+    return init_x
 
 def step_embed(
     t: int,

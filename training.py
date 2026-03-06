@@ -173,7 +173,8 @@ def main():
         combined_internal_weight=best_config["combined_internal_weight"],
         combined_output_weight=best_config["combined_output_weight"],
         use_flash_attention=best_config["use_flash_attention"],
-        alpha = best_config["alpha"]
+        alpha = best_config["alpha"],
+        init_method = best_config.get("init_method", "random")
     )
     
     # Create a separate logger for hyperparameters
@@ -218,6 +219,9 @@ def main():
     for epoch in range(config.num_epochs):
         if hasattr(train_loader, "sampler") and isinstance(train_loader.sampler, torch.utils.data.DistributedSampler):
             train_loader.sampler.set_epoch(epoch)
+
+        base_model = model.module if hasattr(model, 'module') else model
+        base_model.clear_prev_hidden_states()
 
         if rank == 0:
             logger.info(f"Epoch {epoch + 1}/{config.num_epochs}")
