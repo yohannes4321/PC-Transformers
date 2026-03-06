@@ -3,6 +3,7 @@ import pickle
 import time
 import pickle
 import logging
+import math
 from training import train
 from eval import evaluate
 from utils.pc_utils import cleanup_memory
@@ -13,18 +14,34 @@ from tuning.config import get_dynamic_model_config, update_global_config
 from tuning.tuning_logs import log_trial_to_detailed_log, trial_batch_logger
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
-import torch.nn.functional as F
 from data_preparation.dataloader import get_loaders
 from data_preparation.config import vocab_size
 
 logger = logging.getLogger(__name__)
 
-def combined_loss(energy, ce_loss, alpha=0.5):
+def combined_loss(val_energy, val_perplexity, train_energy=None, energy_weight=0.9, ppl_weight=0.1, ppl_floor=8.0):
     """
-    Combine energy and cross-entropy loss.
-    alpha: weight between energy and CE loss (0.0 = only CE, 1.0 = only energy)
+    Energy-first tuning objective.
+    - Primary term: validation free energy
+    - Secondary term: log perplexity (small weight)
+    - Guardrail: penalty when perplexity collapses below ppl_floor
+    - Optional: penalty when validation energy is worse than training energy
     """
-    return alpha * energy + (1 - alpha) * ce_loss
+    safe_ppl = max(float(val_perplexity), 1e-8)
+    ppl_term = math.log(safe_ppl)
+    low_ppl_penalty = max(0.0, ppl_floor - safe_ppl) / ppl_floor
+
+    overfit_penalty = 0.0
+    if train_energy is not None:
+        overfit_penalty = max(0.0, float(val_energy) - float(train_energy))
+
+    objective = (
+        energy_weight * float(val_energy)
+        + ppl_weight * ppl_term
+        + 0.15 * low_ppl_penalty
+        + 0.25 * overfit_penalty
+    )
+    return objective
 
 def broadcast_config(config_dict, device):
     """Broadcast config from rank 0 to all other ranks"""
@@ -122,19 +139,26 @@ def objective(trial, device = None, flash=False, enable_batch_logging=False):
                 f"Val Energy: {avg_energy:.4f} | Val Perplexity: {avg_perplexity:.4f}"
             )
         
-        train_ce_loss = torch.log(torch.tensor(train_perplexity)).item()
-        
-        alpha = 0.5
-        combined_objective = combined_loss(train_energy, train_ce_loss, alpha=alpha)
+        val_ce_loss = math.log(max(float(avg_perplexity), 1e-8))
+        combined_objective = combined_loss(
+            val_energy=avg_energy,
+            val_perplexity=avg_perplexity,
+            train_energy=train_energy,
+            energy_weight=0.9,
+            ppl_weight=0.1,
+            ppl_floor=8.0,
+        )
         
         trial_time = (time.time() - start_time) 
         
         trial.set_user_attr("config", config.__dict__)
-        trial.set_user_attr("energy", train_energy)
-        trial.set_user_attr("perplexity", train_perplexity)
-        trial.set_user_attr("ce_loss", train_ce_loss)
+        trial.set_user_attr("energy", avg_energy)
+        trial.set_user_attr("perplexity", avg_perplexity)
+        trial.set_user_attr("ce_loss", val_ce_loss)
         trial.set_user_attr("combined_loss", combined_objective)
-        trial.set_user_attr("alpha", alpha)
+        trial.set_user_attr("energy_weight", 0.9)
+        trial.set_user_attr("ppl_weight", 0.1)
+        trial.set_user_attr("ppl_floor", 8.0)
         trial.set_user_attr("trial_time", trial_time)
 
         trial_path = "tuning/bayesian_tuning_trials.txt"
