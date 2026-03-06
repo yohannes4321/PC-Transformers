@@ -58,10 +58,19 @@ class PCLayer(nn.Module):
     def _get_cached_state(self, layer_type: str):
         return self._x_cache.get(layer_type, None)
 
-    def _init_stream_memory(self, layer_type: str, hidden_dim: int, num_classes: int, momentum: float):
+    def _init_stream_memory(
+        self,
+        layer_type: str,
+        hidden_dim: int,
+        num_classes: int,
+        momentum: float,
+        device: Optional[torch.device] = None,
+    ):
         module_name = f"stream_{layer_type}"
         if module_name not in self.stream_memories:
             self.stream_memories[module_name] = StreamAverageMemory(num_classes, hidden_dim, momentum)
+        if device is not None:
+            self.stream_memories[module_name] = self.stream_memories[module_name].to(device)
 
     def _init_hopfield_memory(
         self,
@@ -71,6 +80,7 @@ class PCLayer(nn.Module):
         memory_slots: int,
         memory_temperature: float,
         memory_lr: float,
+        device: Optional[torch.device] = None,
     ):
         module_name = f"hopfield_{layer_type}"
         if module_name not in self.hopfield_memories:
@@ -81,6 +91,8 @@ class PCLayer(nn.Module):
                 temperature=memory_temperature,
                 memory_lr=memory_lr,
             )
+        if device is not None:
+            self.hopfield_memories[module_name] = self.hopfield_memories[module_name].to(device)
 
     def update_initialization_memory(
         self,
@@ -94,10 +106,12 @@ class PCLayer(nn.Module):
 
         stream_name = f"stream_{layer_type}"
         if stream_labels is not None and stream_name in self.stream_memories:
+            self.stream_memories[stream_name] = self.stream_memories[stream_name].to(settled_x.device)
             self.stream_memories[stream_name].update(settled_x.detach(), stream_labels.detach())
 
         hopfield_name = f"hopfield_{layer_type}"
         if observation is not None and hopfield_name in self.hopfield_memories:
+            self.hopfield_memories[hopfield_name] = self.hopfield_memories[hopfield_name].to(settled_x.device)
             self.hopfield_memories[hopfield_name].update(observation.detach(), settled_x.detach())
 
     def set_x(self, layer_type: str, x_value: torch.Tensor) -> None:
@@ -259,14 +273,22 @@ class PCLayer(nn.Module):
             x_tensor = None
 
             if init_strategy in {"stream_avg", "hybrid"} and stream_labels is not None:
-                self._init_stream_memory(layer_type, H_out, num_classes, stream_momentum)
+                self._init_stream_memory(layer_type, H_out, num_classes, stream_momentum, device=device)
                 stream_memory = self.stream_memories[f"stream_{layer_type}"]
-                x_tensor = stream_memory.retrieve(stream_labels.to(device)).unsqueeze(1).expand(-1, seq_len, -1).clone()
+                x_tensor = stream_memory.retrieve(stream_labels).unsqueeze(1).expand(-1, seq_len, -1).clone()
 
             if x_tensor is None and init_strategy in {"memory", "hybrid"} and observation is not None:
-                self._init_hopfield_memory(layer_type, H_out, obs_dim, memory_slots, memory_temperature, memory_lr)
+                self._init_hopfield_memory(
+                    layer_type,
+                    H_out,
+                    obs_dim,
+                    memory_slots,
+                    memory_temperature,
+                    memory_lr,
+                    device=device,
+                )
                 hopfield_memory = self.hopfield_memories[f"hopfield_{layer_type}"]
-                retrieved, _ = hopfield_memory.retrieve(observation.to(device))
+                retrieved, _ = hopfield_memory.retrieve(observation)
                 x_tensor = retrieved.unsqueeze(1).expand(-1, seq_len, -1).clone()
 
             self._x_cache["attn"] = x_tensor if x_tensor is not None else x_init(batch_size, seq_len, H_out, device)
@@ -281,14 +303,22 @@ class PCLayer(nn.Module):
             x_tensor = None
 
             if init_strategy in {"stream_avg", "hybrid"} and stream_labels is not None:
-                self._init_stream_memory(layer_type, input_dim, num_classes, stream_momentum)
+                self._init_stream_memory(layer_type, input_dim, num_classes, stream_momentum, device=device)
                 stream_memory = self.stream_memories[f"stream_{layer_type}"]
-                x_tensor = stream_memory.retrieve(stream_labels.to(device)).unsqueeze(1).expand(-1, seq_len, -1).clone()
+                x_tensor = stream_memory.retrieve(stream_labels).unsqueeze(1).expand(-1, seq_len, -1).clone()
 
             if x_tensor is None and init_strategy in {"memory", "hybrid"} and observation is not None:
-                self._init_hopfield_memory(layer_type, input_dim, obs_dim, memory_slots, memory_temperature, memory_lr)
+                self._init_hopfield_memory(
+                    layer_type,
+                    input_dim,
+                    obs_dim,
+                    memory_slots,
+                    memory_temperature,
+                    memory_lr,
+                    device=device,
+                )
                 hopfield_memory = self.hopfield_memories[f"hopfield_{layer_type}"]
-                retrieved, _ = hopfield_memory.retrieve(observation.to(device))
+                retrieved, _ = hopfield_memory.retrieve(observation)
                 x_tensor = retrieved.unsqueeze(1).expand(-1, seq_len, -1).clone()
 
             self._x_cache[layer_type] = x_tensor if x_tensor is not None else x_init(batch_size, seq_len, input_dim, device)

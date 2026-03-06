@@ -16,12 +16,13 @@ class StreamAverageMemory(nn.Module):
         self.register_buffer("class_counts", torch.zeros(self.num_classes))
 
     def retrieve(self, labels: torch.Tensor) -> torch.Tensor:
-        labels = labels.long().clamp(min=0, max=self.num_classes - 1)
+        labels = labels.to(self.class_memory.device).long().clamp(min=0, max=self.num_classes - 1)
         return self.class_memory[labels]
 
     def update(self, settled_x: torch.Tensor, labels: torch.Tensor) -> None:
-        labels = labels.long().clamp(min=0, max=self.num_classes - 1)
+        labels = labels.to(self.class_memory.device).long().clamp(min=0, max=self.num_classes - 1)
         x_summary = settled_x.mean(dim=1) if settled_x.dim() == 3 else settled_x
+        x_summary = x_summary.to(self.class_memory.device)
 
         with torch.no_grad():
             for class_idx in labels.unique().tolist():
@@ -64,6 +65,7 @@ class HopfieldInitMemory(nn.Module):
         return torch.exp(self.log_temp).clamp(min=1e-3, max=100.0)
 
     def retrieve(self, observation: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+        observation = observation.to(self.query.weight.device)
         query = self.query(observation)
         logits = (query @ self.keys.t()) * self._temperature()
         attention = F.softmax(logits, dim=-1)
@@ -71,6 +73,8 @@ class HopfieldInitMemory(nn.Module):
         return retrieved, attention
 
     def update(self, observation: torch.Tensor, settled_x: torch.Tensor) -> None:
+        observation = observation.to(self.query.weight.device)
+        settled_x = settled_x.to(self.query.weight.device)
         target = settled_x.mean(dim=1) if settled_x.dim() == 3 else settled_x
         retrieved, attention = self.retrieve(observation)
         error = target - retrieved
