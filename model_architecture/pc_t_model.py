@@ -137,6 +137,24 @@ class PCTransformer(nn.Module):
         target_logits = ids_to_one_hot(target_ids, vocab_size).to(device)
         position_ids = torch.arange(S, device=input_ids.device).unsqueeze(0).expand(B, S)
 
+        prev_h_embed = self.get_prev_hidden_state("embed")
+        self.embedding.pc_layer.init_x(
+            batch_size=B,
+            seq_len=S,
+            layer_type="embed",
+            device = device,
+            layer={"word": self.embedding.word_embeddings, "pos": self.embedding.position_embeddings},
+            proj_layers=None,
+            input_ids=input_ids,
+            position_ids=position_ids,
+            init_method=init_method,
+            prev_hidden_states=prev_h_embed,
+            labels=labels,
+            num_classes=num_classes,
+            layer_idx=0,
+            hybrid_m=self.hybrid_m,
+        )
+
         for block_idx, block in enumerate(self.blocks):
             base_layer_idx = block_idx * 4 + 1
             
