@@ -23,7 +23,7 @@ class PCTransformer(nn.Module):
         self.blocks = nn.ModuleList([TransformerBlock(config) for _ in range(config.n_blocks)])
         self.output = OutputLayer(config)
         
-        self.init_method = getattr(config, 'init_method', 'random')
+        self.init_method = getattr(config, 'init_method', 'imem')
         self.hybrid_m = getattr(config, 'hybrid_m', (config.n_blocks * 4 + 2) // 2 + 1)
         
         self.prev_hidden_states: Dict[str, torch.Tensor] = {}
@@ -190,9 +190,6 @@ class PCTransformer(nn.Module):
         num_classes = self.num_classes if self.num_classes > 0 else vocab_size
         
         init_method = self.init_method
-        
-        if init_method == "iavg" and (self.prev_labels is None or self.prev_hidden_states == {}):
-            init_method = "random"
         
         if init_method == "imem" and len(self.hopfield_memories) > 0 and self.prev_hidden_states == {}:
             self._init_hopfield_with_first_batch(input_ids, target_ids)
@@ -492,10 +489,6 @@ class PCTransformer(nn.Module):
 
             # Synchronize all parallel tasks
             synchronize_execution(use_cuda, streams_or_futures)
-        
-        if self.init_method == "iavg":
-            self.store_hidden_states()
-            self.set_labels(labels)
         
         logits = self.output.pc_layer.get_mu("linear_output")
         return logits

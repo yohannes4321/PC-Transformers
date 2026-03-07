@@ -72,4 +72,7 @@ def load_best_config():
         if key not in config:
             config[key] = fallback_values[key]
 
+    # Enforce Hopfield memory initialization globally.
+    config["init_method"] = "imem"
+
     return config

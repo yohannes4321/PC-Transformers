@@ -4,7 +4,6 @@ from typing import Optional, Dict, Tuple
 
 from utils.pc_utils import (
     x_init,
-    x_init_iavg,
     x_init_imem,
     step_embed,
     step_linear,
@@ -177,7 +176,7 @@ class PCLayer(nn.Module):
         proj_layers: Optional[dict] = None,
         input_ids: Optional[torch.Tensor] = None,
         position_ids: Optional[torch.Tensor] = None,
-        init_method: str = "random",
+        init_method: str = "imem",
         prev_hidden_states: Optional[torch.Tensor] = None,
         labels: Optional[torch.Tensor] = None,
         num_classes: int = 0,
@@ -189,16 +188,16 @@ class PCLayer(nn.Module):
         """
         Initialize cached activity `x` for the layer type.
         - embed: stores (x_word, x_pos) from embedding weights
-        - attn: creates random initialization shaped (B, S, H_out)
-        - linear/others: random init sized to layer input dimension
+        - attn: initializes from Hopfield memory (falls back to tensor init if memory is unavailable)
+        - linear/others: initializes from Hopfield memory (falls back to tensor init if memory is unavailable)
         
         Args:
-            init_method: "random", "iavg", or "imem"
-            prev_hidden_states: Hidden states from previous batch (for Iavg)
-            labels: Class labels for stream-aligned training (for Iavg)
+            init_method: Initialization mode (expected "imem")
+            prev_hidden_states: Reserved compatibility argument
+            labels: Reserved compatibility argument
             num_classes: Number of unique classes
             layer_idx: Current layer index
-            hybrid_m: Number of layers to use random init (hybrid approach)
+            hybrid_m: Reserved compatibility argument
             hopfield_memory: Hopfield memory module (for Imem)
             observations: Input observations (for Imem)
         """
@@ -221,11 +220,7 @@ class PCLayer(nn.Module):
             H_in = proj_layers["q_proj"].weight.shape[1]
             H_out = proj_layers["v_proj"].weight.shape[0] 
             
-            if init_method == "iavg" and prev_hidden_states is not None and labels is not None:
-                self._x_cache["attn"] = x_init_iavg(
-                    prev_hidden_states, labels, num_classes, layer_idx, hybrid_m
-                )
-            elif init_method == "imem" and hopfield_memory is not None and observations is not None:
+            if init_method == "imem" and hopfield_memory is not None and observations is not None:
                 self._x_cache["attn"] = x_init_imem(observations, hopfield_memory)
             else:
                 self._x_cache["attn"] = x_init(batch_size, seq_len, H_out, device)
@@ -238,11 +233,7 @@ class PCLayer(nn.Module):
             assert layer is not None, "Linear layer requires layer parameter"
             input_dim = layer.weight.shape[1]
             
-            if init_method == "iavg" and prev_hidden_states is not None and labels is not None:
-                self._x_cache[layer_type] = x_init_iavg(
-                    prev_hidden_states, labels, num_classes, layer_idx, hybrid_m
-                )
-            elif init_method == "imem" and hopfield_memory is not None and observations is not None:
+            if init_method == "imem" and hopfield_memory is not None and observations is not None:
                 self._x_cache[layer_type] = x_init_imem(observations, hopfield_memory)
             else:
                 self._x_cache[layer_type] = x_init(batch_size, seq_len, input_dim, device)

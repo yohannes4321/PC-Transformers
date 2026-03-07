@@ -46,7 +46,8 @@ def get_dynamic_model_config(trial, vocab_size, flash=False):
         combined_internal_weight = combined_internal_weight,
         combined_output_weight = combined_output_weight,
         use_flash_attention=flash,
-        alpha=alpha
+        alpha=alpha,
+        init_method="imem"
     )
 
 def update_global_config(config):
@@ -55,8 +56,8 @@ def update_global_config(config):
         'num_heads', 'n_embed', 'block_size', 'n_blocks', 'vocab_size',
         'dropout', 'lr', 'peak_learning_rate', 'warmup_steps',
         'update_bias', 'T', 'internal_energy_fn_name', 'output_energy_fn_name',
-        'batch_size', 'num_epochs', 'combined_internal_weight', 
-        'combined_output_weight', 'alpha'
+        'batch_size', 'num_epochs', 'combined_internal_weight',
+        'combined_output_weight', 'alpha', 'init_method', 'hybrid_m', 'num_classes'
     ]
     
     for key in config_keys:

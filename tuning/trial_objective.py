@@ -55,6 +55,9 @@ def objective(trial, device = None, flash=False, enable_batch_logging=False):
 
         if dist.is_initialized():
             config_dict = broadcast_config(config_dict, device)
+
+        # Enforce Hopfield memory initialization for all tuning trials.
+        config_dict["init_method"] = "imem"
         
         config = GPTConfig(**config_dict)
         update_global_config(config.__dict__)
