@@ -9,7 +9,7 @@ def load_best_config():
 
     selected_keys = {
         "block_size", "peak_learning_rate", "warmup_steps", "n_embed",
-        "dropout", "T", "num_heads", "n_blocks", "update_bias",
+        "dropout", "T", "embed_T", "attn_T", "linear_attn_T", "fc1_T", "fc2_T", "linear_output_T", "num_heads", "n_blocks", "update_bias",
         "lr", "batch_size", "num_epochs", "internal_energy_fn_name",
         "output_energy_fn_name", "combined_internal_weight",
         "combined_output_weight", "use_flash_attention"
@@ -22,6 +22,12 @@ def load_best_config():
         "n_embed": 512,
         "dropout": 0.46876145412214615,
         "T": 2,
+        "embed_T": 2,
+        "attn_T": 2,
+        "linear_attn_T": 2,
+        "fc1_T": 2,
+        "fc2_T": 2,
+        "linear_output_T": 2,
         "num_heads": 32,
         "n_blocks": 12,
         "update_bias": False,
@@ -61,6 +67,12 @@ def load_best_config():
         print(f"[WARNING] Tuning result file not found: {file_path}")
         print(f"[INFO] Using fallback values for missing keys: {selected_keys - config.keys()}")
         
+
+    # Backward compatibility: older tuning results may only store a single "T".
+    if "T" in config:
+        t_value = config["T"]
+        for key in ["embed_T", "attn_T", "linear_attn_T", "fc1_T", "fc2_T", "linear_output_T"]:
+            config.setdefault(key, t_value)
 
     # Fill in missing keys from fallback
     for key in selected_keys:
