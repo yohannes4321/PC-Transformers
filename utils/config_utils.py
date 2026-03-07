@@ -35,7 +35,7 @@ def load_best_config():
         "combined_internal_weight": 0.8779955579743048,
         "combined_output_weight": 0.12200444202569516,
         "use_flash_attention": False,
-        "init_method": "random",
+        "init_method": "imem",
         "hybrid_m": 25,
         "num_classes": 0,
     }
