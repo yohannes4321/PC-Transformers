@@ -18,6 +18,7 @@ import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
 from utils.device_utils import setup_device, cleanup_memory
 import json
+import logging
 from data_preparation.config import vocab_size
 
 """
@@ -28,23 +29,21 @@ Usage: torchrun --nproc-per-node=<NUM_GPU> training.py
 
 """
 
-def train(model, dataloader, config, global_step, device):
-    torch.set_grad_enabled(False)
+def train(model, dataloader, config, global_step, device, logger):
     model.train()
     total_ce_loss = 0.0
     total_energy = 0.0
     batch_count = 0
-    debug_every = 10
 
     base_model = model.module if hasattr(model, 'module') else model
     output_pc_layer = base_model.output.pc_layer
+    
+    init_method = getattr(config, 'init_method', 'imem')
     
     for batch_idx, batch in enumerate(dataloader):
         input_ids = batch["input_ids"].to(device)
         target_ids = batch["target_ids"].to(device)
 
-        # total_steps = len(dataloader) * config.num_epochs
-        
         if target_ids.max() >= vocab_size:
             target_ids = torch.clamp(target_ids, max=vocab_size - 1)
 
@@ -52,14 +51,6 @@ def train(model, dataloader, config, global_step, device):
             lr = config.lr + global_step / config.warmup_steps * (
                 config.peak_learning_rate - config.lr)
         else:
-            # # Cosine decay after warmup
-            # decay_step = global_step - config.warmup_steps
-            # decay_total = total_steps - config.warmup_steps
-            # cosine_decay = 0.5 * (1 + math.cos(math.pi * decay_step / decay_total))
-            
-            # # Minimum learning rate = 10% of peak_lr
-            # min_lr = 0.1 * config.peak_learning_rate
-            # lr = min_lr + (config.peak_learning_rate - min_lr) * cosine_decay
             lr = config.peak_learning_rate
 
         for module in model.modules():
@@ -69,15 +60,35 @@ def train(model, dataloader, config, global_step, device):
         global_step += 1
         if target_ids.max() >= vocab_size:
             target_ids = torch.clamp(target_ids, max=vocab_size-1)
+        
+        
+        labels = target_ids
+        logits = model(target_ids, input_ids, labels=labels)
+        
+        if init_method == 'imem' and hasattr(base_model, 'hopfield_memories'):
+            hopfield_loss = None
+            for layer_key, hopfield_mem in base_model.hopfield_memories.items():
+                if hopfield_mem is not None:
+                    layer_idx = int(layer_key.split('_')[1])
+                    layer_key_state = base_model._get_layer_key(layer_idx)
+                    target_state = base_model.prev_hidden_states.get(layer_key_state)
+                    if target_state is not None:
+                        mem_init = hopfield_mem(input_ids.float().unsqueeze(-1) if layer_idx == 0 else target_state)
+                        loss = F.mse_loss(mem_init, target_state.detach())
+                        if hopfield_loss is None:
+                            hopfield_loss = loss
+                        else:
+                            hopfield_loss = hopfield_loss + loss
             
-            
-        with torch.no_grad():
-            logits = model(target_ids, input_ids)
-            ce_loss = F.cross_entropy(
-                logits.view(-1, logits.size(-1)),
-                target_ids.view(-1),
-                ignore_index=0
-            )
+            if hopfield_loss is not None:
+                hopfield_loss = hopfield_loss / len(base_model.hopfield_memories)
+                (hopfield_loss * 0.01).backward()
+        
+        ce_loss = F.cross_entropy(
+            logits.view(-1, logits.size(-1)),
+            target_ids.view(-1),
+            ignore_index=0
+        )
         total_ce_loss += ce_loss.item()
 
         internal_energies = []
@@ -114,9 +125,10 @@ def train(model, dataloader, config, global_step, device):
         perplexity = math.exp(ce_loss.item()) if ce_loss.item() < 100 else float("inf")
 
         if (not dist.is_initialized() or dist.get_rank() == 0) and (batch_idx + 1) % 10 == 0:
-            print(f"  Batch {batch_idx + 1}/{len(dataloader)} | Batch Energy: {batch_energy:.4f} | Perplexity: {perplexity:.4f}")
-
-       
+            if logger:
+                logger.info(f"  Batch {batch_idx + 1}/{len(dataloader)} | Batch Energy: {batch_energy:.4f} | Perplexity: {perplexity:.4f}")
+            else:
+                print(f"  Batch {batch_idx + 1}/{len(dataloader)} | Batch Energy: {batch_energy:.4f} | Perplexity: {perplexity:.4f}")
 
     avg_energy = total_energy / batch_count if batch_count > 0 else 0.0
     avg_ce_loss = total_ce_loss / batch_count if batch_count > 0 else 0.0
@@ -132,7 +144,28 @@ def main():
 
     rank = dist.get_rank() if dist.is_initialized() else 0
 
-    best_config = load_best_config()
+    best_config = load_best_config()   
+    # Configure logging
+    log_dir = 'logs'
+    os.makedirs(log_dir, exist_ok=True)
+
+    # build handlers and remove existing ones
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.INFO)
+    for h in list(root_logger.handlers):
+        root_logger.removeHandler(h)
+
+    fmt = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    stream_h = logging.StreamHandler()
+    stream_h.setFormatter(fmt)
+    root_logger.addHandler(stream_h)
+
+    if rank == 0:
+        file_h = logging.FileHandler(os.path.join(log_dir, "training.log"), mode="a")
+        file_h.setFormatter(fmt)
+        root_logger.addHandler(file_h)
+
+    logger = logging.getLogger(__name__)
    
     config = GPTConfig(
         vocab_size = vocab_size,
@@ -154,37 +187,36 @@ def main():
         combined_output_weight=best_config["combined_output_weight"],
         use_flash_attention=best_config["use_flash_attention"],
         alpha = best_config["alpha"],
-        optimizer_name = best_config["optimizer_name"],
-        optimizer_beta1 = best_config["optimizer_beta1"],
-        optimizer_beta2 = best_config["optimizer_beta2"],
-        optimizer_eps = best_config["optimizer_eps"],
-        optimizer_sign_value = best_config["optimizer_sign_value"],
-        optimizer_weight_bound = best_config["optimizer_weight_bound"],
+        init_method = "imem",
+        hybrid_m = best_config.get("hybrid_m", (best_config["n_blocks"] * 4 + 2) // 2 + 1),
+        num_classes = best_config.get("num_classes", vocab_size),
     )
     
+    # Create a separate logger for hyperparameters
+    param_logger = logging.getLogger('param_logger')
+    param_logger.setLevel(logging.INFO)
+    if rank == 0 and root_logger.handlers:
+        param_logger.addHandler(root_logger.handlers[1])
+        param_logger.propagate = False
+
     if rank == 0:
-        print(f"\n{'#' * 120}") 
-        print(f"Using device: {device} (local rank {local_rank})")
+        param_logger.info(f"\n{'#' * 120}") 
+        logger.info(f"Using device: {device} (local rank {local_rank})")
         try:
             cfg = config.__dict__
         except Exception:
             cfg = {k: getattr(config, k) for k in dir(config) if not k.startswith("_") and not callable(getattr(config, k))}
         config_json = json.dumps(cfg, indent=6, default=str)
-       
+        param_logger.info("Saving the hyperparameters configurations:")
+        param_logger.info(config_json)
 
-    torch.set_grad_enabled(False)
     model = PCTransformer(config).to(device)
-    model.requires_grad_(False)
-    has_trainable = any(p.requires_grad for p in model.parameters())
-    if use_ddp and has_trainable:
+    if use_ddp:
         model = DDP(model, device_ids=[local_rank], 
                     output_device=local_rank, 
                     find_unused_parameters=True)
 
-        model.module.requires_grad_(False)
-
-    base_model = model.module if hasattr(model, "module") else model
-    base_model.register_all_lateral_weights()
+        model.module.register_all_lateral_weights()
 
     train_loader, valid_loader, _ = get_loaders(distributed=use_ddp)
     
@@ -196,19 +228,19 @@ def main():
 
     start_time = time.time()
     if rank == 0:
-        print("========== Training started ==========") 
-        print(f"{sum(p.numel() for p in model.parameters())/1e6:.2f} M parameters")
+        logger.info("========== Training started ==========") 
+        logger.info(f"{sum(p.numel() for p in model.parameters())/1e6:.2f} M parameters")
 
     for epoch in range(config.num_epochs):
         if hasattr(train_loader, "sampler") and isinstance(train_loader.sampler, torch.utils.data.DistributedSampler):
             train_loader.sampler.set_epoch(epoch)
 
         if rank == 0:
-            print(f"Epoch {epoch + 1}/{config.num_epochs}")
+            logger.info(f"Epoch {epoch + 1}/{config.num_epochs}")
 
         model.train()
         train_energy, train_perplexity, global_step = train(
-            model, train_loader, config, global_step, device
+            model, train_loader, config, global_step, device, logger
         )
         train_energies.append(train_energy)
         train_perplexities.append(train_perplexity)
@@ -223,7 +255,7 @@ def main():
         val_perplexities.append(val_perplexity)
 
         if rank == 0:
-            print(f"Epoch {epoch + 1}/{config.num_epochs} | "
+            logger.info(f"Epoch {epoch + 1}/{config.num_epochs} | "
                   f"Train Energy: {train_energy:.4f} | Train Perplexity: {train_perplexity:.4f} | "
                   f"Val Energy: {val_energy:.4f} | Val Perplexity: {val_perplexity:.4f}")
 
@@ -241,7 +273,7 @@ def main():
                 }
                 checkpoint_path = f'checkpoints/model_epoch_{epoch+1}.pt'
                 torch.save(checkpoint, checkpoint_path)
-                print(f"Saved checkpoint to {checkpoint_path}")
+                logger.info(f"Saved checkpoint to {checkpoint_path}")
 
     if rank == 0:
         plot_metrics(
@@ -264,9 +296,9 @@ def main():
         }
         torch.save(final_checkpoint, 'checkpoints/final_model.pt')
         total_time = time.time() - start_time
-        print(f"Training completed in {total_time:.2f} seconds")
-        print("Final model saved to: checkpoints/final_model.pt")
-        print("========== Training completed ==========")
+        logger.info(f"Training completed in {total_time:.2f} seconds")
+        logger.info("Final model saved to: checkpoints/final_model.pt")
+        logger.info("========== Training completed ==========")
 
     # dist.destroy_process_group()
     if use_ddp and dist.is_initialized():
