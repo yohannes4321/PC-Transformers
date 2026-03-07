@@ -22,7 +22,6 @@ Usage: torchrun --nproc-per-node=<NUM_GPU> generate_text.py
 local_rank, device, use_ddp = setup_device()
 
 def generate_text(model, config, input_ids, max_new_tokens, temperature, device = None, use_cache=True):
-    torch.set_grad_enabled(False)
     model.eval()
     
     if input_ids is None:
@@ -43,11 +42,10 @@ def generate_text(model, config, input_ids, max_new_tokens, temperature, device 
         # For first token or with cache, pass full or last token
         current_input = input_tensor[:, -config.block_size:] if input_tensor.size(1) > config.block_size else input_tensor
       
-        with torch.no_grad():
-            logits = model(current_input, current_input, use_kv_cache=use_cache)
-            logits = logits[:, -1, :] / temperature
-            probs = F.softmax(logits, dim=-1)
-            next_token = torch.multinomial(probs, num_samples=1)
+        logits = model(current_input, current_input, use_kv_cache=use_cache)
+        logits = logits[:, -1, :] / temperature
+        probs = F.softmax(logits, dim=-1)
+        next_token = torch.multinomial(probs, num_samples=1)
         
         generated_tokens.append(next_token.item())
         input_tensor = torch.cat((input_tensor, next_token), dim=1)
@@ -74,7 +72,6 @@ def text_generation(model, config, device = None,  max_samples=2, max_new_tokens
     return decoded_preds
 
 def main():
-    torch.set_grad_enabled(False)
     set_seed(42)
     parser = argparse.ArgumentParser()
     parser.add_argument('--flash', action='store_true', help='Enable FlashAttention for attention layers')
@@ -107,22 +104,16 @@ def main():
         combined_output_weight=best_config["combined_output_weight"],
         use_flash_attention=best_config["use_flash_attention"],
         alpha = best_config["alpha"],
-        optimizer_name = best_config["optimizer_name"],
-        optimizer_beta1 = best_config["optimizer_beta1"],
-        optimizer_beta2 = best_config["optimizer_beta2"],
-        optimizer_eps = best_config["optimizer_eps"],
-        optimizer_sign_value = best_config["optimizer_sign_value"],
-        optimizer_weight_bound = best_config["optimizer_weight_bound"],
+        init_method = "imem",
+        hybrid_m = best_config.get("hybrid_m", (best_config["n_blocks"] * 4 + 2) // 2 + 1),
+        num_classes = best_config.get("num_classes", vocab_size),
     )
     
     model_path = "checkpoints/final_model.pt"
     model = load_model(model_path, config)
     model = model.to(device)
-    model.requires_grad_(False)
-    has_trainable = any(p.requires_grad for p in model.parameters())
-    if use_ddp and has_trainable:
+    if use_ddp:
         model = DDP(model, device_ids=[local_rank], output_device=local_rank)
-        model.module.requires_grad_(False)
 
     if not dist.is_initialized() or dist.get_rank() == 0:
         decoded_preds, decoded_targets = text_generation(model, config, device, max_samples=2, use_cache=True)
