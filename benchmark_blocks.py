@@ -14,7 +14,6 @@ from data_preparation.dataloader import get_loaders
 from model_architecture.pc_t_model import PCTransformer
 
 def benchmark_blocks(block_values=[2, 3, 4, 5, 6], num_epochs=5):
-    torch.set_grad_enabled(False)
     """Run controlled experiments varying only n_blocks"""
     local_rank, device, use_ddp = setup_device()
     
@@ -52,22 +51,16 @@ def benchmark_blocks(block_values=[2, 3, 4, 5, 6], num_epochs=5):
             combined_output_weight = best_config["combined_output_weight"],
             use_flash_attention = best_config["use_flash_attention"],
             alpha = best_config["alpha"],
-            optimizer_name = best_config["optimizer_name"],
-            optimizer_beta1 = best_config["optimizer_beta1"],
-            optimizer_beta2 = best_config["optimizer_beta2"],
-            optimizer_eps = best_config["optimizer_eps"],
-            optimizer_sign_value = best_config["optimizer_sign_value"],
-            optimizer_weight_bound = best_config["optimizer_weight_bound"],
+            init_method = "imem",
+            hybrid_m = best_config.get("hybrid_m", (n_blocks * 4 + 2) // 2 + 1),
+            num_classes = best_config.get("num_classes", vocab_size),
         )
         
         # Initialize model
         model = PCTransformer(config).to(device)
-        model.requires_grad_(False)
-        has_trainable = any(p.requires_grad for p in model.parameters())
-        if use_ddp and has_trainable:
+        if use_ddp:
             from torch.nn.parallel import DistributedDataParallel as DDP
             model = DDP(model, device_ids=[local_rank], output_device=local_rank)
-            model.module.requires_grad_(False)
         
         # Get data loaders
         train_loader, valid_loader, _ = get_loaders(distributed=use_ddp)
