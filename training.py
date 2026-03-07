@@ -38,12 +38,26 @@ def train(model, dataloader, config, global_step, device, logger):
     base_model = model.module if hasattr(model, 'module') else model
     output_pc_layer = base_model.output.pc_layer
     
+    init_method = getattr(config, 'init_method', 'random')
+    if init_method == 'imem':
+        base_model.eval()
+        with torch.no_grad():
+            for batch_idx, batch in enumerate(dataloader):
+                if batch_idx >= 1:
+                    break
+                input_ids = batch["input_ids"].to(device)
+                target_ids = batch["target_ids"].to(device)
+                
+                if target_ids.max() >= vocab_size:
+                    target_ids = torch.clamp(target_ids, max=vocab_size - 1)
+                
+                _ = base_model(target_ids, input_ids)
+        base_model.train()
+    
     for batch_idx, batch in enumerate(dataloader):
         input_ids = batch["input_ids"].to(device)
         target_ids = batch["target_ids"].to(device)
 
-        # total_steps = len(dataloader) * config.num_epochs
-        
         if target_ids.max() >= vocab_size:
             target_ids = torch.clamp(target_ids, max=vocab_size - 1)
 
@@ -51,14 +65,6 @@ def train(model, dataloader, config, global_step, device, logger):
             lr = config.lr + global_step / config.warmup_steps * (
                 config.peak_learning_rate - config.lr)
         else:
-            # # Cosine decay after warmup
-            # decay_step = global_step - config.warmup_steps
-            # decay_total = total_steps - config.warmup_steps
-            # cosine_decay = 0.5 * (1 + math.cos(math.pi * decay_step / decay_total))
-            
-            # # Minimum learning rate = 10% of peak_lr
-            # min_lr = 0.1 * config.peak_learning_rate
-            # lr = min_lr + (config.peak_learning_rate - min_lr) * cosine_decay
             lr = config.peak_learning_rate
 
         for module in model.modules():
@@ -68,9 +74,10 @@ def train(model, dataloader, config, global_step, device, logger):
         global_step += 1
         if target_ids.max() >= vocab_size:
             target_ids = torch.clamp(target_ids, max=vocab_size-1)
-            
-            
-        logits = model(target_ids, input_ids)
+        
+        
+        labels = target_ids
+        logits = model(target_ids, input_ids, labels=labels)
         ce_loss = F.cross_entropy(
             logits.view(-1, logits.size(-1)),
             target_ids.view(-1),
@@ -173,7 +180,10 @@ def main():
         combined_internal_weight=best_config["combined_internal_weight"],
         combined_output_weight=best_config["combined_output_weight"],
         use_flash_attention=best_config["use_flash_attention"],
-        alpha = best_config["alpha"]
+        alpha = best_config["alpha"],
+        init_method = best_config.get("init_method", "random"),
+        hybrid_m = best_config.get("hybrid_m", (best_config["n_blocks"] * 4 + 2) // 2 + 1),
+        num_classes = best_config.get("num_classes", vocab_size),
     )
     
     # Create a separate logger for hyperparameters

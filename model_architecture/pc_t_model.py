@@ -2,9 +2,10 @@ import torch
 import torch.nn as nn
 from .embedding import Embedding_Layer
 from .transformer_block import TransformerBlock
-from utils.pc_utils import ids_to_one_hot
+from utils.pc_utils import ids_to_one_hot, HopfieldMemory
 from .output import OutputLayer
 from utils.device_utils import create_streams_or_futures, execute_parallel, synchronize_execution
+from typing import Optional, Dict, List
 
 class PCTransformer(nn.Module):
     """
@@ -21,6 +22,61 @@ class PCTransformer(nn.Module):
         self.embedding = Embedding_Layer(config)
         self.blocks = nn.ModuleList([TransformerBlock(config) for _ in range(config.n_blocks)])
         self.output = OutputLayer(config)
+        
+        self.init_method = getattr(config, 'init_method', 'random')
+        self.hybrid_m = getattr(config, 'hybrid_m', (config.n_blocks * 4 + 2) // 2 + 1)
+        
+        self.prev_hidden_states: Dict[str, torch.Tensor] = {}
+        self.prev_labels: Optional[torch.Tensor] = None
+        self.num_classes: int = getattr(config, 'num_classes', 0)
+        
+        self.hopfield_memories: Dict[str, HopfieldMemory] = {}
+        if self.init_method == 'imem':
+            self._setup_hopfield_memories()
+    
+    def _setup_hopfield_memories(self):
+        """Setup Hopfield memory modules for each layer for Imem initialization."""
+        n_layers = self.config.n_blocks * 4 + 2
+        for layer_idx in range(n_layers):
+            hidden_dim = self.config.n_embed
+            self.hopfield_memories[f"layer_{layer_idx}"] = HopfieldMemory(
+                input_dim=hidden_dim,
+                memory_dim=hidden_dim,
+                delta=1.0
+            )
+    
+    def get_hopfield_memory(self, layer_idx: int) -> Optional[HopfieldMemory]:
+        """Get Hopfield memory for a specific layer."""
+        return self.hopfield_memories.get(f"layer_{layer_idx}", None)
+    
+    def store_hidden_states(self):
+        """Store hidden states from current batch for Iavg initialization in next batch."""
+        self.prev_hidden_states["embed"] = self.embedding.pc_layer.get_mu("embed")
+        
+        for idx, block in enumerate(self.blocks):
+            base_idx = idx * 4 + 1
+            self.prev_hidden_states[f"attn_{idx}"] = block.attn.pc_qkv.get_mu("attn")
+            self.prev_hidden_states[f"attn_output_{idx}"] = block.attn.pc_output.get_mu("linear_attn")
+            self.prev_hidden_states[f"mlp1_{idx}"] = block.mlp.pc_layer1.get_mu("fc1")
+            self.prev_hidden_states[f"mlp2_{idx}"] = block.mlp.pc_layer2.get_mu("fc2")
+        
+        self.prev_hidden_states["output"] = self.output.pc_layer.get_mu("linear_output")
+    
+    def get_prev_hidden_state(self, layer_key: str) -> Optional[torch.Tensor]:
+        """Get previous hidden state for a specific layer."""
+        return self.prev_hidden_states.get(layer_key, None)
+    
+    def clear_prev_hidden_states(self):
+        """Clear stored hidden states."""
+        self.prev_hidden_states.clear()
+    
+    def set_labels(self, labels: torch.Tensor):
+        """Set labels for stream-aligned training."""
+        self.prev_labels = labels
+    
+    def set_num_classes(self, num_classes: int):
+        """Set number of classes for stream-aligned training."""
+        self.num_classes = num_classes
 
     def register_all_lateral_weights(self):
         """
@@ -40,13 +96,14 @@ class PCTransformer(nn.Module):
                     if module.W_latents[key] is not None:
                         module.W_latents[key] = module.W_latents[key].to(next(self.parameters()).device)
 
-    def forward(self, target_ids, input_ids, use_kv_cache=False):
+    def forward(self, target_ids, input_ids, use_kv_cache=False, labels=None):
         """
         Forward pass of the PCTransformer model, using device-specific parallelism (CUDA streams or torch.jit.fork).
 
         Args:
             target_ids (torch.Tensor): Target token IDs of shape (B, T).
             input_ids (torch.Tensor): Input token IDs of shape (B, T).
+            labels (torch.Tensor): Labels for stream-aligned training (B,). For language modeling, can use target_ids.
 
         Returns:
             logits (torch.Tensor): Tensor of shape (B, T, vocab_size), the model's output logits for each token position.
@@ -62,7 +119,15 @@ class PCTransformer(nn.Module):
         device = input_ids.device
         vocab_size = self.output.config.vocab_size
         
-        # Clip input_ids and target_ids to valid range before using them
+        if labels is None:
+            labels = target_ids
+        
+        num_classes = self.num_classes if self.num_classes > 0 else vocab_size
+        
+        init_method = self.init_method
+        if init_method == "iavg" and (self.prev_labels is None or self.prev_hidden_states == {}):
+            init_method = "random"
+        
         if input_ids.max() >= vocab_size:
             input_ids = torch.clamp(input_ids, max=vocab_size-1)
         
@@ -72,19 +137,10 @@ class PCTransformer(nn.Module):
         target_logits = ids_to_one_hot(target_ids, vocab_size).to(device)
         position_ids = torch.arange(S, device=input_ids.device).unsqueeze(0).expand(B, S)
 
-        # Initialize all predictive coding layers
-        self.embedding.pc_layer.init_x(
-            batch_size=B,
-            seq_len=S,
-            layer_type="embed",
-            device = device,
-            layer={"word": self.embedding.word_embeddings, "pos": self.embedding.position_embeddings},
-            proj_layers=None,
-            input_ids=input_ids,
-            position_ids=position_ids,
-        )
-
-        for block in self.blocks:
+        for block_idx, block in enumerate(self.blocks):
+            base_layer_idx = block_idx * 4 + 1
+            
+            prev_h_attn = self.get_prev_hidden_state(f"attn_{block_idx}")
             block.attn.pc_qkv.init_x(
                 batch_size=B,
                 seq_len=S,
@@ -94,7 +150,15 @@ class PCTransformer(nn.Module):
                 proj_layers={"q_proj": block.attn.q, "k_proj": block.attn.k, "v_proj": block.attn.v},
                 input_ids = None,
                 position_ids = None,
+                init_method=init_method,
+                prev_hidden_states=prev_h_attn,
+                labels=labels,
+                num_classes=num_classes,
+                layer_idx=base_layer_idx,
+                hybrid_m=self.hybrid_m,
             )
+            
+            prev_h_attn_out = self.get_prev_hidden_state(f"attn_output_{block_idx}")
             block.attn.pc_output.init_x(
                 batch_size=B,
                 seq_len=S,
@@ -104,7 +168,15 @@ class PCTransformer(nn.Module):
                 proj_layers= None, 
                 input_ids = None,
                 position_ids = None,
+                init_method=init_method,
+                prev_hidden_states=prev_h_attn_out,
+                labels=labels,
+                num_classes=num_classes,
+                layer_idx=base_layer_idx + 1,
+                hybrid_m=self.hybrid_m,
             )
+            
+            prev_h_mlp1 = self.get_prev_hidden_state(f"mlp1_{block_idx}")
             block.mlp.pc_layer1.init_x(
                 batch_size=B,
                 seq_len=S,
@@ -114,7 +186,15 @@ class PCTransformer(nn.Module):
                 proj_layers= None, 
                 input_ids = None,
                 position_ids = None,
+                init_method=init_method,
+                prev_hidden_states=prev_h_mlp1,
+                labels=labels,
+                num_classes=num_classes,
+                layer_idx=base_layer_idx + 2,
+                hybrid_m=self.hybrid_m,
             )
+            
+            prev_h_mlp2 = self.get_prev_hidden_state(f"mlp2_{block_idx}")
             block.mlp.pc_layer2.init_x(
                 batch_size=B,
                 seq_len=S,
@@ -124,7 +204,16 @@ class PCTransformer(nn.Module):
                 proj_layers= None, 
                 input_ids = None,
                 position_ids = None,
+                init_method=init_method,
+                prev_hidden_states=prev_h_mlp2,
+                labels=labels,
+                num_classes=num_classes,
+                layer_idx=base_layer_idx + 3,
+                hybrid_m=self.hybrid_m,
             )
+        
+        prev_h_output = self.get_prev_hidden_state("output")
+        output_layer_idx = self.config.n_blocks * 4 + 1
         self.output.pc_layer.init_x(
             batch_size=B,
             seq_len=S,
@@ -134,6 +223,12 @@ class PCTransformer(nn.Module):
             proj_layers= None, 
             input_ids = None,
             position_ids = None,
+            init_method=init_method,
+            prev_hidden_states=prev_h_output,
+            labels=labels,
+            num_classes=num_classes,
+            layer_idx=output_layer_idx,
+            hybrid_m=self.hybrid_m,
         )
 
         # Initialize streams or futures for parallel execution
@@ -290,6 +385,11 @@ class PCTransformer(nn.Module):
 
             # Synchronize all parallel tasks
             synchronize_execution(use_cuda, streams_or_futures)
+        
+        if self.init_method == "iavg":
+            self.store_hidden_states()
+            self.set_labels(labels)
+        
         logits = self.output.pc_layer.get_mu("linear_output")
         return logits
     
