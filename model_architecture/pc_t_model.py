@@ -2,10 +2,11 @@ import torch
 import torch.nn as nn
 from .embedding import Embedding_Layer
 from .transformer_block import TransformerBlock
-from utils.pc_utils import ids_to_one_hot, _merge_heads
+from utils.pc_utils import ids_to_one_hot, HopfieldMemory
 from .output import OutputLayer
 from utils.device_utils import create_streams_or_futures, execute_parallel, synchronize_execution
-import math
+from typing import Optional, Dict, List
+
 class PCTransformer(nn.Module):
     """
     Top-down Predictive Coding Transformer model.
@@ -21,6 +22,126 @@ class PCTransformer(nn.Module):
         self.embedding = Embedding_Layer(config)
         self.blocks = nn.ModuleList([TransformerBlock(config) for _ in range(config.n_blocks)])
         self.output = OutputLayer(config)
+        
+        self.init_method = getattr(config, 'init_method', 'imem')
+        self.hybrid_m = getattr(config, 'hybrid_m', (config.n_blocks * 4 + 2) // 2 + 1)
+        
+        self.prev_hidden_states: Dict[str, torch.Tensor] = {}
+        self.prev_labels: Optional[torch.Tensor] = None
+        self.num_classes: int = getattr(config, 'num_classes', 0)
+        
+        self.hopfield_memories: Dict[str, HopfieldMemory] = {}
+        if self.init_method == 'imem':
+            self._setup_hopfield_memories()
+    
+    def _setup_hopfield_memories(self):
+        """Setup Hopfield memory modules for each layer for Imem initialization."""
+        n_layers = self.config.n_blocks * 4 + 2
+        for layer_idx in range(n_layers):
+            hidden_dim = self.config.n_embed
+            self.hopfield_memories[f"layer_{layer_idx}"] = HopfieldMemory(
+                input_dim=hidden_dim,
+                memory_dim=hidden_dim,
+                delta=1.0
+            )
+        self.hopfield_memories = nn.ModuleDict(self.hopfield_memories)
+    
+    def _init_hopfield_with_first_batch(self, input_ids, target_ids):
+        """Initialize Hopfield memory with first batch (Ifw-like) to set starting point."""
+        if self.init_method != 'imem':
+            return
+        
+        with torch.no_grad():
+            self._forward_for_hopfield_init(input_ids, target_ids)
+            
+            for layer_idx in range(self.config.n_blocks * 4 + 2):
+                hopfield_mem = self.hopfield_memories.get(f"layer_{layer_idx}")
+                if hopfield_mem is not None:
+                    layer_key = self._get_layer_key(layer_idx)
+                    hidden_state = self.prev_hidden_states.get(layer_key)
+                    if hidden_state is not None:
+                        obs = input_ids.float().unsqueeze(1) if layer_idx == 0 else hidden_state
+                        hopfield_mem.init_value_matrix(hidden_state, obs)
+    
+    def _get_layer_key(self, layer_idx: int) -> str:
+        """Map layer_idx to hidden state key."""
+        if layer_idx == 0:
+            return "embed"
+        elif layer_idx == self.config.n_blocks * 4 + 1:
+            return "output"
+        else:
+            block_idx = (layer_idx - 1) // 4
+            layer_type = (layer_idx - 1) % 4
+            if layer_type == 0:
+                return f"attn_{block_idx}"
+            elif layer_type == 1:
+                return f"attn_output_{block_idx}"
+            elif layer_type == 2:
+                return f"mlp1_{block_idx}"
+            else:
+                return f"mlp2_{block_idx}"
+    
+    def _forward_for_hopfield_init(self, input_ids, target_ids):
+        """Run forward pass to get hidden states for Hopfield initialization."""
+        B, S = input_ids.shape
+        device = input_ids.device
+        vocab_size = self.output.config.vocab_size
+        
+        if input_ids.max() >= vocab_size:
+            input_ids = torch.clamp(input_ids, max=vocab_size-1)
+        if target_ids.max() >= vocab_size:
+            target_ids = torch.clamp(target_ids, max=vocab_size-1)
+        
+        position_ids = torch.arange(S, device=device).unsqueeze(0).expand(B, S)
+        
+        x_word = self.embedding.word_embeddings(input_ids)
+        x_pos = self.embedding.position_embeddings(position_ids)
+        x = x_word + x_pos
+        self.prev_hidden_states["embed"] = x
+        
+        for block_idx, block in enumerate(self.blocks):
+            x = block.attn(block.ln2(x))
+            self.prev_hidden_states[f"attn_{block_idx}"] = x
+            
+            x = block.attn.pc_output.get_mu("linear_attn") if hasattr(block.attn, 'pc_output') and block.attn.pc_output.get_mu("linear_attn") is not None else x
+            x = block.mlp(block.ln1(x))
+            self.prev_hidden_states[f"mlp1_{block_idx}"] = x
+            
+            x = block.mlp.pc_layer2.get_mu("fc2") if hasattr(block.mlp, 'pc_layer2') and block.mlp.pc_layer2.get_mu("fc2") is not None else x
+            self.prev_hidden_states[f"mlp2_{block_idx}"] = x
+    
+    def get_hopfield_memory(self, layer_idx: int) -> Optional[HopfieldMemory]:
+        """Get Hopfield memory for a specific layer."""
+        return self.hopfield_memories.get(f"layer_{layer_idx}", None)
+    
+    def store_hidden_states(self):
+        """Store hidden states from current batch for Iavg initialization in next batch."""
+        self.prev_hidden_states["embed"] = self.embedding.pc_layer.get_mu("embed")
+        
+        for idx, block in enumerate(self.blocks):
+            base_idx = idx * 4 + 1
+            self.prev_hidden_states[f"attn_{idx}"] = block.attn.pc_qkv.get_mu("attn")
+            self.prev_hidden_states[f"attn_output_{idx}"] = block.attn.pc_output.get_mu("linear_attn")
+            self.prev_hidden_states[f"mlp1_{idx}"] = block.mlp.pc_layer1.get_mu("fc1")
+            self.prev_hidden_states[f"mlp2_{idx}"] = block.mlp.pc_layer2.get_mu("fc2")
+        
+        self.prev_hidden_states["output"] = self.output.pc_layer.get_mu("linear_output")
+    
+    def get_prev_hidden_state(self, layer_key: str) -> Optional[torch.Tensor]:
+        """Get previous hidden state for a specific layer."""
+        return self.prev_hidden_states.get(layer_key, None)
+    
+    def clear_prev_hidden_states(self):
+        """Clear stored hidden states."""
+        self.prev_hidden_states.clear()
+    
+    def set_labels(self, labels: torch.Tensor):
+        """Set labels for stream-aligned training."""
+        self.prev_labels = labels
+    
+    def set_num_classes(self, num_classes: int):
+        """Set number of classes for stream-aligned training."""
+        self.num_classes = num_classes
 
     def register_all_lateral_weights(self):
         """
@@ -28,16 +149,11 @@ class PCTransformer(nn.Module):
         This enables lateral connections for local learning in each layer.
         """
         for block in self.blocks:
-            head_dim = block.attn.n_embed // block.attn.num_heads
-            block.attn.pc_X_Q.register_lateral("X_Q", head_dim)
-            block.attn.pc_X_K.register_lateral("X_K", head_dim)
-            block.attn.pc_X_V.register_lateral("X_V", head_dim)
+            block.attn.pc_qkv.register_lateral("attn", block.attn.q.in_features)
+            block.attn.pc_output.register_lateral("linear", block.attn.output.in_features)
             block.mlp.pc_layer1.register_lateral("fc1", block.mlp.fc1.in_features)
-            block.attn.pc_output.register_lateral("attn_output", head_dim)
-            block.mlp.pc_layer2.register_lateral("fc2", block.mlp.fc2.in_features)
-        self.output.pc_layer.register_lateral("linear_output", self.output.output.in_features)
-
-
+            block.mlp.pc_layer2.register_lateral("linear", block.mlp.fc2.in_features)
+        self.output.pc_layer.register_lateral("linear", self.output.output.in_features)
 
         for module in self.modules():
             if hasattr(module, 'W_latents'):
@@ -45,13 +161,22 @@ class PCTransformer(nn.Module):
                     if module.W_latents[key] is not None:
                         module.W_latents[key] = module.W_latents[key].to(next(self.parameters()).device)
 
-    def forward(self, target_ids, input_ids, use_kv_cache=False):
+    def forward(self, target_ids, input_ids, use_kv_cache=False, labels=None):
         """
-        Forward pass of the PCTransformer model.
+        Forward pass of the PCTransformer model, using device-specific parallelism (CUDA streams or torch.jit.fork).
+
+        Args:
+            target_ids (torch.Tensor): Target token IDs of shape (B, T).
+            input_ids (torch.Tensor): Input token IDs of shape (B, T).
+            labels (torch.Tensor): Labels for stream-aligned training (B,). For language modeling, can use target_ids.
+
+        Returns:
+            logits (torch.Tensor): Tensor of shape (B, T, vocab_size), the model's output logits for each token position.
         """
         for module in self.modules():
             if hasattr(module, "clear_energy"):
                 module.clear_energy()
+            
             if hasattr(module, "clear_errors"):
                 module.clear_errors()
 
@@ -59,223 +184,312 @@ class PCTransformer(nn.Module):
         device = input_ids.device
         vocab_size = self.output.config.vocab_size
         
-        # Clip input_ids and target_ids to valid range
-        input_ids = torch.clamp(input_ids, max=vocab_size-1)
-        target_ids = torch.clamp(target_ids, max=vocab_size-1)
+        if labels is None:
+            labels = target_ids
+        
+        num_classes = self.num_classes if self.num_classes > 0 else vocab_size
+        
+        init_method = self.init_method
+        
+        if init_method == "imem" and len(self.hopfield_memories) > 0 and self.prev_hidden_states == {}:
+            self._init_hopfield_with_first_batch(input_ids, target_ids)
+        
+        observations = input_ids.float().unsqueeze(-1) if init_method == "imem" else None
+        
+        if input_ids.max() >= vocab_size:
+            input_ids = torch.clamp(input_ids, max=vocab_size-1)
+        
+        if target_ids.max() >= vocab_size:
+            target_ids = torch.clamp(target_ids, max=vocab_size-1)
         
         target_logits = ids_to_one_hot(target_ids, vocab_size).to(device)
-        position_ids = torch.arange(S, device=device).unsqueeze(0).expand(B, S)
+        position_ids = torch.arange(S, device=input_ids.device).unsqueeze(0).expand(B, S)
 
-        # Initialize all PC layers
+        prev_h_embed = self.get_prev_hidden_state("embed")
+        hopfield_mem_0 = self.hopfield_memories.get("layer_0")
         self.embedding.pc_layer.init_x(
-            batch_size=B, seq_len=S, layer_type="embed", device=device,
+            batch_size=B,
+            seq_len=S,
+            layer_type="embed",
+            device = device,
             layer={"word": self.embedding.word_embeddings, "pos": self.embedding.position_embeddings},
-            input_ids=input_ids, position_ids=position_ids
+            proj_layers=None,
+            input_ids=input_ids,
+            position_ids=position_ids,
+            init_method=init_method,
+            prev_hidden_states=prev_h_embed,
+            labels=labels,
+            num_classes=num_classes,
+            layer_idx=0,
+            hybrid_m=self.hybrid_m,
+            hopfield_memory=hopfield_mem_0,
+            observations=observations,
         )
 
-        for block in self.blocks:
-            # Initialize Attention Latents
-            block.attn.pc_X_Q.init_x(batch_size=B, seq_len=S, layer_type="X_Q", device=device,
-                                    proj_layers={"q_proj": block.attn.q, "k_proj": block.attn.k, "v_proj": block.attn.v})
-            block.attn.pc_X_K.init_x(batch_size=B, seq_len=S, layer_type="X_K", device=device,
-                                    proj_layers={"q_proj": block.attn.q, "k_proj": block.attn.k, "v_proj": block.attn.v})
-            block.attn.pc_X_V.init_x(batch_size=B, seq_len=S, layer_type="X_V", device=device,
-                                    proj_layers={"q_proj": block.attn.q, "k_proj": block.attn.k, "v_proj": block.attn.v})
-            block.attn.pc_X_score.init_x(batch_size=B, seq_len=S, layer_type="X_score", device=device)
-            block.attn.pc_X_A.init_x(batch_size=B, seq_len=S, layer_type="X_A", device=device)
+        for block_idx, block in enumerate(self.blocks):
+            base_layer_idx = block_idx * 4 + 1
             
-            # Initialize Output and MLP Latents
-            block.attn.pc_output.init_x(batch_size=B, seq_len=S, layer_type="attn_output", device=device, layer=block.attn.output)
-            block.mlp.pc_layer1.init_x(batch_size=B, seq_len=S, layer_type="fc1", device=device, layer=block.mlp.fc1)
-            block.mlp.pc_layer2.init_x(batch_size=B, seq_len=S, layer_type="fc2", device=device, layer=block.mlp.fc2)
+            prev_h_attn = self.get_prev_hidden_state(f"attn_{block_idx}")
+            hopfield_mem_attn = self.hopfield_memories.get(f"layer_{base_layer_idx}")
+            block.attn.pc_qkv.init_x(
+                batch_size=B,
+                seq_len=S,
+                layer_type="attn",
+                device = device,
+                layer = None,
+                proj_layers={"q_proj": block.attn.q, "k_proj": block.attn.k, "v_proj": block.attn.v},
+                input_ids = None,
+                position_ids = None,
+                init_method=init_method,
+                prev_hidden_states=prev_h_attn,
+                labels=labels,
+                num_classes=num_classes,
+                layer_idx=base_layer_idx,
+                hybrid_m=self.hybrid_m,
+                hopfield_memory=hopfield_mem_attn,
+                observations=observations,
+            )
+            
+            prev_h_attn_out = self.get_prev_hidden_state(f"attn_output_{block_idx}")
+            hopfield_mem_attn_out = self.hopfield_memories.get(f"layer_{base_layer_idx + 1}")
+            block.attn.pc_output.init_x(
+                batch_size=B,
+                seq_len=S,
+                layer_type="linear_attn",
+                device=device,
+                layer=block.attn.output,
+                proj_layers= None, 
+                input_ids = None,
+                position_ids = None,
+                init_method=init_method,
+                prev_hidden_states=prev_h_attn_out,
+                labels=labels,
+                num_classes=num_classes,
+                layer_idx=base_layer_idx + 1,
+                hybrid_m=self.hybrid_m,
+                hopfield_memory=hopfield_mem_attn_out,
+                observations=observations,
+            )
+            
+            prev_h_mlp1 = self.get_prev_hidden_state(f"mlp1_{block_idx}")
+            hopfield_mem_mlp1 = self.hopfield_memories.get(f"layer_{base_layer_idx + 2}")
+            block.mlp.pc_layer1.init_x(
+                batch_size=B,
+                seq_len=S,
+                layer_type="fc1",
+                device=device,
+                layer=block.mlp.fc1,
+                proj_layers= None, 
+                input_ids = None,
+                position_ids = None,
+                init_method=init_method,
+                prev_hidden_states=prev_h_mlp1,
+                labels=labels,
+                num_classes=num_classes,
+                layer_idx=base_layer_idx + 2,
+                hybrid_m=self.hybrid_m,
+                hopfield_memory=hopfield_mem_mlp1,
+                observations=observations,
+            )
+            
+            prev_h_mlp2 = self.get_prev_hidden_state(f"mlp2_{block_idx}")
+            hopfield_mem_mlp2 = self.hopfield_memories.get(f"layer_{base_layer_idx + 3}")
+            block.mlp.pc_layer2.init_x(
+                batch_size=B,
+                seq_len=S,
+                layer_type="fc2",
+                device=device,
+                layer=block.mlp.fc2,
+                proj_layers= None, 
+                input_ids = None,
+                position_ids = None,
+                init_method=init_method,
+                prev_hidden_states=prev_h_mlp2,
+                labels=labels,
+                num_classes=num_classes,
+                layer_idx=base_layer_idx + 3,
+                hybrid_m=self.hybrid_m,
+                hopfield_memory=hopfield_mem_mlp2,
+                observations=observations,
+            )
+        
+        prev_h_output = self.get_prev_hidden_state("output")
+        output_layer_idx = self.config.n_blocks * 4 + 1
+        hopfield_mem_output = self.hopfield_memories.get(f"layer_{output_layer_idx}")
+        self.output.pc_layer.init_x(
+            batch_size=B,
+            seq_len=S,
+            layer_type="linear_output",
+            device=device,
+            layer=self.output.output,
+            proj_layers= None, 
+            input_ids = None,
+            position_ids = None,
+            init_method=init_method,
+            prev_hidden_states=prev_h_output,
+            labels=labels,
+            num_classes=num_classes,
+            layer_idx=output_layer_idx,
+            hybrid_m=self.hybrid_m,
+            hopfield_memory=hopfield_mem_output,
+            observations=observations,
+        )
 
-        self.output.pc_layer.init_x(batch_size=B, seq_len=S, layer_type="linear_output", device=device, layer=self.output.output)
+        # Initialize streams or futures for parallel execution
+        use_cuda, streams_or_futures = create_streams_or_futures(device, len(self.blocks) * 4 + 2)
 
-        use_cuda, streams_or_futures = create_streams_or_futures(device, len(self.blocks) * 8 + 2)
-
-        def ensure_3d(tensor: torch.Tensor) -> torch.Tensor:
-            if tensor is not None and tensor.dim() == 4:
-                return _merge_heads(tensor)
-            return tensor
-        # 3. Embedding Layer Forward
-               
         for t in range(self.config.T):
-            first_block = self.blocks[0]
-            embed_target = (ensure_3d(first_block.attn.pc_X_Q.get_x("X_Q")) + 
-                            ensure_3d(first_block.attn.pc_X_K.get_x("X_K")) + 
-                                ensure_3d(first_block.attn.pc_X_V.get_x("X_V"))) / 3.0
-                
+            # Execute output layer
+            td_mlp2 = self.blocks[-1].mlp.pc_layer2.get_td_err("fc2") if t > 0 else None
             execute_parallel(
-                    use_cuda, streams_or_futures, self.embedding.pc_layer.forward,
-                    target_activity=embed_target, layer_type="embed", t=t, T=self.config.T,
-                    requires_update=True, td_err=None,
-                    layer={"word": self.embedding.word_embeddings, "pos": self.embedding.position_embeddings},
-                    input_ids=input_ids, position_ids=position_ids
-                ) 
-            
+                use_cuda,
+                streams_or_futures,
+                self.output.pc_layer.forward,
+                target_activity=target_logits,
+                layer_type="linear_output",
+                t=t,
+                T=self.config.T,
+                requires_update=True,
+                td_err= td_mlp2,
+                layer=self.output.output,
+                layer_norm=None,
+                proj_layers=None,
+                input_ids=None,
+                position_ids=None,
+                flash=False
 
-            # 2. Reverse Block Iteration
+            )
+
+            # Iterate through blocks in reverse order for parallel execution
             for idx in range(len(self.blocks) - 1, -1, -1):
                 block = self.blocks[idx]
+                next_target = (
+                    self.blocks[idx + 1].attn.pc_qkv.get_x("attn")
+                    if idx < len(self.blocks) - 1
+                    else self.output.pc_layer.get_x("linear_output")
+                )
                 
-                
+                layer_norm2 = (block.ln2
+                   if idx < len(self.blocks) - 1
+                    else None)
+                td_mlp1 = block.mlp.pc_layer1.get_td_err("fc1") if t > 0 else None
 
-     
-                block_td_source = self.embedding.pc_layer.get_td_err("embed") if idx == 0 else self.blocks[idx-1].mlp.pc_layer2.get_td_err("fc2")
-                ####
-
-                
-                target_score=block.attn.pc_X_score.get_x("X_score")
-                
+                # Execute MLP layer 2
                 execute_parallel(
                     use_cuda,
                     streams_or_futures,
-                    block.attn.pc_X_Q.forward,
-                    target_activity=target_score,
-                    layer_type="X_Q",
+                    block.mlp.pc_layer2.forward,
+                    target_activity=next_target,
+                    layer_type="fc2",
                     t=t,
                     T=self.config.T,
                     requires_update=True,
-                    td_err=block_td_source,
-                    layer=None,
-                    layer_norm=block.ln2,
-                    proj_layers={"q_proj": block.attn.q, "k_proj": block.attn.k, "v_proj": block.attn.v},
+                    td_err= td_mlp1,
+                    layer=block.mlp.fc2,
+                    layer_norm=layer_norm2,
+                    proj_layers=None,
                     input_ids=None,
                     position_ids=None,
-                    flash=False,
-                )
+                    flash=False
 
+                )
+                td_attn_op = block.attn.pc_output.get_td_err("linear_attn") if t > 0 else None
+
+                # Execute MLP layer 1
                 execute_parallel(
                     use_cuda,
                     streams_or_futures,
-                    block.attn.pc_X_K.forward,
-                    target_activity=target_score,
-                    layer_type="X_K",
+                    block.mlp.pc_layer1.forward,
+                    target_activity=block.mlp.pc_layer2.get_x("fc2"),
+                    layer_type="fc1",
                     t=t,
                     T=self.config.T,
                     requires_update=True,
-                    td_err=block_td_source,
-                    layer=None,
-                    layer_norm=block.ln2,
-                    proj_layers={"q_proj": block.attn.q, "k_proj": block.attn.k, "v_proj": block.attn.v},
+                    td_err= td_attn_op,
+                    layer=block.mlp.fc1,
+                    layer_norm=block.ln1, 
+                    proj_layers=None,
                     input_ids=None,
                     position_ids=None,
-                    flash=False,
+                    flash=False
+
                 )
-                target_attn_output = block.attn.pc_output.get_x("attn_output")
-
-
                 
-                q_mu = block.attn.pc_X_Q.get_mu("X_Q")
-                k_mu = block.attn.pc_X_K.get_mu("X_K")
-                
-
-                # Compute Score TD error properly - use actual attention scores
-                head_dim = q_mu.shape[-1]
-                mu_score = torch.matmul(q_mu, k_mu.transpose(-2, -1)) / (head_dim ** 0.5)
-                
-                # Get the actual score prediction
-                x_score = block.attn.pc_X_score.get_x("X_score")
-                if x_score is not None:
-                    td_score = x_score - mu_score
+                if idx == 0:
+                   td_embed = self.embedding.pc_layer.get_td_err("embed") if t > 0 else None
                 else:
-                    td_score = None
-      
-               
-                # Execute Attention mechanism PC nodes
-                execute_parallel(
-                    use_cuda, streams_or_futures, block.attn.pc_X_score.forward,
-                    target_activity=block.attn.pc_X_A.get_x("X_A"), layer_type="X_score",
-                    t=t, T=self.config.T, requires_update=True, td_err=td_score,layer=None,
-                    q=q_mu, k=k_mu, use_cache=use_kv_cache
-                )
-                execute_parallel(
-                    use_cuda, streams_or_futures, block.attn.pc_X_A.forward,
-                    target_activity=target_attn_output, layer_type="X_A",
-                    t=t, T=self.config.T, requires_update=True,
-                    td_err=block.attn.pc_X_score.get_td_err("X_score") ,
-                    score=block.attn.pc_X_score.get_mu("X_score"),
-            
-                )
-
+                   td_embed = self.blocks[idx - 1].mlp.pc_layer2.get_td_err("fc2") if t > 0 else None
                 
+                td_attn_qkv = block.attn.pc_qkv.get_td_err("attn") if t > 0 else None
 
+    
+                # Execute attention output
                 execute_parallel(
                     use_cuda,
                     streams_or_futures,
-                    block.attn.pc_X_V.forward,
-                    target_activity=target_attn_output,
-                    layer_type="X_V",
+                    block.attn.pc_output.forward,
+                    target_activity=block.mlp.pc_layer1.get_x("fc1"),
+                    layer_type="linear_attn",
                     t=t,
                     T=self.config.T,
                     requires_update=True,
-                    td_err=block_td_source,
-                    layer=None,
+                    td_err= td_attn_qkv,
+                    layer=block.attn.output, 
+                    layer_norm=block.ln1,
+                    proj_layers=None,
+                    input_ids=None,
+                    position_ids=None,
+                    flash=False
+
+                )
+
+                # Execute attention QKV
+                execute_parallel(
+                    use_cuda,
+                    streams_or_futures,
+                    block.attn.pc_qkv.forward,
+                    target_activity=block.attn.pc_output.get_x("linear_attn"),
+                    layer_type="attn",
+                    t=t,
+                    T=self.config.T,
+                    requires_update=True,
+                    td_err= td_embed,
+                    layer = None,
                     layer_norm=block.ln2,
                     proj_layers={"q_proj": block.attn.q, "k_proj": block.attn.k, "v_proj": block.attn.v},
                     input_ids=None,
                     position_ids=None,
-                    flash=False,
-                )
-                 # Compute Attention Output TD error from Softmax(A) and V errors
-                v_mu = block.attn.pc_X_V.get_mu("X_V")
-                a_mu = block.attn.pc_X_A.get_mu("X_A")
-                td_err_xa = block.attn.pc_X_A.get_td_err("X_A")
-                td_err_xv = block.attn.pc_X_V.get_td_err("X_V")
-                td_X_A_X_V = td_err_xv
-                if td_err_xa is not None and td_err_xv is not None:
-                    td_a = td_err_xa.mean(dim=-1, keepdim=True)
-                    td_a = td_a.expand_as(td_err_xv)
-                    td_X_A_X_V = td_err_xv + td_a
-
-                
-
-                execute_parallel(
-                    use_cuda, streams_or_futures, block.attn.pc_output.forward,
-                    target_activity=block.mlp.pc_layer1.get_x("fc1"), layer_type="attn_output",
-                    t=t, T=self.config.T, requires_update=True, td_err=td_X_A_X_V,
-                    a_weights=a_mu, v=v_mu, layer=block.attn.output, layer_norm=block.ln1
-                )
-                td_mlp1 = block.mlp.pc_layer1.get_td_err("fc1") 
-                td_attn_op = block.attn.pc_output.get_td_err("attn_output")
-                # Determine target for the end of the block (MLP)
-                if idx < len(self.blocks) - 1:
-                    next_block = self.blocks[idx + 1]
-                    # Averaging Q, K, V targets as top-down pressure
-                    next_q = ensure_3d(next_block.attn.pc_X_Q.get_x("X_Q"))
-                    next_k = ensure_3d(next_block.attn.pc_X_K.get_x("X_K"))
-                    next_v = ensure_3d(next_block.attn.pc_X_V.get_x("X_V"))
-                    next_target = (next_q + next_k + next_v) / 3.0
-                    layer_norm_mlp2 = block.ln2
-                else:
-                    next_target = self.output.pc_layer.get_x("linear_output")
-                    layer_norm_mlp2 = None
-                # --- MLP Layer 2 ---
-                execute_parallel(
-                    use_cuda, streams_or_futures, block.mlp.pc_layer2.forward,
-                    target_activity=next_target, layer_type="fc2", t=t, T=self.config.T,
-                    requires_update=True, td_err=td_mlp1, layer=block.mlp.fc2,
-                    layer_norm=layer_norm_mlp2
+                    flash=getattr(self.config, 'use_flash_attention', False),
+                    use_cache=use_kv_cache,  
+                    kv_cache=block.attn.kv_cache if use_kv_cache else None, 
                 )
 
-                # --- MLP Layer 1 ---
-                execute_parallel(
-                    use_cuda, streams_or_futures, block.mlp.pc_layer1.forward,
-                    target_activity=block.mlp.pc_layer2.get_x("fc2"), layer_type="fc1",
-                    t=t, T=self.config.T, requires_update=True, td_err=td_attn_op,
-                    layer=block.mlp.fc1, layer_norm=block.ln1
-                )
-            # 1. Output Layer Forward
-            td_mlp2_last = self.blocks[-1].mlp.pc_layer2.get_td_err("fc2") 
+                # Update cache after last iteration
+                if use_kv_cache and t == self.config.T - 1:
+                    block.attn.kv_cache = block.attn.pc_qkv._last_kv_cache
+    
+            # Execute embedding layer
             execute_parallel(
-                use_cuda, streams_or_futures, self.output.pc_layer.forward,
-                target_activity=target_logits, layer_type="linear_output",
-                t=t, T=self.config.T, requires_update=True, td_err=td_mlp2_last,
-                layer=self.output.output, flash=False
-            )    
+                use_cuda,
+                streams_or_futures,
+                self.embedding.pc_layer.forward,
+                target_activity=self.blocks[0].attn.pc_qkv.get_x("attn"),
+                layer_type="embed",
+                t=t,
+                T=self.config.T,
+                requires_update=True,
+                td_err = None,
+                layer={"word": self.embedding.word_embeddings, "pos": self.embedding.position_embeddings},
+                layer_norm= block.ln2,
+                proj_layers=None,
+                input_ids=input_ids,
+                position_ids=position_ids,
+                flash=False
+            )
 
-            
-
+            # Synchronize all parallel tasks
             synchronize_execution(use_cuda, streams_or_futures)
-
-        return self.output.pc_layer.get_mu("linear_output")
+        
+        logits = self.output.pc_layer.get_mu("linear_output")
+        return logits
+    
