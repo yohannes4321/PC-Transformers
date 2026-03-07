@@ -45,12 +45,11 @@ def evaluate(model, config, dataloader, max_batches=None, device = None):
         input_ids = batch["input_ids"].to(device)
         targets = batch["target_ids"].to(device)
 
-        # Clip targets to valid range before using them for loss calculation
         if targets.max() >= vocab_size:
             targets = torch.clamp(targets, max=vocab_size-1)
        
-
-        logits = model(targets, input_ids)
+        labels = targets
+        logits = model(targets, input_ids, labels=labels)
         ce_loss = F.cross_entropy(
             logits.view(-1, logits.size(-1)),
             targets.view(-1),
@@ -130,7 +129,10 @@ def main():
         combined_internal_weight=best_config["combined_internal_weight"],
         combined_output_weight=best_config["combined_output_weight"],
         use_flash_attention=best_config["use_flash_attention"],
-        alpha = best_config["alpha"]
+        alpha = best_config["alpha"],
+        init_method = "imem",
+        hybrid_m = best_config.get("hybrid_m", (best_config["n_blocks"] * 4 + 2) // 2 + 1),
+        num_classes = best_config.get("num_classes", vocab_size),
     )
   
     model_path = "checkpoints/final_model.pt"
