@@ -39,20 +39,6 @@ def train(model, dataloader, config, global_step, device, logger):
     output_pc_layer = base_model.output.pc_layer
     
     init_method = getattr(config, 'init_method', 'random')
-    if init_method == 'imem':
-        base_model.eval()
-        with torch.no_grad():
-            for batch_idx, batch in enumerate(dataloader):
-                if batch_idx >= 1:
-                    break
-                input_ids = batch["input_ids"].to(device)
-                target_ids = batch["target_ids"].to(device)
-                
-                if target_ids.max() >= vocab_size:
-                    target_ids = torch.clamp(target_ids, max=vocab_size - 1)
-                
-                _ = base_model(target_ids, input_ids)
-        base_model.train()
     
     for batch_idx, batch in enumerate(dataloader):
         input_ids = batch["input_ids"].to(device)
@@ -78,6 +64,26 @@ def train(model, dataloader, config, global_step, device, logger):
         
         labels = target_ids
         logits = model(target_ids, input_ids, labels=labels)
+        
+        if init_method == 'imem' and hasattr(base_model, 'hopfield_memories'):
+            hopfield_loss = None
+            for layer_key, hopfield_mem in base_model.hopfield_memories.items():
+                if hopfield_mem is not None:
+                    layer_idx = int(layer_key.split('_')[1])
+                    layer_key_state = base_model._get_layer_key(layer_idx)
+                    target_state = base_model.prev_hidden_states.get(layer_key_state)
+                    if target_state is not None:
+                        mem_init = hopfield_mem(input_ids.float().unsqueeze(-1) if layer_idx == 0 else target_state)
+                        loss = F.mse_loss(mem_init, target_state.detach())
+                        if hopfield_loss is None:
+                            hopfield_loss = loss
+                        else:
+                            hopfield_loss = hopfield_loss + loss
+            
+            if hopfield_loss is not None:
+                hopfield_loss = hopfield_loss / len(base_model.hopfield_memories)
+                (hopfield_loss * 0.01).backward()
+        
         ce_loss = F.cross_entropy(
             logits.view(-1, logits.size(-1)),
             target_ids.view(-1),

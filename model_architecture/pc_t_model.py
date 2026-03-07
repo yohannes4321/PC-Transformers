@@ -44,6 +44,71 @@ class PCTransformer(nn.Module):
                 memory_dim=hidden_dim,
                 delta=1.0
             )
+        self.hopfield_memories = nn.ModuleDict(self.hopfield_memories)
+    
+    def _init_hopfield_with_first_batch(self, input_ids, target_ids):
+        """Initialize Hopfield memory with first batch (Ifw-like) to set starting point."""
+        if self.init_method != 'imem':
+            return
+        
+        with torch.no_grad():
+            self._forward_for_hopfield_init(input_ids, target_ids)
+            
+            for layer_idx in range(self.config.n_blocks * 4 + 2):
+                hopfield_mem = self.hopfield_memories.get(f"layer_{layer_idx}")
+                if hopfield_mem is not None:
+                    layer_key = self._get_layer_key(layer_idx)
+                    hidden_state = self.prev_hidden_states.get(layer_key)
+                    if hidden_state is not None:
+                        obs = input_ids.float().unsqueeze(1) if layer_idx == 0 else hidden_state
+                        hopfield_mem.init_value_matrix(hidden_state, obs)
+    
+    def _get_layer_key(self, layer_idx: int) -> str:
+        """Map layer_idx to hidden state key."""
+        if layer_idx == 0:
+            return "embed"
+        elif layer_idx == self.config.n_blocks * 4 + 1:
+            return "output"
+        else:
+            block_idx = (layer_idx - 1) // 4
+            layer_type = (layer_idx - 1) % 4
+            if layer_type == 0:
+                return f"attn_{block_idx}"
+            elif layer_type == 1:
+                return f"attn_output_{block_idx}"
+            elif layer_type == 2:
+                return f"mlp1_{block_idx}"
+            else:
+                return f"mlp2_{block_idx}"
+    
+    def _forward_for_hopfield_init(self, input_ids, target_ids):
+        """Run forward pass to get hidden states for Hopfield initialization."""
+        B, S = input_ids.shape
+        device = input_ids.device
+        vocab_size = self.output.config.vocab_size
+        
+        if input_ids.max() >= vocab_size:
+            input_ids = torch.clamp(input_ids, max=vocab_size-1)
+        if target_ids.max() >= vocab_size:
+            target_ids = torch.clamp(target_ids, max=vocab_size-1)
+        
+        position_ids = torch.arange(S, device=device).unsqueeze(0).expand(B, S)
+        
+        x_word = self.embedding.word_embeddings(input_ids)
+        x_pos = self.embedding.position_embeddings(position_ids)
+        x = x_word + x_pos
+        self.prev_hidden_states["embed"] = x
+        
+        for block_idx, block in enumerate(self.blocks):
+            x = block.attn(block.ln2(x))
+            self.prev_hidden_states[f"attn_{block_idx}"] = x
+            
+            x = block.attn.pc_output.get_mu("linear_attn") if hasattr(block.attn, 'pc_output') and block.attn.pc_output.get_mu("linear_attn") is not None else x
+            x = block.mlp(block.ln1(x))
+            self.prev_hidden_states[f"mlp1_{block_idx}"] = x
+            
+            x = block.mlp.pc_layer2.get_mu("fc2") if hasattr(block.mlp, 'pc_layer2') and block.mlp.pc_layer2.get_mu("fc2") is not None else x
+            self.prev_hidden_states[f"mlp2_{block_idx}"] = x
     
     def get_hopfield_memory(self, layer_idx: int) -> Optional[HopfieldMemory]:
         """Get Hopfield memory for a specific layer."""
@@ -125,8 +190,14 @@ class PCTransformer(nn.Module):
         num_classes = self.num_classes if self.num_classes > 0 else vocab_size
         
         init_method = self.init_method
+        
         if init_method == "iavg" and (self.prev_labels is None or self.prev_hidden_states == {}):
             init_method = "random"
+        
+        if init_method == "imem" and len(self.hopfield_memories) > 0 and self.prev_hidden_states == {}:
+            self._init_hopfield_with_first_batch(input_ids, target_ids)
+        
+        observations = input_ids.float().unsqueeze(-1) if init_method == "imem" else None
         
         if input_ids.max() >= vocab_size:
             input_ids = torch.clamp(input_ids, max=vocab_size-1)
@@ -138,6 +209,7 @@ class PCTransformer(nn.Module):
         position_ids = torch.arange(S, device=input_ids.device).unsqueeze(0).expand(B, S)
 
         prev_h_embed = self.get_prev_hidden_state("embed")
+        hopfield_mem_0 = self.hopfield_memories.get("layer_0")
         self.embedding.pc_layer.init_x(
             batch_size=B,
             seq_len=S,
@@ -153,12 +225,15 @@ class PCTransformer(nn.Module):
             num_classes=num_classes,
             layer_idx=0,
             hybrid_m=self.hybrid_m,
+            hopfield_memory=hopfield_mem_0,
+            observations=observations,
         )
 
         for block_idx, block in enumerate(self.blocks):
             base_layer_idx = block_idx * 4 + 1
             
             prev_h_attn = self.get_prev_hidden_state(f"attn_{block_idx}")
+            hopfield_mem_attn = self.hopfield_memories.get(f"layer_{base_layer_idx}")
             block.attn.pc_qkv.init_x(
                 batch_size=B,
                 seq_len=S,
@@ -174,9 +249,12 @@ class PCTransformer(nn.Module):
                 num_classes=num_classes,
                 layer_idx=base_layer_idx,
                 hybrid_m=self.hybrid_m,
+                hopfield_memory=hopfield_mem_attn,
+                observations=observations,
             )
             
             prev_h_attn_out = self.get_prev_hidden_state(f"attn_output_{block_idx}")
+            hopfield_mem_attn_out = self.hopfield_memories.get(f"layer_{base_layer_idx + 1}")
             block.attn.pc_output.init_x(
                 batch_size=B,
                 seq_len=S,
@@ -192,9 +270,12 @@ class PCTransformer(nn.Module):
                 num_classes=num_classes,
                 layer_idx=base_layer_idx + 1,
                 hybrid_m=self.hybrid_m,
+                hopfield_memory=hopfield_mem_attn_out,
+                observations=observations,
             )
             
             prev_h_mlp1 = self.get_prev_hidden_state(f"mlp1_{block_idx}")
+            hopfield_mem_mlp1 = self.hopfield_memories.get(f"layer_{base_layer_idx + 2}")
             block.mlp.pc_layer1.init_x(
                 batch_size=B,
                 seq_len=S,
@@ -210,9 +291,12 @@ class PCTransformer(nn.Module):
                 num_classes=num_classes,
                 layer_idx=base_layer_idx + 2,
                 hybrid_m=self.hybrid_m,
+                hopfield_memory=hopfield_mem_mlp1,
+                observations=observations,
             )
             
             prev_h_mlp2 = self.get_prev_hidden_state(f"mlp2_{block_idx}")
+            hopfield_mem_mlp2 = self.hopfield_memories.get(f"layer_{base_layer_idx + 3}")
             block.mlp.pc_layer2.init_x(
                 batch_size=B,
                 seq_len=S,
@@ -228,10 +312,13 @@ class PCTransformer(nn.Module):
                 num_classes=num_classes,
                 layer_idx=base_layer_idx + 3,
                 hybrid_m=self.hybrid_m,
+                hopfield_memory=hopfield_mem_mlp2,
+                observations=observations,
             )
         
         prev_h_output = self.get_prev_hidden_state("output")
         output_layer_idx = self.config.n_blocks * 4 + 1
+        hopfield_mem_output = self.hopfield_memories.get(f"layer_{output_layer_idx}")
         self.output.pc_layer.init_x(
             batch_size=B,
             seq_len=S,
@@ -247,6 +334,8 @@ class PCTransformer(nn.Module):
             num_classes=num_classes,
             layer_idx=output_layer_idx,
             hybrid_m=self.hybrid_m,
+            hopfield_memory=hopfield_mem_output,
+            observations=observations,
         )
 
         # Initialize streams or futures for parallel execution
