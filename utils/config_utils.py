@@ -12,7 +12,8 @@ def load_best_config():
         "dropout", "T", "num_heads", "n_blocks", "update_bias", "alpha",
         "lr", "batch_size", "num_epochs", "internal_energy_fn_name",
         "output_energy_fn_name", "combined_internal_weight",
-        "combined_output_weight", "use_flash_attention"
+        "combined_output_weight", "use_flash_attention", "init_method",
+        "hybrid_m", "num_classes"
     }
 
     fallback_values = {
@@ -33,7 +34,10 @@ def load_best_config():
         "output_energy_fn_name": "pc_e",
         "combined_internal_weight": 0.8779955579743048,
         "combined_output_weight": 0.12200444202569516,
-        "use_flash_attention": False
+        "use_flash_attention": False,
+        "init_method": "imem",
+        "hybrid_m": 25,
+        "num_classes": 0,
     }
 
     config = {}
@@ -67,5 +71,8 @@ def load_best_config():
     for key in selected_keys:
         if key not in config:
             config[key] = fallback_values[key]
+
+    # Enforce Hopfield memory initialization globally.
+    config["init_method"] = "imem"
 
     return config
