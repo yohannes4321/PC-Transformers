@@ -1,78 +1,123 @@
-import os
-import re
+import torch
+import pickle
+import time
+import pickle
+from training import train
+from eval import evaluate
+from utils.pc_utils import cleanup_memory
+from utils.model_utils import set_seed
+from model_architecture.pc_t_model import PCTransformer
+from predictive_coding.config import GPTConfig
+from tuning.config import get_dynamic_model_config, update_global_config
+from tuning.tuning_logs import log_trial_to_detailed_log, trial_batch_logger
+import torch.distributed as dist
+from torch.nn.parallel import DistributedDataParallel as DDP
+import torch.nn.functional as F
+from data_preparation.dataloader import get_loaders
+from data_preparation.config import vocab_size
 
-def load_best_config():
+def combined_loss(energy, ce_loss, alpha=0.5):
     """
-    Parses a result file and returns a dict of selected hyperparameters.
-    If the file is missing or a key is missing, fallback values are used.
+    Combine energy and cross-entropy loss.
+    alpha: weight between energy and CE loss (0.0 = only CE, 1.0 = only energy)
     """
+    return alpha * energy + (1 - alpha) * ce_loss
 
-    selected_keys = {
-        "block_size", "peak_learning_rate", "warmup_steps", "n_embed",
-        "dropout", "T", "num_heads", "n_blocks", "update_bias", "alpha",
-        "lr", "batch_size", "num_epochs", "internal_energy_fn_name",
-        "output_energy_fn_name", "combined_internal_weight",
-        "combined_output_weight", "use_flash_attention", "init_method",
-        "hybrid_m", "num_classes"
-    }
+def broadcast_config(config_dict, device):
+    """Broadcast config from rank 0 to all other ranks"""
+    obj_bytes = pickle.dumps(config_dict)
+    obj_tensor = torch.tensor(list(obj_bytes), dtype=torch.uint8, device=device)
+    length = torch.tensor([len(obj_tensor)], device=device)
 
-    fallback_values = {
-        "block_size": 64,
-        "peak_learning_rate": 0.009606017304857476,
-        "warmup_steps": 59,
-        "n_embed": 512,
-        "dropout": 0.46876145412214615,
-        "T": 2,
-        "num_heads": 32,
-        "n_blocks": 12,
-        "update_bias": False,
-        "alpha": 0.5,
-        "lr": 0.0009606017304857476,
-        "batch_size": 8,
-        "num_epochs": 10,
-        "internal_energy_fn_name": "pc_e",
-        "output_energy_fn_name": "pc_e",
-        "combined_internal_weight": 0.8779955579743048,
-        "combined_output_weight": 0.12200444202569516,
-        "use_flash_attention": False,
-        "init_method": "imem",
-        "hybrid_m": 25,
-        "num_classes": 0,
-    }
+    dist.broadcast(length, src=0)
+    if dist.get_rank() != 0:
+        obj_tensor = torch.empty(length.item(), dtype=torch.uint8, device=device)
 
-    config = {}
-    file_path = os.path.join(os.path.dirname(__file__), "..", "tuning", "bayesian_tuning_results.txt")
+    dist.broadcast(obj_tensor, src=0)
+    return pickle.loads(bytes(obj_tensor.tolist()))
 
-    if os.path.exists(file_path):
-        with open(file_path, 'r') as f:
-            content = f.read()
+def objective(trial, device = None, flash=False, enable_batch_logging=False):
+    """Bayesian Objective function"""
+    set_seed(42 + trial.number)
+    start_time = time.time()
+    model = None
+    
+    print(f"\nStarting Trial {trial.number}")
+    
+    try:       
+        if not dist.is_initialized() or dist.get_rank() == 0:
+            config = get_dynamic_model_config(trial, vocab_size, flash)
+            if config is None:
+                return float("inf")
+            config_dict = config.__dict__
+        else:
+            config_dict = None
 
-        for line in content.splitlines():
-            match = re.match(r'(\w+):\s+(.*)', line)
-            if match:
-                key, value = match.groups()
-                if key in selected_keys:
-                    try:
-                        num = float(value)
-                        config[key] = int(num) if num.is_integer() else num
-                    except ValueError:
-                        # Handle booleans
-                        if value.lower() in {"true", "false"}:
-                            config[key] = value.lower() == "true"
-                        else:
-                            # Keep as string
-                            config[key] = value.strip('"').strip("'")
-    else:
-        print(f"[WARNING] Tuning result file not found: {file_path}")
-        print(f"[INFO] Using fallback values for missing keys: {selected_keys - config.keys()}")
+        if dist.is_initialized():
+            config_dict = broadcast_config(config_dict, device)
+
+        # Ensure required GPTConfig fields are present before reconstruction.
+        config_dict["init_method"] = "imem"
+        config_dict.setdefault("hybrid_m", (config_dict["n_blocks"] * 4 + 2) // 2 + 1)
+        config_dict.setdefault("num_classes", vocab_size)
         
+        config = GPTConfig(**config_dict)
+        update_global_config(config.__dict__)
 
-    # Fill in missing keys from fallback
-    for key in selected_keys:
-        if key not in config:
-            config[key] = fallback_values[key]
+        model = PCTransformer(config).to(device)  
+       
+        if dist.is_initialized():
+            if device.type == "cuda":
+                model = DDP(model, device_ids=[device.index], output_device=device.index)
+            else:
+                model = DDP(model)
+       
+        train_loader, valid_loader, _ = get_loaders(distributed=dist.is_initialized())
+        
+        if len(train_loader) == 0 or len(valid_loader) == 0:
+            return float("inf")
 
-    # Enforce Hopfield memory initialization globally.
-    config["init_method"] = "imem"
+        trial_logger = trial_batch_logger(trial_number=trial.number) if enable_batch_logging else None
 
-    return config
+        model.train()
+        train_energy, train_perplexity, _ = train(model, train_loader, config, global_step = 0, device = device, logger=trial_logger)
+
+        model.eval()
+        avg_energy, avg_perplexity = evaluate(model, config, valid_loader, max_batches=None, device=device)
+        
+        train_ce_loss = torch.log(torch.tensor(train_perplexity)).item()
+        
+        alpha = 0.5
+        combined_objective = combined_loss(train_energy, train_ce_loss, alpha=alpha)
+        
+        trial_time = (time.time() - start_time) 
+        
+        trial.set_user_attr("config", config.__dict__)
+        trial.set_user_attr("energy", train_energy)
+        trial.set_user_attr("perplexity", train_perplexity)
+        trial.set_user_attr("ce_loss", train_ce_loss)
+        trial.set_user_attr("combined_loss", combined_objective)
+        trial.set_user_attr("alpha", alpha)
+        trial.set_user_attr("trial_time", trial_time)
+
+        trial_path = "tuning/bayesian_tuning_trials.txt"
+
+        if not dist.is_initialized() or dist.get_rank() == 0:
+            write_header = trial.number == 0 
+            log_trial_to_detailed_log(trial_path, trial, config, trial_time, train_energy, write_header=write_header)
+
+        return combined_objective
+    
+    except Exception as e:
+        print("Trial failed:", e)
+        trial.set_user_attr("energy", "N/A")
+        trial.set_user_attr("perplexity", "N/A")
+        trial.set_user_attr("combined_loss", "N/A")
+        trial.set_user_attr("trial_time", (time.time() - start_time))
+
+        return float("inf")
+    
+    finally:
+        if model:
+            del model
+        cleanup_memory()
