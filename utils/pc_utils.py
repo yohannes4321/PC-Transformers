@@ -9,6 +9,135 @@ def x_init(batch_size: int, seq_len: int, embedding_size: int, device: torch.dev
     device = device or (torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu"))
     return torch.randn(batch_size, seq_len, embedding_size, device = device)
 
+
+def x_init_iavg(
+    prev_hidden_states: torch.Tensor,
+    labels: torch.Tensor,
+    num_classes: int,
+    layer_idx: int,
+    hybrid_m: int,
+) -> torch.Tensor:
+    """
+    Average initialization (Iavg) for stream-aligned training.
+    
+    h^(0,b+1)_l,i = (C/n) * sum_{j:yj=yi} h^(T,b)_l,j
+    
+    For layers l <= m (hybrid_m), use random initialization (Ifw-like behavior).
+    For layers l > m, use average initialization based on class labels.
+    
+    Args:
+        prev_hidden_states: Hidden states from previous batch (batch_size, seq_len, hidden_dim)
+        labels: Class labels for each sample (batch_size,)
+        num_classes: Number of unique classes
+        layer_idx: Current layer index
+        hybrid_m: Number of layers to use random init (hybrid approach)
+    
+    Returns:
+        Initialized tensor for current batch
+    """
+    if layer_idx <= hybrid_m:
+        return x_init(prev_hidden_states.size(0), prev_hidden_states.size(1), 
+                      prev_hidden_states.size(2), prev_hidden_states.device)
+    
+    batch_size, seq_len, hidden_dim = prev_hidden_states.shape
+    device = prev_hidden_states.device
+    
+    initialized = torch.zeros_like(prev_hidden_states)
+    
+    for c in range(num_classes):
+        class_mask = (labels == c)
+        if class_mask.sum() > 0:
+            class_states = prev_hidden_states[class_mask]
+            class_avg = class_states.mean(dim=0, keepdim=True)
+            initialized[class_mask] = class_avg
+    
+    return initialized
+
+
+class HopfieldMemory(nn.Module):
+    """
+    Hopfield Network as Associative Memory for initialization (Imem).
+    Used for unsupervised learning where labels are not available.
+    
+    h^(0)_l,i = sigma(delta_l * (o_i * Q_l + b_l) * K_l^T) * V_l
+    """
+    def __init__(self, input_dim: int, memory_dim: int, delta: float = 1.0):
+        super().__init__()
+        self.input_dim = input_dim
+        self.memory_dim = memory_dim
+        self.delta = nn.Parameter(torch.tensor(delta))
+        self.bias = nn.Parameter(torch.zeros(memory_dim))
+        
+        self.query = nn.Linear(input_dim, memory_dim)
+        self.key = nn.Linear(input_dim, memory_dim)
+        self.value = nn.Linear(memory_dim, input_dim)
+    
+    def forward(self, observations: torch.Tensor) -> torch.Tensor:
+        """
+        Retrieve memory states based on observations.
+        
+        Args:
+            observations: (batch_size, seq_len, input_dim) or (batch_size, input_dim)
+        
+        Returns:
+            Retrieved memory states
+        """
+        if observations.dim() == 2:
+            observations = observations.unsqueeze(1)
+        
+        batch_size, seq_len, _ = observations.shape
+        
+        Q = self.query(observations)
+        K = self.key(observations)
+        V = self.value.weight.T 
+        
+        scores = torch.matmul(Q, K.transpose(-2, -1)) * self.delta
+        attention = F.softmax(scores, dim=-1)
+        
+        retrieved = torch.matmul(attention, V)
+        
+        return retrieved
+    
+    def init_value_matrix(self, ifw_states: torch.Tensor, observations: torch.Tensor):
+        """
+        Initialize V matrix to minimize difference between Imem and Ifw.
+        V = A^+ * h^(0)_Ifw
+        
+        Args:
+            ifw_states: Hidden states from forward pass initialization
+            observations: Input observations
+        """
+        if observations.dim() == 2:
+            observations = observations.unsqueeze(1)
+        
+        Q = self.query(observations)
+        A = F.softmax(self.delta * torch.matmul(Q, self.key(observations).transpose(-2, -1)), dim=-1)
+        
+        A_pseudo_inv = torch.pinverse(A)
+        
+        if ifw_states.dim() == 3:
+            ifw_states = ifw_states.mean(dim=1)
+        
+        V_init = torch.matmul(A_pseudo_inv, ifw_states)
+        self.value.weight.data = V_init.T
+
+
+def x_init_imem(
+    observations: torch.Tensor,
+    hopfield_memory: HopfieldMemory,
+) -> torch.Tensor:
+    """
+    Memory-based initialization (Imem) using Hopfield networks.
+    
+    Args:
+        observations: Input observations (batch_size, seq_len, input_dim)
+        hopfield_memory: HopfieldMemory module
+    
+    Returns:
+        Initialized hidden states from memory
+    """
+    return hopfield_memory(observations)
+
 def step_embed(
     t: int,
     T: int,
