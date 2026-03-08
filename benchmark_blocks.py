@@ -50,7 +50,10 @@ def benchmark_blocks(block_values=[2, 3, 4, 5, 6], num_epochs=5):
             combined_internal_weight = best_config["combined_internal_weight"],
             combined_output_weight = best_config["combined_output_weight"],
             use_flash_attention = best_config["use_flash_attention"],
-            alpha = best_config["alpha"]
+            alpha = best_config["alpha"],
+            init_method = "imem",
+            hybrid_m = best_config.get("hybrid_m", (n_blocks * 4 + 2) // 2 + 1),
+            num_classes = best_config.get("num_classes", vocab_size),
         )
         
         # Initialize model
