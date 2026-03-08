@@ -4,10 +4,12 @@ from typing import Optional, Dict, Tuple
 
 from utils.pc_utils import (
     x_init,
+    x_init_imem,
     step_embed,
     step_linear,
     step_attn,
     finalize_step,
+    HopfieldMemory,
 )
 from predictive_coding.lateral_connc import LateralConnections
 
@@ -174,12 +176,30 @@ class PCLayer(nn.Module):
         proj_layers: Optional[dict] = None,
         input_ids: Optional[torch.Tensor] = None,
         position_ids: Optional[torch.Tensor] = None,
+        init_method: str = "imem",
+        prev_hidden_states: Optional[torch.Tensor] = None,
+        labels: Optional[torch.Tensor] = None,
+        num_classes: int = 0,
+        layer_idx: int = 0,
+        hybrid_m: int = 0,
+        hopfield_memory: Optional[HopfieldMemory] = None,
+        observations: Optional[torch.Tensor] = None,
     ):
         """
         Initialize cached activity `x` for the layer type.
         - embed: stores (x_word, x_pos) from embedding weights
-        - attn: creates random initialization shaped (B, S, H_out)
-        - linear/others: random init sized to layer input dimension
+        - attn: initializes from Hopfield memory (falls back to tensor init if memory is unavailable)
+        - linear/others: initializes from Hopfield memory (falls back to tensor init if memory is unavailable)
+        
+        Args:
+            init_method: Initialization mode (expected "imem")
+            prev_hidden_states: Reserved compatibility argument
+            labels: Reserved compatibility argument
+            num_classes: Number of unique classes
+            layer_idx: Current layer index
+            hybrid_m: Reserved compatibility argument
+            hopfield_memory: Hopfield memory module (for Imem)
+            observations: Input observations (for Imem)
         """
         if layer_type == "embed":
             assert input_ids is not None and position_ids is not None, "Embedding layer requires input_ids and position_ids"
@@ -199,7 +219,11 @@ class PCLayer(nn.Module):
             assert proj_layers is not None, "Attention layer requires proj_layers"
             H_in = proj_layers["q_proj"].weight.shape[1]
             H_out = proj_layers["v_proj"].weight.shape[0] 
-            self._x_cache["attn"] = x_init(batch_size, seq_len, H_out, device)
+            
+            if init_method == "imem" and hopfield_memory is not None and observations is not None:
+                self._x_cache["attn"] = x_init_imem(observations, hopfield_memory)
+            else:
+                self._x_cache["attn"] = x_init(batch_size, seq_len, H_out, device)
             
             self.register_lateral(layer_type, H_in)
             if layer_type in self.lateral_connections:
@@ -208,11 +232,15 @@ class PCLayer(nn.Module):
         else:  
             assert layer is not None, "Linear layer requires layer parameter"
             input_dim = layer.weight.shape[1]
-            self._x_cache[layer_type] = x_init(batch_size, seq_len, input_dim, device)
+            
+            if init_method == "imem" and hopfield_memory is not None and observations is not None:
+                self._x_cache[layer_type] = x_init_imem(observations, hopfield_memory)
+            else:
+                self._x_cache[layer_type] = x_init(batch_size, seq_len, input_dim, device)
             
             self.register_lateral(layer_type, input_dim)  
             if layer_type in self.lateral_connections:
-                self.lateral_connections[layer_type] = self.lateral_connections[layer_type].to(device) 
+                self.lateral_connections[layer_type] = self.lateral_connections[layer_type].to(device)
     
     def get_x(self, layer_type: str) -> Optional[torch.Tensor]:
         """Get the cached activity tensor for a given layer type."""
