@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from .embedding import Embedding_Layer
 from .transformer_block import TransformerBlock
 from utils.pc_utils import ids_to_one_hot
@@ -21,6 +22,9 @@ class PCTransformer(nn.Module):
         self.embedding = Embedding_Layer(config)
         self.blocks = nn.ModuleList([TransformerBlock(config) for _ in range(config.n_blocks)])
         self.output = OutputLayer(config)
+        
+        self._prev_hidden_states = None
+        self._prev_labels = None
 
     def register_all_lateral_weights(self):
         """
@@ -39,14 +43,53 @@ class PCTransformer(nn.Module):
                 for key in module.W_latents:
                     if module.W_latents[key] is not None:
                         module.W_latents[key] = module.W_latents[key].to(next(self.parameters()).device)
+    
+    def get_final_hidden_states(self):
+        """
+        Get final hidden states from all layers after PC inference.
+        Used for Iavg initialization (h^{(T,b)}).
+        
+        Returns:
+            List of hidden states from each layer: [embed, attn, mlp1, mlp2, output, ...]
+        """
+        hidden_states = []
+        
+        hidden_states.append(self.embedding.pc_layer.get_mu("embed"))
+        
+        for block in self.blocks:
+            hidden_states.append(block.attn.pc_qkv.get_mu("attn"))
+            hidden_states.append(block.attn.pc_output.get_mu("linear_attn"))
+            hidden_states.append(block.mlp.pc_layer1.get_mu("fc1"))
+            hidden_states.append(block.mlp.pc_layer2.get_mu("fc2"))
+        
+        hidden_states.append(self.output.pc_layer.get_mu("linear_output"))
+        
+        return hidden_states
+    
+    def set_prev_hidden_states(self, hidden_states, labels):
+        """
+        Set previous batch's hidden states for Iavg initialization.
+        
+        Args:
+            hidden_states: List of hidden states from previous batch
+            labels: Labels from previous batch
+        """
+        self._prev_hidden_states = hidden_states
+        self._prev_labels = labels
+    
+    def clear_prev_hidden_states(self):
+        """Clear previous hidden states (for first batch)."""
+        self._prev_hidden_states = None
+        self._prev_labels = None
 
-    def forward(self, target_ids, input_ids, use_kv_cache=False):
+    def forward(self, target_ids, input_ids, use_kv_cache=False, labels=None):
         """
         Forward pass of the PCTransformer model, using device-specific parallelism (CUDA streams or torch.jit.fork).
 
         Args:
             target_ids (torch.Tensor): Target token IDs of shape (B, T).
             input_ids (torch.Tensor): Input token IDs of shape (B, T).
+            labels (torch.Tensor): Labels for Iavg initialization of shape (B,).
 
         Returns:
             logits (torch.Tensor): Tensor of shape (B, T, vocab_size), the model's output logits for each token position.
@@ -61,6 +104,9 @@ class PCTransformer(nn.Module):
         B, S = input_ids.shape
         device = input_ids.device
         vocab_size = self.output.config.vocab_size
+        
+        if labels is None:
+            labels = target_ids
         
         # Clip input_ids and target_ids to valid range before using them
         if input_ids.max() >= vocab_size:
@@ -82,6 +128,8 @@ class PCTransformer(nn.Module):
             proj_layers=None,
             input_ids=input_ids,
             position_ids=position_ids,
+            labels=labels,
+            prev_hidden_states=self._prev_hidden_states,
         )
 
         for block in self.blocks:
@@ -94,6 +142,8 @@ class PCTransformer(nn.Module):
                 proj_layers={"q_proj": block.attn.q, "k_proj": block.attn.k, "v_proj": block.attn.v},
                 input_ids = None,
                 position_ids = None,
+                labels=labels,
+                prev_hidden_states=self._prev_hidden_states,
             )
             block.attn.pc_output.init_x(
                 batch_size=B,
@@ -101,9 +151,11 @@ class PCTransformer(nn.Module):
                 layer_type="linear_attn",
                 device=device,
                 layer=block.attn.output,
-                proj_layers= None, 
+                proj_layers = None, 
                 input_ids = None,
                 position_ids = None,
+                labels=labels,
+                prev_hidden_states=self._prev_hidden_states,
             )
             block.mlp.pc_layer1.init_x(
                 batch_size=B,
@@ -111,9 +163,11 @@ class PCTransformer(nn.Module):
                 layer_type="fc1",
                 device=device,
                 layer=block.mlp.fc1,
-                proj_layers= None, 
+                proj_layers = None, 
                 input_ids = None,
                 position_ids = None,
+                labels=labels,
+                prev_hidden_states=self._prev_hidden_states,
             )
             block.mlp.pc_layer2.init_x(
                 batch_size=B,
@@ -121,9 +175,11 @@ class PCTransformer(nn.Module):
                 layer_type="fc2",
                 device=device,
                 layer=block.mlp.fc2,
-                proj_layers= None, 
+                proj_layers = None, 
                 input_ids = None,
                 position_ids = None,
+                labels=labels,
+                prev_hidden_states=self._prev_hidden_states,
             )
         self.output.pc_layer.init_x(
             batch_size=B,
@@ -131,9 +187,11 @@ class PCTransformer(nn.Module):
             layer_type="linear_output",
             device=device,
             layer=self.output.output,
-            proj_layers= None, 
+            proj_layers = None, 
             input_ids = None,
             position_ids = None,
+            labels=labels,
+            prev_hidden_states=self._prev_hidden_states,
         )
 
         # Initialize streams or futures for parallel execution
@@ -290,6 +348,12 @@ class PCTransformer(nn.Module):
 
             # Synchronize all parallel tasks
             synchronize_execution(use_cuda, streams_or_futures)
+            
         logits = self.output.pc_layer.get_mu("linear_output")
+        
+        if self.config.init_method == 'avg':
+            final_hidden_states = self.get_final_hidden_states()
+            self.set_prev_hidden_states(final_hidden_states, labels)
+        
         return logits
     
