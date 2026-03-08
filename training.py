@@ -38,12 +38,12 @@ def train(model, dataloader, config, global_step, device, logger):
     base_model = model.module if hasattr(model, 'module') else model
     output_pc_layer = base_model.output.pc_layer
     
+    init_method = getattr(config, 'init_method', 'imem')
+    
     for batch_idx, batch in enumerate(dataloader):
         input_ids = batch["input_ids"].to(device)
         target_ids = batch["target_ids"].to(device)
 
-        # total_steps = len(dataloader) * config.num_epochs
-        
         if target_ids.max() >= vocab_size:
             target_ids = torch.clamp(target_ids, max=vocab_size - 1)
 
@@ -51,14 +51,6 @@ def train(model, dataloader, config, global_step, device, logger):
             lr = config.lr + global_step / config.warmup_steps * (
                 config.peak_learning_rate - config.lr)
         else:
-            # # Cosine decay after warmup
-            # decay_step = global_step - config.warmup_steps
-            # decay_total = total_steps - config.warmup_steps
-            # cosine_decay = 0.5 * (1 + math.cos(math.pi * decay_step / decay_total))
-            
-            # # Minimum learning rate = 10% of peak_lr
-            # min_lr = 0.1 * config.peak_learning_rate
-            # lr = min_lr + (config.peak_learning_rate - min_lr) * cosine_decay
             lr = config.peak_learning_rate
 
         for module in model.modules():
@@ -68,9 +60,30 @@ def train(model, dataloader, config, global_step, device, logger):
         global_step += 1
         if target_ids.max() >= vocab_size:
             target_ids = torch.clamp(target_ids, max=vocab_size-1)
+        
+        
+        labels = target_ids
+        logits = model(target_ids, input_ids, labels=labels)
+        
+        if init_method == 'imem' and hasattr(base_model, 'hopfield_memories'):
+            hopfield_loss = None
+            for layer_key, hopfield_mem in base_model.hopfield_memories.items():
+                if hopfield_mem is not None:
+                    layer_idx = int(layer_key.split('_')[1])
+                    layer_key_state = base_model._get_layer_key(layer_idx)
+                    target_state = base_model.prev_hidden_states.get(layer_key_state)
+                    if target_state is not None:
+                        mem_init = hopfield_mem(input_ids.float().unsqueeze(-1) if layer_idx == 0 else target_state)
+                        loss = F.mse_loss(mem_init, target_state.detach())
+                        if hopfield_loss is None:
+                            hopfield_loss = loss
+                        else:
+                            hopfield_loss = hopfield_loss + loss
             
-            
-        logits = model(target_ids, input_ids)
+            if hopfield_loss is not None:
+                hopfield_loss = hopfield_loss / len(base_model.hopfield_memories)
+                (hopfield_loss * 0.01).backward()
+        
         ce_loss = F.cross_entropy(
             logits.view(-1, logits.size(-1)),
             target_ids.view(-1),
@@ -173,7 +186,10 @@ def main():
         combined_internal_weight=best_config["combined_internal_weight"],
         combined_output_weight=best_config["combined_output_weight"],
         use_flash_attention=best_config["use_flash_attention"],
-        alpha = best_config["alpha"]
+        alpha = best_config["alpha"],
+        init_method = "imem",
+        hybrid_m = best_config.get("hybrid_m", (best_config["n_blocks"] * 4 + 2) // 2 + 1),
+        num_classes = best_config.get("num_classes", vocab_size),
     )
     
     # Create a separate logger for hyperparameters
